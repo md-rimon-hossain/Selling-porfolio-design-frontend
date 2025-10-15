@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ReduxProvider from "@/store/ReduxProvider";
+import { AuthWrapper } from "@/components/AuthWrapper";
+import ConditionalLayout from "../components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxProvider>{children}</ReduxProvider>
+        <ReduxProvider>
+          <AuthWrapper>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </AuthWrapper>
+        </ReduxProvider>5
       </body>
     </html>
   );
