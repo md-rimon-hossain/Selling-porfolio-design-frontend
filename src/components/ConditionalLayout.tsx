@@ -15,7 +15,7 @@ export default function ConditionalLayout({
 
   // Pages where header and footer should be hidden
   const hideHeaderFooter = pathname === "/login" || pathname === "/register";
-  const hideHeaderWhenDashboard = pathname?.startsWith("/dashboard");
+  const hideHeaderWhenDashboard = pathname?.startsWith("/dashboard") || pathname?.startsWith("/profile") || pathname?.startsWith("/settings") || pathname?.startsWith("/admin");
 
   if (hideHeaderFooter) {
     return <>{children}</>;

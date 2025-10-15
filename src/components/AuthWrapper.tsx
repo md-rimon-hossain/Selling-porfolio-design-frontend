@@ -16,11 +16,14 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
   const [authChecked, setAuthChecked] = useState(false);
-  
-  const { data, error, isLoading, isSuccess, isError } = useGetProfileQuery(undefined, {
-    // Skip if on login/register pages
-    skip: pathname === "/login" || pathname === "/register",
-  });
+
+  const { data, error, isLoading, isSuccess, isError } = useGetProfileQuery(
+    undefined,
+    {
+      // Skip if on login/register pages
+      skip: pathname === "/login" || pathname === "/register",
+    }
+  );
 
   useEffect(() => {
     if (data && data.data) {
@@ -50,7 +53,15 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   // Redirect logic ONLY in AuthWrapper
   useEffect(() => {
     // Skip auth check on public pages
-    if (pathname === "/login" || pathname === "/register" || pathname === "/" || pathname.startsWith("/designs") || pathname === "/pricing" || pathname === "/about" || pathname === "/contact") {
+    if (
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/" ||
+      pathname.startsWith("/designs") ||
+      pathname === "/pricing" ||
+      pathname === "/about" ||
+      pathname === "/contact"
+    ) {
       setAuthChecked(true);
       return;
     }
@@ -61,8 +72,9 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     }
 
     // Protected routes: /dashboard and /admin
-    const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
-    
+    const isProtectedRoute =
+      pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+
     if (isProtectedRoute && !user) {
       // No user on protected route -> redirect to login
       router.push("/login");

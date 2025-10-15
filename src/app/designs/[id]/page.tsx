@@ -11,6 +11,7 @@ import PurchaseModal from "@/components/PurchaseModal";
 import { useAppSelector } from "@/store/hooks";
 import { ShoppingCart, Download, CheckCircle, Loader2 } from "lucide-react";
 import { useDesignDownloadAccess } from "@/hooks/useDesignDownloadAccess";
+import { LikeButton } from "@/components/LikeButton";
 
 export default function DesignDetailPage() {
   const params = useParams();
@@ -207,15 +208,14 @@ export default function DesignDetailPage() {
                       />
                     </svg>
                   </button>
-                  <button className="backdrop-blur-md bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all hover:scale-110">
-                    <svg
-                      className="w-5 h-5 text-red-500"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </button>
+                  <LikeButton
+                    designId={design._id}
+                    initialLikesCount={design.likesCount}
+                    variant="icon"
+                    size="lg"
+                    showCount={false}
+                    className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg"
+                  />
                 </div>
 
                 {/* Status Badge */}
@@ -236,19 +236,17 @@ export default function DesignDetailPage() {
               <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
                 <div className="grid grid-cols-4 gap-4 text-center">
                   <div>
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <svg
-                        className="w-4 h-4 text-red-500"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
-                      <span className="text-lg font-bold text-gray-900">
-                        {design.likesCount || 0}
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-600">Likes</span>
+                    <LikeButton
+                      designId={design._id}
+                      initialLikesCount={design.likesCount}
+                      variant="compact"
+                      size="md"
+                      showCount={true}
+                      className="mx-auto"
+                    />
+                    <span className="text-xs text-gray-600 block mt-1">
+                      Likes
+                    </span>
                   </div>
                   <div>
                     <div className="flex items-center justify-center gap-1 mb-1">
@@ -465,19 +463,14 @@ export default function DesignDetailPage() {
                   </>
                 )}
                 <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="h-12 font-semibold border-2 rounded-xl hover:bg-gray-50"
-                  >
-                    <svg
-                      className="w-4 h-4 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                    Wishlist
-                  </Button>
+                  <LikeButton
+                    designId={design._id}
+                    initialLikesCount={design.likesCount}
+                    variant="full"
+                    size="md"
+                    showCount={true}
+                    className="h-12 rounded-xl"
+                  />
                   <Button
                     variant="outline"
                     className="h-12 font-semibold border-2 rounded-xl hover:bg-gray-50"

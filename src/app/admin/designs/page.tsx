@@ -15,9 +15,11 @@ import {
   Search,
   Filter,
   Image as ImageIcon,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function DesignsPage() {
   const [page, setPage] = useState(1);
@@ -233,6 +235,39 @@ export default function DesignsPage() {
                 <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                   {design.description}
                 </p>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3 h-3 text-red-500 fill-red-500" />
+                      {design.likesCount || 0}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                        />
+                      </svg>
+                      {design.downloadCount || 0}
+                    </span>
+                  </div>
+                  {design.likesCount > 0 && (
+                    <Link
+                      href={`/admin/designs/${design._id}/likers`}
+                      className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                    >
+                      <Heart className="w-3 h-3" />
+                      View Likers
+                    </Link>
+                  )}
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-blue-600">
                     ${design.price}

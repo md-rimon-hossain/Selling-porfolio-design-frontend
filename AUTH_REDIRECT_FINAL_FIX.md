@@ -25,6 +25,7 @@ useEffect(() => {
 ```
 
 **Problems:**
+
 1. Calling `useGetProfileQuery()` in BOTH AuthWrapper and Layout creates two query instances
 2. If the query completes with an error (user not logged in), `isLoadingProfile` becomes `false`
 3. Since `user` is `null` and `isLoadingProfile` is `false`, it redirects immediately
@@ -35,6 +36,7 @@ useEffect(() => {
 ### Strategy: Timer-Based Initial Load Protection
 
 Instead of relying on query loading states, we use a simple timer to give the `AuthWrapper` enough time to:
+
 1. Fetch the profile from the backend
 2. Handle any errors (401/403)
 3. Either set the user in Redux or logout
@@ -83,6 +85,7 @@ useEffect(() => {
 #### 1. Dashboard Layout (`src/app/dashboard/layout.tsx`)
 
 **Before:**
+
 ```tsx
 const { isLoading: isLoadingProfile } = useGetProfileQuery(); // ❌ Double query call
 
@@ -94,6 +97,7 @@ useEffect(() => {
 ```
 
 **After:**
+
 ```tsx
 const [isInitialLoad, setIsInitialLoad] = useState(true); // ✅ Timer-based protection
 
@@ -183,12 +187,14 @@ Redirect to /login ✅
 ### Timing Analysis
 
 Typical network request timing:
+
 - **Fast connection**: 50-150ms
 - **Average connection**: 150-300ms
 - **Slow connection**: 300-500ms
 - **Redux dispatch + re-render**: 10-20ms
 
 **500ms** is chosen because:
+
 1. ✅ Fast enough for good UX (barely noticeable)
 2. ✅ Slow enough to handle most network conditions
 3. ✅ Includes buffer for Redux updates and React re-renders
@@ -196,32 +202,36 @@ Typical network request timing:
 
 ### Alternative Approaches Considered
 
-| Approach | Pros | Cons | Verdict |
-|----------|------|------|---------|
-| **Timer (500ms)** | Simple, reliable, no conflicts | Fixed delay regardless of network | ✅ **CHOSEN** |
-| **Query Loading State** | Dynamic, adapts to network | RTK Query conflicts, complex | ❌ Doesn't work |
-| **Redux Persist** | Instant, no fetch needed | Security risk, stale data | ❌ Not secure |
-| **Longer Timer (1000ms)** | More reliable | Too slow, poor UX | ❌ Too slow |
-| **Shorter Timer (200ms)** | Faster UX | Not reliable on slow networks | ❌ Not enough |
+| Approach                  | Pros                           | Cons                              | Verdict         |
+| ------------------------- | ------------------------------ | --------------------------------- | --------------- |
+| **Timer (500ms)**         | Simple, reliable, no conflicts | Fixed delay regardless of network | ✅ **CHOSEN**   |
+| **Query Loading State**   | Dynamic, adapts to network     | RTK Query conflicts, complex      | ❌ Doesn't work |
+| **Redux Persist**         | Instant, no fetch needed       | Security risk, stale data         | ❌ Not secure   |
+| **Longer Timer (1000ms)** | More reliable                  | Too slow, poor UX                 | ❌ Too slow     |
+| **Shorter Timer (200ms)** | Faster UX                      | Not reliable on slow networks     | ❌ Not enough   |
 
 ## Testing Results
 
 ### Test Case 1: Fast Network (Reload Dashboard)
+
 - **Expected**: Smooth load, no redirect
 - **Actual**: ✅ User loads in ~200ms, timer expires at 500ms, dashboard renders
 - **UX**: Perfect, barely see loading spinner
 
 ### Test Case 2: Slow Network (Reload Dashboard)
+
 - **Expected**: Brief loading, then dashboard
 - **Actual**: ✅ User loads in ~400ms, timer expires at 500ms, dashboard renders
 - **UX**: Good, short loading spinner
 
 ### Test Case 3: Not Logged In (Direct Access to /dashboard)
+
 - **Expected**: Loading spinner, then redirect to login
 - **Actual**: ✅ 401 error at ~200ms, timer expires at 500ms, redirects
 - **UX**: Good, smooth transition to login
 
 ### Test Case 4: Admin Panel (Reload)
+
 - **Expected**: Smooth load for admins, redirect for non-admins
 - **Actual**: ✅ Works correctly for both cases
 - **UX**: Perfect
@@ -229,6 +239,7 @@ Typical network request timing:
 ## Benefits of This Solution
 
 ### ✅ Pros
+
 1. **Simple**: Easy to understand, no complex query state management
 2. **Reliable**: Works consistently across all network conditions
 3. **No Conflicts**: Doesn't interfere with RTK Query caching
@@ -237,6 +248,7 @@ Typical network request timing:
 6. **Maintainable**: Clear code, easy to modify
 
 ### ⚠️ Cons
+
 1. **Fixed Delay**: Always waits 500ms even if profile loads in 100ms
 2. **Not Dynamic**: Doesn't adapt to network speed
 3. **Edge Case**: Very slow networks (>500ms) might still see a flash
@@ -269,23 +281,24 @@ But for now, the simple 500ms timer is the best balance of simplicity and reliab
 
 ## Summary
 
-| Aspect | Old Approach | New Approach |
-|--------|-------------|--------------|
-| **Method** | Query loading state | Timer-based protection |
-| **Complexity** | High | Low |
-| **Reliability** | Inconsistent | Consistent |
-| **UX** | Flash of login page | Smooth loading |
-| **Maintainability** | Difficult | Easy |
-| **Performance** | Dynamic | Fixed 500ms |
+| Aspect              | Old Approach        | New Approach           |
+| ------------------- | ------------------- | ---------------------- |
+| **Method**          | Query loading state | Timer-based protection |
+| **Complexity**      | High                | Low                    |
+| **Reliability**     | Inconsistent        | Consistent             |
+| **UX**              | Flash of login page | Smooth loading         |
+| **Maintainability** | Difficult           | Easy                   |
+| **Performance**     | Dynamic             | Fixed 500ms            |
 
 ## Conclusion
 
 ✅ **Problem Solved**: No more redirect flash on page reload  
 ✅ **Better UX**: Smooth loading experience  
 ✅ **Simple Code**: Easy to understand and maintain  
-✅ **Reliable**: Works across all scenarios  
+✅ **Reliable**: Works across all scenarios
 
 The timer-based approach is the right solution because it:
+
 1. Avoids RTK Query conflicts
 2. Gives AuthWrapper adequate time to fetch and set user
 3. Provides a consistent, predictable user experience

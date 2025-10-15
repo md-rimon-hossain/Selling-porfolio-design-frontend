@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useGetDesignsQuery } from "@/services/api";
 import { Button } from "@/components/ui/button";
+import { LikeButton } from "@/components/LikeButton";
 import Link from "next/link";
 import Image from "next/image";
 import { Design } from "@/lib/allTypes";
@@ -207,15 +208,14 @@ const FeaturedDesigns: React.FC = () => {
 
                 {/* Quick Action Buttons (Visible on Hover) */}
                 <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                  <button className="backdrop-blur-md bg-white/90 hover:bg-white p-2.5 rounded-full shadow-lg transition-all hover:scale-110">
-                    <svg
-                      className="w-5 h-5 text-red-500"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </button>
+                  <LikeButton
+                    designId={design._id}
+                    initialLikesCount={design.likesCount}
+                    variant="icon"
+                    size="lg"
+                    showCount={false}
+                    className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg"
+                  />
                   <button className="backdrop-blur-md bg-white/90 hover:bg-white p-2.5 rounded-full shadow-lg transition-all hover:scale-110">
                     <svg
                       className="w-5 h-5 text-gray-700"
@@ -309,18 +309,13 @@ const FeaturedDesigns: React.FC = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   {/* Stats */}
                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <svg
-                        className="w-4 h-4 text-red-500"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
-                      <span className="font-semibold">
-                        {design.likesCount || 0}
-                      </span>
-                    </div>
+                    <LikeButton
+                      designId={design._id}
+                      initialLikesCount={design.likesCount}
+                      variant="compact"
+                      size="md"
+                      showCount={true}
+                    />
                     <div className="flex items-center gap-1">
                       <svg
                         className="w-4 h-4 text-blue-500"

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useGetDesignsQuery, useGetCategoriesQuery } from "@/services/api";
 import { Button } from "@/components/ui/button";
+import { LikeButton } from "@/components/LikeButton";
 import Link from "next/link";
 import Image from "next/image";
 import { Design } from "@/lib/allTypes";
@@ -537,15 +538,14 @@ export default function DesignsPage() {
 
                         {/* Quick Actions (Hover) */}
                         <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button className="backdrop-blur-md bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all hover:scale-110">
-                            <svg
-                              className="w-4 h-4 text-red-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                          </button>
+                          <LikeButton
+                            designId={design._id}
+                            initialLikesCount={design.likesCount}
+                            variant="icon"
+                            size="md"
+                            showCount={false}
+                            className="backdrop-blur-md bg-white/90 hover:bg-white shadow-lg"
+                          />
                         </div>
                       </div>
 
@@ -577,18 +577,13 @@ export default function DesignsPage() {
 
                         {/* Stats */}
                         <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                          <div className="flex items-center gap-1">
-                            <svg
-                              className="w-4 h-4 text-red-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                            <span className="font-semibold">
-                              {design.likesCount || 0}
-                            </span>
-                          </div>
+                          <LikeButton
+                            designId={design._id}
+                            initialLikesCount={design.likesCount}
+                            variant="compact"
+                            size="md"
+                            showCount={true}
+                          />
                           <div className="flex items-center gap-1">
                             <svg
                               className="w-4 h-4 text-blue-500"
@@ -708,16 +703,13 @@ export default function DesignsPage() {
                                 </span>
                               )}
                               <div className="flex items-center gap-1 text-gray-500">
-                                <svg
-                                  className="w-4 h-4 text-red-500"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                </svg>
-                                <span className="font-semibold">
-                                  {design.likesCount || 0}
-                                </span>
+                                <LikeButton
+                                  designId={design._id}
+                                  initialLikesCount={design.likesCount}
+                                  variant="compact"
+                                  size="md"
+                                  showCount={true}
+                                />
                               </div>
                               <div className="flex items-center gap-1 text-gray-500">
                                 <svg
@@ -805,16 +797,13 @@ export default function DesignsPage() {
                           {design.category.name}
                         </p>
                         <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <svg
-                              className="w-3 h-3 text-red-500"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                            {design.likesCount || 0}
-                          </div>
+                          <LikeButton
+                            designId={design._id}
+                            initialLikesCount={design.likesCount}
+                            variant="compact"
+                            size="sm"
+                            showCount={true}
+                          />
                           <div className="flex items-center gap-1">
                             <svg
                               className="w-3 h-3 text-blue-500"

@@ -9,15 +9,16 @@ export const api = createApi({
   }),
   tagTypes: [
     "User",
+    "Users",
     "Categories",
     "Designs",
     "PricingPlans",
     "Purchases",
     "Reviews",
     "Downloads",
+    "Likes",
   ],
   endpoints: (builder) => ({
-    // ==================== AUTH ====================
     // ==================== AUTH ====================
     getProfile: builder.query<any, void>({
       query: () => "/users/myProfile",
@@ -72,6 +73,71 @@ export const api = createApi({
           dispatch(api.util.resetApiState());
         }
       },
+    }),
+
+    // ==================== USERS ====================
+    getAllUsers: builder.query<
+      any,
+      {
+        role?: "admin" | "customer";
+        isActive?: boolean;
+        search?: string;
+        page?: number;
+        limit?: number;
+        sortBy?: "name" | "email" | "createdAt" | "updatedAt";
+        sortOrder?: "asc" | "desc";
+      }
+    >({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.role) searchParams.append("role", params.role);
+        if (params.isActive !== undefined)
+          searchParams.append("isActive", params.isActive.toString());
+        if (params.search) searchParams.append("search", params.search);
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
+        return `/users?${searchParams.toString()}`;
+      },
+      providesTags: ["Users"],
+    }),
+    getUser: builder.query<any, string>({
+      query: (id) => `/users/${id}`,
+      providesTags: ["Users"],
+    }),
+    updateUser: builder.mutation<
+      any,
+      { id: string; name?: string; email?: string; profileImage?: string }
+    >({
+      query: ({ id, ...data }) => ({
+        url: `/users/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Users", "User"],
+    }),
+    deleteUser: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    changePassword: builder.mutation<
+      any,
+      {
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+      }
+    >({
+      query: (data) => ({
+        url: "/users/change-password",
+        method: "PUT",
+        body: data,
+      }),
     }),
 
     // ==================== CATEGORIES ====================
@@ -537,6 +603,60 @@ export const api = createApi({
         return `/downloads/analytics?${searchParams.toString()}`;
       },
     }),
+
+    // ==================== LIKES ====================
+    toggleLike: builder.mutation<any, string>({
+      query: (designId) => ({
+        url: `/likes/${designId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Likes", "Designs"],
+      // Optimistic update for better UX
+      async onQueryStarted(designId, { dispatch, queryFulfilled }) {
+        // Optimistically update the design's like status
+        const patchResult = dispatch(
+          api.util.updateQueryData("getDesign", designId, (draft: any) => {
+            if (draft?.data) {
+              draft.data.likesCount = (draft.data.likesCount || 0) + 1;
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+    getMyLikes: builder.query<any, { page?: number; limit?: number }>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        return `/likes/my-likes?${searchParams.toString()}`;
+      },
+      providesTags: ["Likes"],
+    }),
+    checkIfLiked: builder.query<any, string>({
+      query: (designId) => `/likes/${designId}/check`,
+      providesTags: (result, error, designId) => [
+        { type: "Likes", id: designId },
+      ],
+    }),
+    getDesignLikers: builder.query<
+      any,
+      { designId: string; page?: number; limit?: number }
+    >({
+      query: ({ designId, page, limit }) => {
+        const searchParams = new URLSearchParams();
+        if (page) searchParams.append("page", page.toString());
+        if (limit) searchParams.append("limit", limit.toString());
+        return `/likes/${designId}/likers?${searchParams.toString()}`;
+      },
+      providesTags: (result, error, { designId }) => [
+        { type: "Likes", id: `${designId}-likers` },
+      ],
+    }),
   }),
 });
 
@@ -546,6 +666,12 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useGetProfileQuery,
+  // Users
+  useGetAllUsersQuery,
+  useGetUserQuery,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useChangePasswordMutation,
   // Categories
   useGetCategoriesQuery,
   useGetCategoryQuery,
@@ -589,4 +715,9 @@ export const {
   useGetSubscriptionStatusQuery,
   useDownloadDesignMutation,
   useGetDownloadAnalyticsQuery,
+  // Likes
+  useToggleLikeMutation,
+  useGetMyLikesQuery,
+  useCheckIfLikedQuery,
+  useGetDesignLikersQuery,
 } = api;

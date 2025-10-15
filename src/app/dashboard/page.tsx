@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Sparkles,
   Package,
+  Heart,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -123,7 +124,23 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Link href="/dashboard/liked-designs">
+          <div className="bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transform hover:scale-[1.02] transition-all">
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Heart className="w-7 h-7 fill-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">My Liked Designs</h3>
+                <p className="text-sm text-red-100 mt-1">
+                  View all your favorite designs
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
         <Link href="/dashboard/available-downloads">
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-2xl transform hover:scale-[1.02] transition-all">
             <div className="flex items-center space-x-4">
