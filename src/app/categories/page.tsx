@@ -3,7 +3,6 @@
 
 import React, { useState } from 'react';
 import { useGetCategoriesQuery } from '@/services/api';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 

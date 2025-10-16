@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   useGetDesignsQuery,
   useGetCategoriesQuery,
@@ -16,6 +17,7 @@ import {
   Filter,
   Image as ImageIcon,
   Heart,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -26,21 +28,42 @@ export default function DesignsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [complexityFilter, setComplexityFilter] = useState<string>("");
+  const [minPrice, setMinPrice] = useState<number | undefined>();
+  const [maxPrice, setMaxPrice] = useState<number | undefined>();
 
-  const { data, isLoading } = useGetDesignsQuery({
-    page,
-    limit: 10,
-    search: searchTerm,
-    status: statusFilter || undefined,
-    category: categoryFilter || undefined,
-  });
+  // Memoize query parameters to ensure proper refetching
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit: 10,
+      search: searchTerm || undefined,
+      status: statusFilter || undefined,
+      category: categoryFilter || undefined,
+      complexityLevel: complexityFilter || undefined,
+      minPrice,
+      maxPrice,
+    }),
+    [
+      page,
+      searchTerm,
+      statusFilter,
+      categoryFilter,
+      complexityFilter,
+      minPrice,
+      maxPrice,
+    ]
+  );
+
+  const { data, isLoading, refetch } = useGetDesignsQuery(queryParams);
   const { data: categoriesData } = useGetCategoriesQuery();
-  const [createDesign] = useCreateDesignMutation();
-  const [updateDesign] = useUpdateDesignMutation();
+  const [createDesign, { isLoading: isCreating }] = useCreateDesignMutation();
+  const [updateDesign, { isLoading: isUpdating }] = useUpdateDesignMutation();
   const [deleteDesign] = useDeleteDesignMutation();
 
   const [showModal, setShowModal] = useState(false);
   const [editingDesign, setEditingDesign] = useState<any>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -59,6 +82,21 @@ export default function DesignsPage() {
   const designs = data?.data || [];
   const categories = categoriesData?.data || [];
 
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    if (page !== 1) {
+      setPage(1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    searchTerm,
+    statusFilter,
+    categoryFilter,
+    complexityFilter,
+    minPrice,
+    maxPrice,
+  ]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -76,6 +114,16 @@ export default function DesignsPage() {
     } catch (error: any) {
       alert(error?.data?.message || "An error occurred");
     }
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("");
+    setCategoryFilter("");
+    setComplexityFilter("");
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setPage(1);
   };
 
   const handleEdit = (design: any) => {
@@ -126,6 +174,8 @@ export default function DesignsPage() {
     });
   };
 
+  console.log(formData.price);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -133,19 +183,38 @@ export default function DesignsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Designs</h1>
           <p className="mt-2 text-gray-600">
-            Manage design portfolio ({data?.pagination?.total || 0} total)
+            Manage design portfolio ({data?.pagination?.totalItems || 0} total)
           </p>
         </div>
-        <Button
-          onClick={() => setShowModal(true)}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Design
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => refetch()}
+            disabled={isLoading}
+            variant="outline"
+          >
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+          <Button
+            onClick={() => setShowFilters(!showFilters)}
+            variant="outline"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            {showFilters ? "Hide" : "Show"} Filters
+          </Button>
+          <Button
+            onClick={() => setShowModal(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Design
+          </Button>
+        </div>
       </div>
 
-      {/* Filters */}
+      {/* Basic Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
@@ -186,10 +255,109 @@ export default function DesignsPage() {
         </div>
       </div>
 
+      {/* Advanced Filters */}
+      {showFilters && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Advanced Filters
+            </h3>
+            <button
+              onClick={clearFilters}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Clear All
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Complexity Level Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Complexity Level
+              </label>
+              <select
+                value={complexityFilter}
+                onChange={(e) => setComplexityFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              >
+                <option value="">All Levels</option>
+                <option value="Basic">Basic</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </div>
+
+            {/* Min Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Min Price ($)
+              </label>
+              <input
+                type="number"
+                value={minPrice || ""}
+                onChange={(e) =>
+                  setMinPrice(
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                placeholder="0.00"
+                step="0.01"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+
+            {/* Max Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Max Price ($)
+              </label>
+              <input
+                type="number"
+                value={maxPrice || ""}
+                onChange={(e) =>
+                  setMaxPrice(
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
+                placeholder="999.99"
+                step="0.01"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Designs Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      ) : designs.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No designs found
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {searchTerm ||
+            statusFilter ||
+            categoryFilter ||
+            complexityFilter ||
+            minPrice ||
+            maxPrice
+              ? "Try adjusting your filters to see more results."
+              : "Get started by creating your first design."}
+          </p>
+          {!searchTerm && !statusFilter && !categoryFilter && (
+            <Button
+              onClick={() => setShowModal(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add Design
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -294,7 +462,7 @@ export default function DesignsPage() {
       )}
 
       {/* Pagination */}
-      {data?.pagination && (
+      {data?.pagination && data.pagination.totalPages > 1 && (
         <div className="flex items-center justify-center space-x-2">
           <Button
             onClick={() => setPage(page - 1)}
@@ -304,11 +472,11 @@ export default function DesignsPage() {
             Previous
           </Button>
           <span className="px-4 py-2 text-gray-700">
-            Page {page} of {data.pagination.pages}
+            Page {page} of {data.pagination.totalPages}
           </span>
           <Button
             onClick={() => setPage(page + 1)}
-            disabled={page >= data.pagination.pages}
+            disabled={page >= data.pagination.totalPages}
             variant="outline"
           >
             Next
@@ -550,14 +718,23 @@ export default function DesignsPage() {
                     onClick={handleCloseModal}
                     variant="outline"
                     className="flex-1"
+                    disabled={isCreating || isUpdating}
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    disabled={isCreating || isUpdating}
                   >
-                    {editingDesign ? "Update" : "Create"}
+                    {isCreating || isUpdating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        {editingDesign ? "Updating..." : "Creating..."}
+                      </>
+                    ) : (
+                      <>{editingDesign ? "Update" : "Create"}</>
+                    )}
                   </Button>
                 </div>
               </form>

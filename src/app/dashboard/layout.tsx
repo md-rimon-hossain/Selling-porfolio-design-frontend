@@ -63,7 +63,8 @@ export default function DashboardLayout({
       href: "/dashboard/available-downloads",
       icon: Download,
     },
-    { name: "Download History", href: "/dashboard/downloads", icon: Download },
+    
+    { name: "Download History", href: "/dashboard/downloads-history", icon: Download },
     { name: "My Reviews", href: "/dashboard/reviews", icon: Star },
   ];
 

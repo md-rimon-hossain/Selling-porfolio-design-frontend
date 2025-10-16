@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -7,7 +8,7 @@ import {
   useUpdatePricingPlanMutation,
   useDeletePricingPlanMutation,
 } from "@/services/api";
-import { Plus, Edit, Trash2, DollarSign, CheckCircle } from "lucide-react";
+import { Plus, Edit, Trash2,  CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function PricingPlansPage() {

@@ -371,42 +371,71 @@ export const api = createApi({
     }),
     getAllPurchases: builder.query<
       any,
-      { page?: number; limit?: number } | undefined
+      {
+        page?: number;
+        limit?: number;
+        sortBy?: "purchaseDate" | "createdAt" | "updatedAt";
+        sortOrder?: "asc" | "desc";
+        status?: "pending" | "completed" | "expired" | "cancelled" | "refunded";
+        paymentMethod?:
+          | "credit_card"
+          | "paypal"
+          | "stripe"
+          | "bank_transfer"
+          | "free";
+        minAmount?: number;
+        maxAmount?: number;
+        startDate?: string;
+        endDate?: string;
+        search?: string;
+        purchaseType?: "individual" | "subscription";
+      }
     >({
-      query: (params) => {
-        if (!params) return "/purchases";
+      query: (params = {}) => {
         const searchParams = new URLSearchParams();
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
+        if (params.status) searchParams.append("status", params.status);
+        if (params.paymentMethod)
+          searchParams.append("paymentMethod", params.paymentMethod);
+        if (params.minAmount !== undefined)
+          searchParams.append("minAmount", params.minAmount.toString());
+        if (params.maxAmount !== undefined)
+          searchParams.append("maxAmount", params.maxAmount.toString());
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        if (params.search) searchParams.append("search", params.search);
+        if (params.purchaseType)
+          searchParams.append("purchaseType", params.purchaseType);
         return `/purchases?${searchParams.toString()}`;
       },
       providesTags: ["Purchases"],
     }),
     getMyPurchases: builder.query<
       any,
-      | {
-          page?: number;
-          limit?: number;
-          status?:
-            | "pending"
-            | "completed"
-            | "expired"
-            | "cancelled"
-            | "refunded";
-          purchaseType?: "individual" | "subscription";
-        }
-      | undefined
+      {
+        page?: number;
+        limit?: number;
+        sortBy?: "purchaseDate" | "createdAt" | "updatedAt";
+        sortOrder?: "asc" | "desc";
+        status?: "pending" | "completed" | "expired" | "cancelled" | "refunded";
+        purchaseType?: "individual" | "subscription";
+      }
     >({
-      query: (params) => {
-        if (!params) return "/purchases/my-purchases";
-
+      query: (params = {}) => {
         const searchParams = new URLSearchParams();
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
         if (params.status) searchParams.append("status", params.status);
         if (params.purchaseType)
           searchParams.append("purchaseType", params.purchaseType);
-
         return `/purchases/my-purchases?${searchParams.toString()}`;
       },
       providesTags: ["Purchases"],
@@ -566,13 +595,18 @@ export const api = createApi({
       {
         page?: number;
         limit?: number;
+        sortBy?: "downloadDate" | "createdAt";
+        sortOrder?: "asc" | "desc";
         downloadType?: "individual_purchase" | "subscription";
       }
     >({
-      query: (params) => {
+      query: (params = {}) => {
         const searchParams = new URLSearchParams();
         if (params.page) searchParams.append("page", params.page.toString());
         if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
         if (params.downloadType)
           searchParams.append("downloadType", params.downloadType);
         return `/downloads/my-downloads?${searchParams.toString()}`;
@@ -602,6 +636,40 @@ export const api = createApi({
         if (params.endDate) searchParams.append("endDate", params.endDate);
         return `/downloads/analytics?${searchParams.toString()}`;
       },
+    }),
+    getAllDownloads: builder.query<
+      any,
+      {
+        page?: number;
+        limit?: number;
+        sortBy?: "downloadDate" | "createdAt";
+        sortOrder?: "asc" | "desc";
+        downloadType?: "individual_purchase" | "subscription";
+        userId?: string;
+        designId?: string;
+        search?: string;
+        startDate?: string;
+        endDate?: string;
+      }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
+        if (params.downloadType)
+          searchParams.append("downloadType", params.downloadType);
+        if (params.userId) searchParams.append("userId", params.userId);
+        if (params.designId) searchParams.append("designId", params.designId);
+        if (params.search) searchParams.append("search", params.search);
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        return `/downloads?${searchParams.toString()}`;
+      },
+      providesTags: ["Downloads"],
     }),
 
     // ==================== LIKES ====================
@@ -715,6 +783,7 @@ export const {
   useGetSubscriptionStatusQuery,
   useDownloadDesignMutation,
   useGetDownloadAnalyticsQuery,
+  useGetAllDownloadsQuery,
   // Likes
   useToggleLikeMutation,
   useGetMyLikesQuery,

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+
   const { data: purchaseAnalytics, isLoading: purchaseLoading } =
     useGetPurchaseAnalyticsQuery({ period: "monthly" });
   const { data: reviewAnalytics, isLoading: reviewLoading } =
@@ -27,34 +29,44 @@ export default function AdminDashboard() {
   const { data: downloadAnalytics, isLoading: downloadLoading } =
     useGetDownloadAnalyticsQuery({ period: "monthly" });
   const { data: purchasesData } = useGetAllPurchasesQuery({ limit: 5 });
+
   const { data: designsData } = useGetDesignsQuery({ limit: 5 });
   const { data: plansData } = useGetPricingPlansQuery({ limit: 5 });
+
+
+  // console.log(reviewAnalytics);
+  // console.log(downloadAnalytics);
+  // console.log(designsData);
+  // console.log(plansData);
+  console.log(reviewAnalytics);
+
+
 
   const stats = [
     {
       name: "Total Revenue",
-      value: `$${purchaseAnalytics?.data?.totalRevenue?.toFixed(2) || "0.00"}`,
+      value: `$${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
       change: "+12.5%",
       icon: DollarSign,
       color: "from-green-600 to-emerald-600",
     },
     {
       name: "Total Purchases",
-      value: purchaseAnalytics?.data?.totalPurchases || "0",
+      value: purchaseAnalytics?.data?.overview.totalPurchases || "0",
       change: "+8.3%",
       icon: ShoppingCart,
       color: "from-blue-600 to-cyan-600",
     },
     {
       name: "Active Designs",
-      value: designsData?.pagination?.total || "0",
+      value: designsData?.pagination?.totalItems || "0",
       change: "+3.2%",
       icon: Package,
       color: "from-purple-600 to-pink-600",
     },
     {
       name: "Total Downloads",
-      value: downloadAnalytics?.data?.totalDownloads || "0",
+      value: downloadAnalytics?.data?.overview.totalDownloads || "0",
       change: "+15.8%",
       icon: Download,
       color: "from-orange-600 to-red-600",
@@ -184,7 +196,7 @@ export default function AdminDashboard() {
                     Average Rating
                   </p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {reviewAnalytics?.data?.averageRating?.toFixed(1) || "0.0"}
+                    {reviewAnalytics?.data?.overview.averageRating?.toFixed(1) || "0.0"}
                   </p>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -193,7 +205,7 @@ export default function AdminDashboard() {
                       key={i}
                       className={`w-6 h-6 ${
                         i <
-                        Math.floor(reviewAnalytics?.data?.averageRating || 0)
+                        Math.floor(reviewAnalytics?.data?.overview.averageRating || 0)
                           ? "text-yellow-500 fill-yellow-500"
                           : "text-gray-300"
                       }`}
@@ -207,15 +219,15 @@ export default function AdminDashboard() {
                     Total Reviews
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {reviewAnalytics?.data?.totalReviews || "0"}
+                    {reviewAnalytics?.data?.overview.totalReviews || "0"}
                   </p>
                 </div>
                 <div className="p-4 rounded-xl bg-green-50">
                   <p className="text-sm font-medium text-gray-600">
-                    This Month
+                    Helpful Reviews
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {reviewAnalytics?.data?.reviewsThisMonth || "0"}
+                    {reviewAnalytics?.data?.overview?.helpfulReviews || "0"}
                   </p>
                 </div>
               </div>

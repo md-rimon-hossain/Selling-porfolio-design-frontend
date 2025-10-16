@@ -3,24 +3,19 @@
 export interface Purchase {
   _id: string;
   purchaseType: "individual" | "subscription";
-  design?: {
-    _id: string;
-    title: string;
-    description?: string;
-    previewImageUrl?: string;
-    category?: {
-      _id: string;
-      name: string;
-    };
-    createdAt: string;
-  };
+  design?: string | null;
   pricingPlan?: {
     _id: string;
     name: string;
+    description?: string;
+    duration?: string;
   };
   status: "pending" | "completed" | "expired" | "cancelled" | "refunded";
   amount: number;
   createdAt: string;
+  subscriptionStartDate?: string;
+  subscriptionEndDate?: string;
+  remainingDownloads?: number;
   expiresAt?: string;
 }
 
@@ -47,6 +42,24 @@ export interface SubscriptionStatus {
     _id: string;
     name: string;
     duration: string;
+  };
+  subscription?: {
+    _id: string;
+    subscriptionEndDate: string;
+    remainingDownloads: number;
+    status: string;
+    pricingPlan?: {
+      name: string;
+      description: string;
+      features: string[];
+      maxDownloads: number;
+      duration: number;
+    };
+  };
+  downloadStats?: {
+    totalDownloaded: number;
+    remainingDownloads: number;
+    downloadLimitReached: boolean;
   };
 }
 

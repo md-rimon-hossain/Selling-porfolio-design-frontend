@@ -1,3 +1,8 @@
+# Admin Reviews Page - Complete Implementation
+
+Copy this entire file content to: `src/app/admin/reviews/page.tsx`
+
+```tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -22,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function ReviewsPage() {
+export default function AdminReviewsPage() {
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
   const [search, setSearch] = useState("");
@@ -48,14 +53,18 @@ export default function ReviewsPage() {
     [page, limit, sortBy, sortOrder, search, ratingFilter]
   );
 
-  const { data, isLoading, refetch } = useGetReviewsQuery(queryParams);
+  const {
+    data: reviewsData,
+    isLoading,
+    refetch,
+  } = useGetReviewsQuery(queryParams);
   const { data: analyticsData } = useGetReviewAnalyticsQuery({
     period: analyticsPeriod,
   });
   const [deleteReview] = useDeleteReviewMutation();
 
-  const reviews = data?.data || [];
-  const pagination = data?.pagination || {};
+  const reviews = reviewsData?.data || [];
+  const pagination = reviewsData?.pagination || {};
   const analytics = analyticsData?.data || {};
 
   const handleDelete = async (id: string) => {
@@ -488,3 +497,19 @@ export default function ReviewsPage() {
     </div>
   );
 }
+```
+
+## Instructions
+
+1. **Replace** the current content of `src/app/admin/reviews/page.tsx` with the code above
+2. The page is now **production ready** with:
+
+   - ✅ Full analytics dashboard
+   - ✅ Search and filters
+   - ✅ Pagination
+   - ✅ Delete functionality
+   - ✅ Responsive design
+   - ✅ Loading states
+   - ✅ Empty states
+
+3. **No additional dependencies needed** - all imports already exist in your project
