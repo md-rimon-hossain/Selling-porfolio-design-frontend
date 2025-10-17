@@ -7,21 +7,259 @@ import {
   useCreateReviewMutation,
   useUpdateReviewMutation,
   useDeleteReviewMutation,
-  useGetReviewsQuery,
+  useGetDesignReviewsQuery,
 } from "@/services/api";
-import { Star, Edit, Trash2, Plus } from "lucide-react";
+import { Star, Edit, Trash2, Plus, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+
+// Separate component for design review to properly handle hooks
+function DesignReviewCard({
+  design,
+  currentUserId,
+  onEditReview,
+  onDeleteReview,
+  onWriteReview,
+}: {
+  design: any;
+  currentUserId: string;
+  onEditReview: (review: any, designId: string) => void;
+  onDeleteReview: (reviewId: string) => void;
+  onWriteReview: (designId: string) => void;
+}) {
+  const { data: designReviewData } = useGetDesignReviewsQuery({
+    designId: design._id,
+    page: 1,
+    limit: 100,
+  });
+
+  const statistics = designReviewData?.data?.statistics;
+  const allReviews = designReviewData?.data?.reviews || [];
+  const existingReview = allReviews.find(
+    (r: any) => r.reviewer._id === currentUserId
+  );
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+      {/* Design Header with Image */}
+      <div className="flex items-start gap-4 p-6 border-b border-gray-100">
+        {design.previewImageUrl && (
+          <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600">
+            <Image
+              src={design.previewImageUrl}
+              alt={design.title}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <Link href={`/designs/${design._id}`}>
+            <h3 className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors">
+              {design.title}
+            </h3>
+          </Link>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="text-sm font-semibold text-gray-900">
+              ${design.price?.toFixed(2)}
+            </span>
+          </div>
+
+          {/* Review Statistics */}
+          {statistics && statistics.totalReviews > 0 && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.round(statistics.averageRating || 0)
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-gray-900">
+                  {statistics.averageRating?.toFixed(1)}
+                </span>
+                <span className="text-sm text-gray-600">
+                  ({statistics.totalReviews}{" "}
+                  {statistics.totalReviews === 1 ? "review" : "reviews"})
+                </span>
+              </div>
+
+              {/* Rating Distribution */}
+              {statistics.ratingDistribution &&
+                statistics.ratingDistribution.length > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <BarChart3 className="w-3 h-3" />
+                    {Object.entries(statistics.ratingDistribution[0]).map(
+                      ([rating, count]) => (
+                        <span key={rating}>
+                          {rating}★: {count as number}
+                        </span>
+                      )
+                    )}
+                  </div>
+                )}
+            </div>
+          )}
+        </div>
+        {existingReview && (
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => onEditReview(existingReview, design._id)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Edit review"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onDeleteReview(existingReview._id)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Delete review"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* My Review Section */}
+      {existingReview ? (
+        <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                Your Review
+              </div>
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-5 h-5 ${
+                    i < existingReview.rating
+                      ? "text-yellow-500 fill-yellow-500"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+              <span className="ml-1 text-base font-bold text-gray-900">
+                {existingReview.rating}/5
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              {new Date(existingReview.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+          {existingReview.title && (
+            <h4 className="font-bold text-gray-900 mb-2 text-base">
+              {existingReview.title}
+            </h4>
+          )}
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {existingReview.comment}
+          </p>
+          {existingReview.updatedAt !== existingReview.createdAt && (
+            <p className="text-xs text-gray-500 mt-3 italic">
+              Edited on{" "}
+              {new Date(existingReview.updatedAt).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="p-6 text-center bg-gray-50 border-b border-gray-100">
+          <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-600 text-sm mb-4">
+            You haven&apos;t reviewed this design yet
+          </p>
+          <button
+            onClick={() => onWriteReview(design._id)}
+            className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm rounded-lg hover:shadow-lg transition-shadow"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Write a review
+          </button>
+        </div>
+      )}
+
+      {/* All Reviews Section */}
+      {allReviews.length > 0 && (
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+              All Reviews ({allReviews.length})
+            </h4>
+            <Link
+              href={`/designs/${design._id}#reviews`}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View All
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {allReviews.slice(0, 3).map((review: any) => (
+              <div
+                key={review._id}
+                className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                      {review.reviewer.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">
+                        {review.reviewer.name}
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-3 h-3 ${
+                              i < review.rating
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {new Date(review.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+                {review.title && (
+                  <h5 className="font-semibold text-gray-900 text-sm mb-1">
+                    {review.title}
+                  </h5>
+                )}
+                <p className="text-gray-700 text-sm line-clamp-2">
+                  {review.comment}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MyReviewsPage() {
   const { data: purchasesData } = useGetMyPurchasesQuery({
     limit: 100,
     status: "completed",
-  });
-  const { data: reviewsData } = useGetReviewsQuery({
-    page: 1,
-    limit: 100,
   });
 
   const [createReview] = useCreateReviewMutation();
@@ -33,12 +271,13 @@ export default function MyReviewsPage() {
   const [formData, setFormData] = useState({
     designId: "",
     rating: 5,
-    title: "",
     comment: "",
   });
 
   const purchases = useMemo(() => purchasesData?.data || [], [purchasesData]);
-  const myReviews = useMemo(() => reviewsData?.data || [], [reviewsData]);
+
+  // Get current user ID
+  const currentUserId = purchases[0]?.user || "";
 
   // Get all purchased designs (individual and from active subscriptions)
   const purchasedDesigns = useMemo(() => {
@@ -59,6 +298,27 @@ export default function MyReviewsPage() {
     return designs;
   }, [purchases]);
 
+  // Handle edit review
+  const handleEditReview = (review: any, designId: string) => {
+    setEditingReview(review);
+    setFormData({
+      designId: designId,
+      rating: review.rating,
+      comment: review.comment,
+    });
+    setShowModal(true);
+  };
+
+  // Handle write new review
+  const handleWriteReview = (designId: string) => {
+    setFormData({
+      designId: designId,
+      rating: 5,
+      comment: "",
+    });
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,11 +328,7 @@ export default function MyReviewsPage() {
       return;
     }
 
-    // Validate title if provided (min 5 chars as per backend)
-    if (formData.title && formData.title.trim().length < 5) {
-      alert("Review title must be at least 5 characters long");
-      return;
-    }
+
 
     try {
       if (editingReview) {
@@ -104,7 +360,6 @@ export default function MyReviewsPage() {
     setFormData({
       designId: "",
       rating: 5,
-      title: "",
       comment: "",
     });
   };
@@ -130,163 +385,16 @@ export default function MyReviewsPage() {
 
       {/* Reviews List */}
       <div className="grid grid-cols-1 gap-6">
-        {purchasedDesigns.map((design: any) => {
-          const existingReview = myReviews.find(
-            (r: any) => r.design?._id === design._id
-          );
-
-          return (
-            <div
-              key={design._id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {/* Design Header with Image */}
-              <div className="flex items-start gap-4 p-6 border-b border-gray-100">
-                {design.previewImageUrl && (
-                  <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600">
-                    <Image
-                      src={design.previewImageUrl}
-                      alt={design.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <Link href={`/designs/${design._id}`}>
-                    <h3 className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors">
-                      {design.title}
-                    </h3>
-                  </Link>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm text-gray-500">
-                      {design.category?.name}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">
-                      ${design.price}
-                    </span>
-                  </div>
-                  {design.totalReviews > 0 && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="flex items-center">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3.5 h-3.5 ${
-                              i < Math.round(design.averageRating || 0)
-                                ? "text-yellow-500 fill-yellow-500"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-600">
-                        {design.averageRating?.toFixed(1)} (
-                        {design.totalReviews} reviews)
-                      </span>
-                    </div>
-                  )}
-                </div>
-                {existingReview && (
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => {
-                        setEditingReview(existingReview);
-                        setFormData({
-                          designId: design._id,
-                          rating: existingReview.rating,
-                          title: existingReview.title || "",
-                          comment: existingReview.comment,
-                        });
-                        setShowModal(true);
-                      }}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Edit review"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(existingReview._id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete review"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Review Content */}
-              {existingReview ? (
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < existingReview.rating
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                      <span className="ml-1 text-base font-bold text-gray-900">
-                        {existingReview.rating}/5
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(existingReview.createdAt).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
-                    </span>
-                  </div>
-                  {existingReview.title && (
-                    <h4 className="font-bold text-gray-900 mb-2 text-base">
-                      {existingReview.title}
-                    </h4>
-                  )}
-                  <p className="text-gray-700 text-sm leading-relaxed">
-                    {existingReview.comment}
-                  </p>
-                  {existingReview.updatedAt !== existingReview.createdAt && (
-                    <p className="text-xs text-gray-500 mt-3 italic">
-                      Edited on{" "}
-                      {new Date(existingReview.updatedAt).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="p-6 text-center bg-gray-50">
-                  <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-600 text-sm mb-4">
-                    You haven&apos;t reviewed this design yet
-                  </p>
-                  <button
-                    onClick={() => {
-                      setFormData({
-                        designId: design._id,
-                        rating: 5,
-                        title: "",
-                        comment: "",
-                      });
-                      setShowModal(true);
-                    }}
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium text-sm rounded-lg hover:shadow-lg transition-shadow"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Write a review
-                  </button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {purchasedDesigns.map((design: any) => (
+          <DesignReviewCard
+            key={design._id}
+            design={design}
+            currentUserId={currentUserId}
+            onEditReview={handleEditReview}
+            onDeleteReview={handleDelete}
+            onWriteReview={handleWriteReview}
+          />
+        ))}
 
         {purchasedDesigns.length === 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
@@ -361,25 +469,7 @@ export default function MyReviewsPage() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title (optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    minLength={5}
-                    maxLength={100}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                    placeholder="Brief summary of your review (min 5 chars)"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formData.title.length}/100 characters
-                  </p>
-                </div>
+               
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Comment *

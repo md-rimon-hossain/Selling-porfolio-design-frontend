@@ -129,52 +129,52 @@ export default function DownloadsHistoryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Downloads History</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-2xl font-bold text-gray-900">Downloads History</h1>
+        <p className="mt-1 text-sm text-gray-600">
           View and track all your design downloads
         </p>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-blue-600 rounded-lg p-5 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">Total Downloads</p>
               <p className="text-3xl font-bold mt-1">{totalDownloads}</p>
             </div>
-            <FileDown className="w-12 h-12 opacity-80" />
+            <FileDown className="w-10 h-10 opacity-80" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-purple-600 rounded-lg p-5 text-white">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-90">Subscription Downloads</p>
               <p className="text-3xl font-bold mt-1">{subscriptionDownloads}</p>
             </div>
-            <Sparkles className="w-12 h-12 opacity-80" />
+            <Sparkles className="w-10 h-10 opacity-80" />
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-green-600 rounded-lg p-5 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm opacity-90">Individual Purchases</p>
+              <p className="text-sm opacity-90">Individual Downloads</p>
               <p className="text-3xl font-bold mt-1">{individualDownloads}</p>
             </div>
-            <ShoppingBag className="w-12 h-12 opacity-80" />
+            <ShoppingBag className="w-10 h-10 opacity-80" />
           </div>
         </div>
       </div>
 
       {/* Filters and Controls */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
         {/* Top Row - Filter Toggle and Refresh */}
         <div className="flex items-center justify-between">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
           >
             <Filter className="w-4 h-4" />
             <span>Filters</span>
@@ -196,7 +196,7 @@ export default function DownloadsHistoryPage() {
               title="Refresh downloads"
             >
               <RefreshCw
-                className={`w-5 h-5 ${isFetching ? "animate-spin" : ""}`}
+                className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`}
               />
             </button>
           </div>
@@ -264,7 +264,7 @@ export default function DownloadsHistoryPage() {
             <div className="flex items-end">
               <button
                 onClick={handleClearFilters}
-                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2 text-sm font-medium"
               >
                 <X className="w-4 h-4" />
                 <span>Clear</span>
@@ -279,27 +279,27 @@ export default function DownloadsHistoryPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading your downloads...</p>
+            <p className="text-gray-600 text-sm">Loading your downloads...</p>
           </div>
         </div>
       ) : downloads.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {downloads.map((download: DownloadHistoryItem) => (
             <div
               key={download._id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all group"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
             >
               {/* Design Image */}
               <Link
                 href={`/designs/${download.design._id}`}
-                className="block relative aspect-video overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100"
+                className="block relative aspect-video overflow-hidden bg-gray-100"
               >
                 {download.design.previewImageUrl ? (
                   <Image
                     src={download.design.previewImageUrl}
                     alt={download.design.title}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -308,11 +308,11 @@ export default function DownloadsHistoryPage() {
                 )}
 
                 {/* Download Type Badge */}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-2 right-2">
                   <span
-                    className={`px-3 py-1 ${getDownloadTypeColor(
+                    className={`px-2.5 py-1 ${getDownloadTypeColor(
                       download.downloadType
-                    )} text-xs font-bold rounded-full shadow-lg flex items-center space-x-1`}
+                    )} text-xs font-semibold rounded-lg flex items-center space-x-1`}
                   >
                     {getDownloadTypeIcon(download.downloadType)}
                     <span>
@@ -327,7 +327,7 @@ export default function DownloadsHistoryPage() {
               {/* Download Info */}
               <div className="p-4">
                 <Link href={`/designs/${download.design._id}`}>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors line-clamp-1">
+                  <h3 className="text-base font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors line-clamp-1">
                     {download.design.title}
                   </h3>
                 </Link>
@@ -364,16 +364,16 @@ export default function DownloadsHistoryPage() {
                 <div className="flex items-center space-x-2">
                   <Link
                     href={`/designs/${download.design._id}`}
-                    className="flex-1 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all text-center"
+                    className="flex-1 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-center text-sm"
                   >
                     View Design
                   </Link>
                   <Link
                     href={`/dashboard/purchases`}
-                    className="px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                     title="View Purchase"
                   >
-                    <ShoppingBag className="w-5 h-5" />
+                    <ShoppingBag className="w-4 h-4" />
                   </Link>
                 </div>
               </div>
@@ -381,12 +381,12 @@ export default function DownloadsHistoryPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No downloads yet
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 mb-6 text-sm">
             {downloadType !== "all"
               ? `No ${
                   downloadType === "individual_purchase"
@@ -398,13 +398,13 @@ export default function DownloadsHistoryPage() {
           <div className="flex items-center justify-center space-x-4">
             <Link
               href="/dashboard/available-downloads"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+              className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
               Browse Available Downloads
             </Link>
             <Link
               href="/pricing"
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
             >
               View Pricing
             </Link>
@@ -418,7 +418,7 @@ export default function DownloadsHistoryPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={!pagination.hasPrevPage || isFetching}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Previous
           </button>
@@ -430,9 +430,9 @@ export default function DownloadsHistoryPage() {
                   <button
                     key={pageNum}
                     onClick={() => setPage(pageNum)}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
                       page === pageNum
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                        ? "bg-blue-600 text-white"
                         : "border border-gray-300 hover:bg-gray-50"
                     }`}
                   >
@@ -443,8 +443,8 @@ export default function DownloadsHistoryPage() {
             )}
             {pagination.totalPages > 5 && (
               <>
-                <span className="text-gray-500">...</span>
-                <span className="px-4 py-2 text-gray-700">
+                <span className="text-gray-500 text-sm">...</span>
+                <span className="px-4 py-2 text-gray-700 text-sm">
                   of {pagination.totalPages}
                 </span>
               </>
@@ -453,7 +453,7 @@ export default function DownloadsHistoryPage() {
           <button
             onClick={() => setPage(page + 1)}
             disabled={!pagination.hasNextPage || isFetching}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Next
           </button>

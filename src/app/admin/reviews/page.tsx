@@ -160,15 +160,16 @@ export default function ReviewsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {[5, 4, 3, 2, 1].map((rating) => (
-              <div key={rating} className="flex flex-col items-center flex-1">
-                <div className="text-xs font-bold">
-                  {ratingDistribution[rating] || 0}
+            {[5, 4, 3, 2, 1].map((rating) => {
+              const count = Number(ratingDistribution[rating]) || 0;
+              return (
+                <div key={rating} className="flex flex-col items-center flex-1">
+                  <div className="text-xs font-bold">{count}</div>
+                  <Star className="w-3 h-3 fill-white" />
+                  <div className="text-xs opacity-75">{rating}</div>
                 </div>
-                <Star className="w-3 h-3 fill-white" />
-                <div className="text-xs opacity-75">{rating}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <p className="text-purple-100 text-sm mt-3">Rating Distribution</p>
         </div>

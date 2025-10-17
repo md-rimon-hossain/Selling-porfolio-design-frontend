@@ -1,26 +1,26 @@
 import Link from "next/link";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="relative bg-gray-900 text-white py-12 mt-32">
+    <footer className="bg-gray-900 text-white py-12 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-black mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Design Portfolio
-            </h3>
-            <p className="text-gray-400 mb-4 max-w-md">
-              Your ultimate destination for stunning design templates and
-              creative inspiration. Built by designers, for designers.
+          <div className="col-span-1 md:col-span-1">
+            <h3 className="text-xl font-bold mb-3 text-white">DesignHub</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              Your destination for premium design templates and creative
+              resources.
             </p>
             <div className="flex gap-3">
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110"
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                aria-label="Facebook"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -29,10 +29,11 @@ const Footer = () => {
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110"
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                aria-label="Twitter"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -41,10 +42,11 @@ const Footer = () => {
               </a>
               <a
                 href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110"
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                aria-label="Instagram"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -56,8 +58,8 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-bold mb-4 text-white">Quick Links</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold mb-4 text-white">Quick Links</h4>
+            <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   href="/designs"
@@ -76,18 +78,18 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/about"
+                  href="/pricing"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  About Us
+                  Pricing
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="/about"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Contact
+                  About Us
                 </Link>
               </li>
             </ul>
@@ -95,8 +97,8 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="font-bold mb-4 text-white">Support</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold mb-4 text-white">Support</h4>
+            <ul className="space-y-2 text-sm">
               <li>
                 <Link
                   href="/help"
@@ -123,21 +125,39 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/faq"
+                  href="/contact"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  FAQ
+                  Contact
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold mb-4 text-white">Contact</h4>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2 text-gray-400">
+                <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>support@designhub.com</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-400">
+                <Phone className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>+1 (555) 123-4567</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-400">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>123 Design Street, Creative City, DC 12345</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800 text-center">
-          <p className="text-gray-400">
-            &copy; 2025 Design Portfolio. All rights reserved. Made with{" "}
-            <span className="text-red-500">❤</span> by designers
+        <div className="pt-8 border-t border-gray-800">
+          <p className="text-center text-sm text-gray-400">
+            &copy; 2025 DesignHub. All rights reserved.
           </p>
         </div>
       </div>

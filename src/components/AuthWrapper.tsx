@@ -19,10 +19,6 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
 
   const { data, error, isLoading, isSuccess, isError } = useGetProfileQuery(
     undefined,
-    {
-      // Skip if on login/register pages
-      skip: pathname === "/login" || pathname === "/register",
-    }
   );
 
   useEffect(() => {
@@ -71,6 +67,7 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       return;
     }
 
+    
     // Protected routes: /dashboard and /admin
     const isProtectedRoute =
       pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
@@ -83,6 +80,13 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       router.push("/");
     }
   }, [pathname, user, authChecked, router]);
+
+  if(user && (pathname === "/login" || pathname === "/register")) {
+      // Logged in user trying to access login/register -> redirect to home
+      router.push("/");
+      return;
+    }
+
 
   // Show loading state while fetching profile (but not on login/register pages)
   if (isLoading && pathname !== "/login" && pathname !== "/register") {

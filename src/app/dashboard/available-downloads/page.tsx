@@ -90,10 +90,10 @@ export default function AvailableDownloadsPage() {
 
   const hasActiveSubscription = !!activeSubscription;
 
-  console.log(purchases);
+  console.log(hasActiveSubscription);
 
   // Get purchased designs - extract the design IDs from COMPLETED individual purchases
-  const purchasedDesignIds  = new Set(
+  const purchasedDesignIds = new Set(
     purchases
       .filter(
         (p: Purchase) =>
@@ -105,15 +105,10 @@ export default function AvailableDownloadsPage() {
       .filter(Boolean)
   );
 
-
-console.log(purchasedDesignIds);
-
   // Filter designs based on purchased IDs
   const purchasedDesigns = allDesigns.filter((design) =>
     purchasedDesignIds.has(design._id)
   );
-
- 
 
   // Combine purchased designs with all designs if subscription
   const availableDesigns =
@@ -172,31 +167,29 @@ console.log(purchasedDesignIds);
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900">
           Available Downloads
         </h1>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-1 text-sm text-gray-600">
           Access all designs you can download
         </p>
       </div>
 
       {/* Subscription Status Banner */}
       <div
-        className={`rounded-xl p-6 ${
-          hasActiveSubscription
-            ? "bg-gradient-to-r from-green-500 to-emerald-600"
-            : "bg-gradient-to-r from-blue-500 to-purple-600"
-        } text-white shadow-lg`}
+        className={`rounded-lg p-5 ${
+          hasActiveSubscription ? "bg-green-600" : "bg-blue-600"
+        } text-white`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {hasActiveSubscription ? (
-              <CheckCircle className="w-12 h-12" />
+              <CheckCircle className="w-10 h-10" />
             ) : (
-              <Sparkles className="w-12 h-12" />
+              <Sparkles className="w-10 h-10" />
             )}
             <div>
-              <h3 className="text-xl font-bold">
+              <h3 className="text-lg font-bold">
                 {hasActiveSubscription
                   ? "Active Subscription"
                   : "No Active Subscription"}
@@ -231,7 +224,7 @@ console.log(purchasedDesignIds);
               <p className="text-4xl font-bold">
                 {activeSubscription.remainingDownloads === -1 ||
                 activeSubscription.remainingDownloads === 999999 ? (
-                  <Infinity className="w-12 h-12 mx-auto" />
+                  <Infinity className="w-10 h-10 mx-auto" />
                 ) : (
                   activeSubscription.remainingDownloads
                 )}
@@ -241,7 +234,7 @@ console.log(purchasedDesignIds);
           ) : (
             <Link
               href="/pricing"
-              className="px-6 py-3 bg-white text-blue-600 font-bold rounded-lg hover:shadow-xl transition-all transform hover:scale-105"
+              className="px-6 py-2.5 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors text-sm"
             >
               View Plans
             </Link>
@@ -250,15 +243,15 @@ console.log(purchasedDesignIds);
       </div>
 
       {/* Filter Tabs and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
         {/* Filter Tabs */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setFilter("all")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
                 filter === "all"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
@@ -266,9 +259,9 @@ console.log(purchasedDesignIds);
             </button>
             <button
               onClick={() => setFilter("purchased")}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
                 filter === "purchased"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
@@ -277,9 +270,9 @@ console.log(purchasedDesignIds);
             {hasActiveSubscription && (
               <button
                 onClick={() => setFilter("subscription")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
                   filter === "subscription"
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                    ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -295,7 +288,7 @@ console.log(purchasedDesignIds);
             className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Refresh designs"
           >
-            <RefreshCw className="w-5 h-5" />
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
 
@@ -306,18 +299,18 @@ console.log(purchasedDesignIds);
             placeholder="Search designs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
           />
           <input
             type="text"
             placeholder="Filter by category..."
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
           />
           <button
             onClick={handleClearFilters}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2 text-sm font-medium"
           >
             <X className="w-4 h-4" />
             <span>Clear Filters</span>
@@ -330,11 +323,11 @@ console.log(purchasedDesignIds);
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading your designs...</p>
+            <p className="text-gray-600 text-sm">Loading your designs...</p>
           </div>
         </div>
       ) : uniqueDesigns.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {uniqueDesigns.map((design: DesignForDownload) => {
             const isPurchased = purchasedDesignIds.has(design._id);
             const isDownloading = downloadingId === design._id;
@@ -342,19 +335,19 @@ console.log(purchasedDesignIds);
             return (
               <div
                 key={design._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all group"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
               >
                 {/* Design Image */}
                 <Link
                   href={`/designs/${design._id}`}
-                  className="block relative aspect-video overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100"
+                  className="block relative aspect-video overflow-hidden bg-gray-100"
                 >
                   {design.previewImageUrl ? (
                     <Image
                       src={design.previewImageUrl}
                       alt={design.title}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -363,14 +356,14 @@ console.log(purchasedDesignIds);
                   )}
 
                   {/* Access Badge */}
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-2 right-2">
                     {isPurchased ? (
-                      <span className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full shadow-lg">
+                      <span className="px-2.5 py-1 bg-blue-600 text-white text-xs font-semibold rounded-lg">
                         Purchased
                       </span>
                     ) : (
-                      <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg">
-                        <Sparkles className="w-3 h-3 inline-block mr-1" />
+                      <span className="px-2.5 py-1 bg-green-600 text-white text-xs font-semibold rounded-lg flex items-center">
+                        <Sparkles className="w-3 h-3 mr-1" />
                         Subscription
                       </span>
                     )}
@@ -380,7 +373,7 @@ console.log(purchasedDesignIds);
                 {/* Design Info */}
                 <div className="p-4">
                   <Link href={`/designs/${design._id}`}>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors line-clamp-1">
+                    <h3 className="text-base font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors line-clamp-1">
                       {design.title}
                     </h3>
                   </Link>
@@ -393,7 +386,7 @@ console.log(purchasedDesignIds);
                       <Calendar className="w-4 h-4 mr-1" />
                       {new Date(design.createdAt).toLocaleDateString()}
                     </span>
-                    <span className="px-2 py-1 bg-gray-100 rounded-full text-xs font-medium">
+                    <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
                       {design.category?.name}
                     </span>
                   </div>
@@ -402,16 +395,16 @@ console.log(purchasedDesignIds);
                   <button
                     onClick={() => handleDownload(design._id, design.title)}
                     disabled={isDownloading || downloadLoading}
-                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                    className="w-full py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-sm"
                   >
                     {isDownloading ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Downloading...</span>
                       </>
                     ) : (
                       <>
-                        <Download className="w-5 h-5" />
+                        <Download className="w-4 h-4" />
                         <span>Download Now</span>
                       </>
                     )}
@@ -422,12 +415,12 @@ console.log(purchasedDesignIds);
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No designs available
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 mb-6 text-sm">
             {filter === "purchased"
               ? "You haven't purchased any designs yet."
               : "Purchase designs or subscribe to start downloading!"}
@@ -435,14 +428,14 @@ console.log(purchasedDesignIds);
           <div className="flex items-center justify-center space-x-4">
             <Link
               href="/designs"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+              className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
               Browse Designs
             </Link>
             {!hasActiveSubscription && (
               <Link
                 href="/pricing"
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
               >
                 View Pricing
               </Link>
@@ -459,17 +452,17 @@ console.log(purchasedDesignIds);
             <button
               onClick={() => setPage(page - 1)}
               disabled={page === 1}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-gray-700">
+            <span className="px-4 py-2 text-gray-700 text-sm">
               Page {page} of {allDesignsData.pagination.totalPages}
             </span>
             <button
               onClick={() => setPage(page + 1)}
               disabled={page >= allDesignsData.pagination.totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
             >
               Next
             </button>

@@ -527,11 +527,9 @@ export const api = createApi({
       any,
       {
         designId: string;
+        title?: string;
         rating: number;
         comment: string;
-        title?: string;
-        pros?: string[];
-        cons?: string[];
       }
     >({
       query: (data) => ({

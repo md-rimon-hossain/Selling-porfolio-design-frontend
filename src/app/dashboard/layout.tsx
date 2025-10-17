@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
@@ -22,6 +22,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,10 +47,10 @@ export default function DashboardLayout({
   // If user is null, AuthWrapper will redirect - just show loading
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading Dashboard...</p>
+          <p className="text-gray-900 font-medium">Loading Dashboard...</p>
         </div>
       </div>
     );
@@ -63,8 +64,12 @@ export default function DashboardLayout({
       href: "/dashboard/available-downloads",
       icon: Download,
     },
-    
-    { name: "Download History", href: "/dashboard/downloads-history", icon: Download },
+
+    {
+      name: "Download History",
+      href: "/dashboard/downloads-history",
+      icon: Download,
+    },
     { name: "My Reviews", href: "/dashboard/reviews", icon: Star },
   ];
 
@@ -80,24 +85,22 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg shadow-md"></div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                Dashboard
-              </span>
+              <div className="w-8 h-8 bg-blue-600 rounded-lg"></div>
+              <span className="text-lg font-bold text-gray-900">Dashboard</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-500 hover:text-gray-900"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
@@ -106,14 +109,19 @@ export default function DashboardLayout({
             <div className="space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center px-3 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors group"
+                    className={`flex items-center px-3 py-2.5 rounded-lg transition-colors group ${
+                      isActive
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                    }`}
                   >
-                    <Icon className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
-                    <span className="font-medium">{item.name}</span>
+                    <Icon className="w-5 h-5 mr-3" />
+                    <span className="font-medium text-sm">{item.name}</span>
                   </Link>
                 );
               })}
@@ -121,9 +129,9 @@ export default function DashboardLayout({
           </nav>
 
           {/* User Profile Section */}
-          <div className="border-t border-gray-200 p-4 bg-gradient-to-br from-blue-50 to-cyan-50">
+          <div className="border-t border-gray-200 p-4 bg-gray-50">
             <div className="flex items-center mb-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center text-white font-bold shadow-md">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                 {user.name?.charAt(0).toUpperCase()}
               </div>
               <div className="ml-3 flex-1 min-w-0">
@@ -131,7 +139,7 @@ export default function DashboardLayout({
                   {user.name}
                 </p>
                 <p className="text-xs text-gray-600 truncate">{user.email}</p>
-                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded-full capitalize">
+                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded capitalize">
                   {user.role}
                 </span>
               </div>
@@ -139,12 +147,10 @@ export default function DashboardLayout({
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="w-full flex items-center justify-center px-3 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-medium"
+              className="w-full flex items-center justify-center px-3 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-medium text-sm"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              <span className="text-sm">
-                {isLoggingOut ? "Logging out..." : "Logout"}
-              </span>
+              <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
             </button>
           </div>
         </div>
@@ -153,13 +159,13 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+          <div className="flex items-center justify-between h-14 px-4 sm:px-6 lg:px-8">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-gray-500 hover:text-gray-900"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center space-x-4">
               <Link
@@ -171,7 +177,8 @@ export default function DashboardLayout({
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-600 hidden sm:inline">
-                Welcome, <span className="font-semibold">{user.name}</span>
+                Welcome,{" "}
+                <span className="font-semibold text-gray-900">{user.name}</span>
               </span>
             </div>
           </div>

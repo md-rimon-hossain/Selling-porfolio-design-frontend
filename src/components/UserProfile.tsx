@@ -12,6 +12,14 @@ import {
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  User,
+  ShoppingBag,
+  Download,
+  Star,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
 
 interface User {
   id: string;
@@ -37,21 +45,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
 
   const handleLogout = async () => {
     try {
-      // Call logout API
       await logoutMutation().unwrap();
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
-      // Always clear local state and redirect
       dispatch(logoutAction());
       setIsDropdownOpen(false);
       router.push("/login");
-      // Force reload to clear any cached data
       window.location.href = "/login";
     }
   };
 
-  // Get stats
   const totalPurchases = purchasesData?.pagination?.total || 0;
   const totalDownloads = downloadsData?.pagination?.total || 0;
   const hasSubscription =
@@ -63,126 +67,119 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
       <Button
         variant="ghost"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center space-x-2 p-2"
+        className="flex items-center gap-2 hover:bg-gray-100"
         disabled={isLoading}
       >
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium shadow-md">
+        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
           {user.name.charAt(0).toUpperCase()}
         </div>
         <span className="hidden md:block text-sm font-medium text-gray-700">
           {user.name}
         </span>
-        <svg
-          className={`w-4 h-4 transition-transform ${
+        <ChevronDown
+          className={`w-4 h-4 text-gray-500 transition-transform ${
             isDropdownOpen ? "rotate-180" : ""
           }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        />
       </Button>
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 z-50 border border-gray-100">
-          <div className="py-1">
-            {/* User Info */}
-            <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
-              <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-600 mt-1">{user.email}</p>
-              <div className="flex items-center justify-between mt-2">
-                <span className="inline-block px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full capitalize">
-                  {user.role}
+        <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+          {/* User Info */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-medium">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-600 truncate">{user.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded capitalize">
+                {user.role}
+              </span>
+              {hasSubscription && (
+                <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-50 rounded">
+                  Premium
                 </span>
-                {hasSubscription && (
-                  <span className="inline-block px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                    ✓ Subscribed
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Stats Section */}
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-              <div className="grid grid-cols-2 gap-3 text-center">
-                <div>
-                  <p className="text-lg font-bold text-gray-900">
-                    {totalPurchases}
-                  </p>
-                  <p className="text-xs text-gray-600">Purchases</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold text-gray-900">
-                    {totalDownloads}
-                  </p>
-                  <p className="text-xs text-gray-600">Downloads</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Menu Items */}
-            <div className="py-1">
-              {user.role === "admin" ? (
-                <Link
-                  href="/admin"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  🎛️ Admin Panel
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  📊 My Dashboard
-                </Link>
               )}
-              <Link
-                href="/dashboard/purchases"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                🛍️ My Purchases
-              </Link>
-              <Link
-                href="/dashboard/downloads"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                📥 My Downloads
-              </Link>
-              <Link
-                href="/dashboard/reviews"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                onClick={() => setIsDropdownOpen(false)}
-              >
-                ⭐ My Reviews
-              </Link>
             </div>
+          </div>
 
-            <hr className="my-1" />
+          {/* Stats */}
+          <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-900">
+                  {totalPurchases}
+                </p>
+                <p className="text-xs text-gray-600">Purchases</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-900">
+                  {totalDownloads}
+                </p>
+                <p className="text-xs text-gray-600">Downloads</p>
+              </div>
+            </div>
+          </div>
 
+          {/* Menu Items */}
+          <div className="py-2">
+            <Link
+              href={user.role === "admin" ? "/admin" : "/dashboard"}
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <User className="w-4 h-4" />
+              {user.role === "admin" ? "Admin Panel" : "Dashboard"}
+            </Link>
+            <Link
+              href="/dashboard/purchases"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <ShoppingBag className="w-4 h-4" />
+              My Purchases
+            </Link>
+            <Link
+              href="/dashboard/downloads"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <Download className="w-4 h-4" />
+              My Downloads
+            </Link>
+            <Link
+              href="/dashboard/reviews"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsDropdownOpen(false)}
+            >
+              <Star className="w-4 h-4" />
+              My Reviews
+            </Link>
+          </div>
+
+          {/* Logout */}
+          <div className="border-t border-gray-200 p-2">
             <button
               onClick={handleLogout}
               disabled={isLoading}
-              className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium disabled:opacity-50"
+              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors font-medium disabled:opacity-50"
             >
-              {isLoading ? "Signing out..." : "🚪 Sign Out"}
+              <LogOut className="w-4 h-4" />
+              {isLoading ? "Signing out..." : "Sign Out"}
             </button>
           </div>
         </div>
       )}
 
-      {/* Backdrop to close dropdown */}
+      {/* Backdrop */}
       {isDropdownOpen && (
         <div
           className="fixed inset-0 z-40"

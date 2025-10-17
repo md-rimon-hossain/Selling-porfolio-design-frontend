@@ -104,8 +104,8 @@ export default function MyPurchasesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Purchases</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900">My Purchases</h1>
+          <p className="mt-1 text-sm text-gray-600">
             View and manage all your purchases (
             {data?.pagination?.totalItems || 0} total)
           </p>
@@ -114,22 +114,22 @@ export default function MyPurchasesPage() {
           <button
             onClick={() => refetch()}
             disabled={isLoading}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50 text-sm font-medium"
           >
             <RefreshCw
               className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
             />
-            <span className="text-sm font-medium">Refresh</span>
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="font-semibold text-gray-900">Filters</h3>
+            <Filter className="w-4 h-4 text-gray-600" />
+            <h3 className="font-semibold text-gray-900 text-sm">Filters</h3>
           </div>
           {(statusFilter ||
             purchaseTypeFilter ||
@@ -226,10 +226,10 @@ export default function MyPurchasesPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading your purchases...</p>
+          <p className="text-gray-600 text-sm">Loading your purchases...</p>
         </div>
       ) : purchases.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           {purchases.map(
             (purchase: {
               _id: string;
@@ -248,26 +248,26 @@ export default function MyPurchasesPage() {
             }) => (
               <div
                 key={purchase._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg border border-gray-200 p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
                       {purchase.purchaseType === "subscription" ? (
-                        <Package className="w-6 h-6 text-white" />
+                        <Package className="w-5 h-5 text-white" />
                       ) : (
-                        <ShoppingBag className="w-6 h-6 text-white" />
+                        <ShoppingBag className="w-5 h-5 text-white" />
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-bold text-gray-900">
+                        <h3 className="text-base font-bold text-gray-900">
                           {purchase.purchaseType === "subscription"
                             ? purchase.pricingPlan?.name || "Subscription Plan"
                             : purchase.design?.title || "Design Purchase"}
                         </h3>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs text-gray-500">
                         Order ID: {purchase._id.slice(-8).toUpperCase()}
                       </p>
                       {purchase.purchaseType === "subscription" &&
@@ -280,7 +280,7 @@ export default function MyPurchasesPage() {
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <div
-                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${getStatusColor(
                         purchase.status
                       )}`}
                     >
@@ -293,39 +293,39 @@ export default function MyPurchasesPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <DollarSign className="w-5 h-5 text-green-600" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                      <DollarSign className="w-4 h-4 text-green-600" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Amount</p>
-                      <p className="font-bold text-gray-900">
+                      <p className="font-bold text-gray-900 text-sm">
                         {purchase.currency || "USD"} $
                         {purchase.amount?.toFixed(2)}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-blue-600" />
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <Calendar className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Purchase Date</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 text-sm">
                         {new Date(
                           purchase.purchaseDate || purchase.createdAt
                         ).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                      <Package className="w-5 h-5 text-purple-600" />
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <Package className="w-4 h-4 text-purple-600" />
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Type</p>
-                      <p className="font-medium text-gray-900 capitalize">
+                      <p className="font-medium text-gray-900 text-sm capitalize">
                         {purchase.purchaseType}
                       </p>
                     </div>
@@ -335,13 +335,13 @@ export default function MyPurchasesPage() {
                 {/* Subscription Details */}
                 {purchase.purchaseType === "subscription" &&
                   purchase.status === "completed" && (
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                       {purchase.subscriptionEndDate && (
                         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <p className="text-xs text-blue-600 font-medium mb-1">
+                          <p className="text-xs text-blue-700 font-medium mb-1">
                             Subscription Expires
                           </p>
-                          <p className="text-sm text-blue-800 font-semibold">
+                          <p className="text-sm text-blue-900 font-semibold">
                             {new Date(
                               purchase.subscriptionEndDate
                             ).toLocaleDateString()}
@@ -360,10 +360,10 @@ export default function MyPurchasesPage() {
                       )}
                       {purchase.remainingDownloads !== undefined && (
                         <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                          <p className="text-xs text-purple-600 font-medium mb-1">
+                          <p className="text-xs text-purple-700 font-medium mb-1">
                             Downloads Remaining
                           </p>
-                          <p className="text-sm text-purple-800 font-semibold">
+                          <p className="text-sm text-purple-900 font-semibold">
                             {purchase.remainingDownloads === 999999
                               ? "Unlimited"
                               : purchase.remainingDownloads}
@@ -375,7 +375,7 @@ export default function MyPurchasesPage() {
 
                 {/* Payment Method */}
                 {purchase.paymentMethod && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
                       Payment Method:{" "}
                       <span className="font-medium text-gray-700 capitalize">
@@ -389,10 +389,10 @@ export default function MyPurchasesPage() {
                 {purchase.purchaseType === "individual" &&
                   purchase.design?._id &&
                   purchase.status === "completed" && (
-                    <div className="mt-4">
+                    <div className="mt-3">
                       <Link
                         href={`/designs/${purchase.design._id}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm"
                       >
                         <ShoppingBag className="w-4 h-4" />
                         View Design
@@ -404,14 +404,14 @@ export default function MyPurchasesPage() {
           )}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
           <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {statusFilter || purchaseTypeFilter
               ? "No purchases found"
               : "No purchases yet"}
           </h3>
-          <p className="text-gray-500 mb-6">
+          <p className="text-gray-500 mb-6 text-sm">
             {statusFilter || purchaseTypeFilter
               ? "Try adjusting your filters to see more results."
               : "Start exploring our designs and pricing plans!"}
@@ -420,13 +420,13 @@ export default function MyPurchasesPage() {
             <div className="flex items-center justify-center gap-4">
               <Link
                 href="/designs"
-                className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-shadow"
+                className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
                 Browse Designs
               </Link>
               <Link
                 href="/pricing"
-                className="inline-block px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-block px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
               >
                 View Plans
               </Link>
@@ -441,17 +441,17 @@ export default function MyPurchasesPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1 || isLoading}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Previous
           </button>
-          <span className="px-4 py-2 text-gray-700">
+          <span className="px-4 py-2 text-gray-700 text-sm">
             Page {page} of {data.pagination.totalPages}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page >= data.pagination.totalPages || isLoading}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Next
           </button>

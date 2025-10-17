@@ -1,4 +1,3 @@
-
 export interface Category {
   _id: string;
   name: string;
@@ -22,6 +21,8 @@ export interface Design {
   tags: string[];
   likesCount: number;
   downloadCount: number;
+  avgRating?: number;
+  totalReviews?: number;
   createdAt: string;
   updatedAt: string;
 }
