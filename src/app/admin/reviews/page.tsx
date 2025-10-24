@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useToast } from "@/components/ToastProvider";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 export default function ReviewsPage() {
   const [page, setPage] = useState(1);
@@ -54,23 +56,26 @@ export default function ReviewsPage() {
   });
   const [deleteReview] = useDeleteReviewMutation();
 
+  const toast = useToast();
+  const { confirm } = useConfirm();
+
   const reviews = data?.data || [];
   const pagination = data?.pagination || {};
   const analytics = analyticsData?.data || {};
 
   const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this review? This action cannot be undone."
-      )
-    )
-      return;
+    const confirmed = await confirm(
+      "Are you sure you want to delete this review? This action cannot be undone.",
+      { title: "Delete review" }
+    );
+    if (!confirmed) return;
+
     try {
       await deleteReview(id).unwrap();
-      alert("Review deleted successfully!");
+      toast.success("Review deleted successfully!");
       refetch();
     } catch (error: any) {
-      alert(error?.data?.message || "Failed to delete review");
+      toast.error(error?.data?.message || "Failed to delete review");
     }
   };
 

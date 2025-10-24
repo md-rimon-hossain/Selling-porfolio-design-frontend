@@ -527,7 +527,6 @@ export const api = createApi({
       any,
       {
         designId: string;
-        title?: string;
         rating: number;
         comment: string;
       }
@@ -545,7 +544,6 @@ export const api = createApi({
         id: string;
         rating?: number;
         comment?: string;
-        title?: string;
         pros?: string[];
         cons?: string[];
       }

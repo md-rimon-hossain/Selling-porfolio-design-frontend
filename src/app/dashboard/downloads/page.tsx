@@ -9,6 +9,7 @@ import {
 import { Download, Calendar, FileDown } from "lucide-react";
 import Link from "next/link";
 import { DownloadRecord, SubscriptionStatus } from "@/types/dashboard";
+import { useToast } from "@/components/ToastProvider";
 
 export default function MyDownloadsPage() {
   const [page, setPage] = useState(1);
@@ -18,6 +19,7 @@ export default function MyDownloadsPage() {
 
   const downloads = (data?.data || []) as DownloadRecord[];
   const subStatus = subscriptionStatus?.data as SubscriptionStatus | undefined;
+  const toast = useToast();
 
   const handleDownload = async (designId: string) => {
     try {
@@ -25,10 +27,10 @@ export default function MyDownloadsPage() {
       if (result.data?.downloadUrl) {
         window.open(result.data.downloadUrl, "_blank");
       }
-      alert("Download started!");
+      toast.success("Download started!");
     } catch (error) {
       const apiError = error as { data?: { message?: string } };
-      alert(apiError?.data?.message || "Download failed");
+      toast.error(apiError?.data?.message || "Download failed");
     }
   };
 

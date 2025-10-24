@@ -10,6 +10,7 @@ import { Purchase, SubscriptionStatus } from "@/types/dashboard";
 export interface DownloadAccess {
   canDownload: boolean;
   reason: "purchased" | "subscription" | "no_access";
+  status?: "completed" | "pending";
   message: string;
 }
 
@@ -38,24 +39,9 @@ export const useDesignDownloadAccess = (
       };
     }
 
-    // Check if user has active subscription
-    const subStatus = subscriptionData?.data as SubscriptionStatus | undefined;
-    if (subStatus?.hasActiveSubscription) {
-      const remaining = subStatus.remainingDownloads;
-      if (remaining === -1 || remaining > 0) {
-        return {
-          canDownload: true,
-          reason: "subscription",
-          message:
-            remaining === -1
-              ? "Unlimited downloads with your subscription"
-              : `${remaining} downloads remaining`,
-        };
-      }
-    }
-
     // Check if user has purchased this specific design
     const purchases = (purchasesData?.data || []) as Purchase[];
+
     const hasPurchased = purchases.some(
       (purchase: Purchase) =>
         purchase.purchaseType === "individual" &&
@@ -64,11 +50,36 @@ export const useDesignDownloadAccess = (
     );
 
     if (hasPurchased) {
+      const purchaseStatus = purchases.find(
+        (purchase) =>
+          purchase.purchaseType === "individual" &&
+          purchase.design?._id  === designId 
+      )?.status as "completed" | "pending";
       return {
-        canDownload: true,
+        canDownload: purchaseStatus === "completed",
         reason: "purchased",
-        message: "You own this design",
+        status: purchaseStatus,
+        message: `Design purchased (${purchaseStatus})`,
       };
+    }
+
+    // Check if user has active subscription
+    const subStatus = subscriptionData?.data as SubscriptionStatus | undefined;
+
+    if (subStatus?.hasActiveSubscription) {
+      const remaining = subStatus?.downloadStats?.remainingDownloads ?? 0;
+      console.log(remaining);
+      if (remaining === -1 || remaining > 0) {
+        return {
+          canDownload: true,
+          reason: "subscription",
+          status: "completed",
+          message:
+            remaining === -1
+              ? "Unlimited downloads with your subscription"
+              : `${remaining} downloads remaining`,
+        };
+      }
     }
 
     return {

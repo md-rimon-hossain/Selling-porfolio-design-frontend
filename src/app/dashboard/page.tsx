@@ -44,9 +44,6 @@ export default function DashboardPage() {
   const subscriptionPlanName = subscription?.pricingPlan?.name || "None";
   const remainingDownloads = downloadStats?.remainingDownloads || 0;
 
-
-  console.log(downloads);
-
   // Format date helper
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

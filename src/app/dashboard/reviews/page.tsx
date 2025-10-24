@@ -13,6 +13,8 @@ import { Star, Edit, Trash2, Plus, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { useToast } from "@/components/ToastProvider";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 // Separate component for design review to properly handle hooks
 function DesignReviewCard({
@@ -266,6 +268,9 @@ export default function MyReviewsPage() {
   const [updateReview] = useUpdateReviewMutation();
   const [deleteReview] = useDeleteReviewMutation();
 
+  const toast = useToast();
+  const confirmDialog = useConfirm();
+
   const [showModal, setShowModal] = useState(false);
   const [editingReview, setEditingReview] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -324,33 +329,35 @@ export default function MyReviewsPage() {
 
     // Validate comment length (min 10 chars as per backend)
     if (formData.comment.trim().length < 10) {
-      alert("Comment must be at least 10 characters long");
+      toast.error("Comment must be at least 10 characters long");
       return;
     }
-
-
 
     try {
       if (editingReview) {
         await updateReview({ id: editingReview._id, ...formData }).unwrap();
-        alert("Review updated successfully!");
+        toast.success("Review updated successfully!");
       } else {
         await createReview(formData).unwrap();
-        alert("Review created successfully!");
+        toast.success("Review created successfully!");
       }
       handleCloseModal();
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this review?")) return;
+    const ok = await confirmDialog.confirm(
+      "Are you sure you want to delete this review?",
+      { title: "Delete review", confirmLabel: "Delete", cancelLabel: "Cancel" }
+    );
+    if (!ok) return;
     try {
       await deleteReview(id).unwrap();
-      alert("Review deleted successfully!");
+      toast.success("Review deleted successfully!");
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 
@@ -469,7 +476,7 @@ export default function MyReviewsPage() {
                     ))}
                   </div>
                 </div>
-               
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Comment *

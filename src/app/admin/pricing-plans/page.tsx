@@ -8,8 +8,10 @@ import {
   useUpdatePricingPlanMutation,
   useDeletePricingPlanMutation,
 } from "@/services/api";
-import { Plus, Edit, Trash2,  CheckCircle } from "lucide-react";
+import { Plus, Edit, Trash2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ToastProvider";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 export default function PricingPlansPage() {
   const { data, isLoading } = useGetPricingPlansQuery({});
@@ -31,6 +33,8 @@ export default function PricingPlansPage() {
   });
 
   const plans = data?.data || [];
+  const toast = useToast();
+  const confirmDialog = useConfirm();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,14 +55,14 @@ export default function PricingPlansPage() {
 
       if (editingPlan) {
         await updatePlan({ id: editingPlan._id, data: submitData }).unwrap();
-        alert("Pricing plan updated successfully!");
+        toast.success("Pricing plan updated successfully!");
       } else {
         await createPlan(submitData).unwrap();
-        alert("Pricing plan created successfully!");
+        toast.success("Pricing plan created successfully!");
       }
       handleCloseModal();
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 
@@ -78,12 +82,20 @@ export default function PricingPlansPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this pricing plan?")) return;
     try {
+      const ok = await confirmDialog.confirm(
+        "Are you sure you want to delete this pricing plan?",
+        {
+          title: "Delete pricing plan",
+          confirmLabel: "Delete",
+          cancelLabel: "Cancel",
+        }
+      );
+      if (!ok) return;
       await deletePlan({ id, permanent: false }).unwrap();
-      alert("Pricing plan deleted successfully!");
+      toast.success("Pricing plan deleted successfully!");
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 

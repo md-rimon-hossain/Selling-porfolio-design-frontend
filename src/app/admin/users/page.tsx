@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useToast } from "@/components/ToastProvider";
 
 interface IUser {
   _id: string;
@@ -58,6 +59,8 @@ export default function AdminUsersPage() {
 
   const users = data?.data || [];
   const pagination = data?.pagination;
+
+  const toast = useToast();
 
   // Handle filter changes
   const handleSearch = (value: string) => {
@@ -102,7 +105,7 @@ export default function AdminUsersPage() {
   // Export users (you can implement actual CSV export)
   const handleExport = () => {
     console.log("Exporting users...", users);
-    alert("Export functionality to be implemented");
+    toast.info("Export functionality to be implemented");
   };
 
   return (
