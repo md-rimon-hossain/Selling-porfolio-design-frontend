@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 interface User {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: string;
@@ -38,9 +38,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
   const router = useRouter();
   const [logoutMutation, { isLoading }] = useLogoutMutation();
 
-  // Fetch user stats
-  const { data: purchasesData } = useGetMyPurchasesQuery({ limit: 1 });
-  const { data: downloadsData } = useGetMyDownloadsQuery({ page: 1, limit: 1 });
   const { data: subscriptionData } = useGetSubscriptionStatusQuery();
 
   const handleLogout = async () => {
@@ -56,8 +53,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     }
   };
 
-  const totalPurchases = purchasesData?.pagination?.total || 0;
-  const totalDownloads = downloadsData?.pagination?.total || 0;
   const hasSubscription =
     subscriptionData?.data?.hasActiveSubscription || false;
 
@@ -111,23 +106,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">
-                  {totalPurchases}
-                </p>
-                <p className="text-xs text-gray-600">Purchases</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">
-                  {totalDownloads}
-                </p>
-                <p className="text-xs text-gray-600">Downloads</p>
-              </div>
-            </div>
-          </div>
+         
 
           {/* Menu Items */}
           <div className="py-2">

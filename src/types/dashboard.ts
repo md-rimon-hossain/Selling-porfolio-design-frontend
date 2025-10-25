@@ -3,7 +3,11 @@
 export interface Purchase {
   _id: string;
   purchaseType: "individual" | "subscription";
-  design?: string | null;
+  design?: {
+    _id: string;
+    title: string;
+    price: number;
+  };
   pricingPlan?: {
     _id: string;
     name: string;

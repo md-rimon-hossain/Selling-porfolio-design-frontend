@@ -37,6 +37,28 @@ interface TopDesign {
   previewImageUrl?: string;
 }
 
+interface DownloadUser {
+  _id?: string;
+  name?: string;
+  email?: string;
+}
+
+interface DownloadDesign {
+  _id?: string;
+  title?: string;
+  previewImageUrl?: string;
+  category?: { name?: string };
+}
+
+interface AdminDownload {
+  _id: string;
+  user?: DownloadUser;
+  design?: DownloadDesign;
+  downloadType?: "subscription" | "individual_purchase" | string;
+  downloadDate?: string;
+  ipAddress?: string;
+}
+
 export default function AdminDownloadsPage() {
   // State
   const [page, setPage] = useState(1);
@@ -83,6 +105,7 @@ export default function AdminDownloadsPage() {
   });
 
   const downloads = data?.data || [];
+
   const pagination = data?.pagination || {
     currentPage: 1,
     totalPages: 1,
@@ -420,7 +443,7 @@ export default function AdminDownloadsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {downloads.map((download: Record<string, unknown>) => (
+                {downloads && downloads.map((download: AdminDownload) => (
                   <tr key={download._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -489,7 +512,7 @@ export default function AdminDownloadsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2 text-sm text-gray-900">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        {new Date(download.downloadDate).toLocaleDateString(
+                        {download.downloadDate && new Date(download.downloadDate).toLocaleDateString(
                           "en-US",
                           {
                             year: "numeric",
@@ -499,7 +522,7 @@ export default function AdminDownloadsPage() {
                         )}
                       </div>
                       <p className="text-xs text-gray-500">
-                        {new Date(download.downloadDate).toLocaleTimeString(
+                        {download.downloadDate && new Date(download.downloadDate).toLocaleTimeString(
                           "en-US",
                           {
                             hour: "2-digit",

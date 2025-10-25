@@ -9,6 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Design } from "@/lib/allTypes";
 import PurchaseModal from "@/components/PurchaseModal";
 import { useAppSelector } from "@/store/hooks";
+import { useToast } from "@/components/ToastProvider";
 import { ShoppingCart, Download, CheckCircle, Loader2 } from "lucide-react";
 import { useDesignDownloadAccess } from "@/hooks/useDesignDownloadAccess";
 import { LikeButton } from "@/components/LikeButton";
@@ -30,6 +31,8 @@ export default function DesignDetailPage() {
   const [downloadDesign, { isLoading: downloadLoading }] =
     useDownloadDesignMutation();
 
+  const toast = useToast();
+
   const handlePurchaseClick = () => {
     if (!user) {
       router.push("/login");
@@ -44,10 +47,12 @@ export default function DesignDetailPage() {
       if (result.data?.downloadUrl) {
         window.open(result.data.downloadUrl, "_blank");
       }
-      alert("Download started successfully!");
+      toast.success("Download started successfully!");
     } catch (error) {
       const apiError = error as { data?: { message?: string } };
-      alert(apiError?.data?.message || "Download failed. Please try again.");
+      toast.error(
+        apiError?.data?.message || "Download failed. Please try again."
+      );
     }
   };
 

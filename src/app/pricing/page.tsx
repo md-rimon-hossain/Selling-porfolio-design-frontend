@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import PurchaseModal from "@/components/PurchaseModal";
 import { useAppSelector } from "@/store/hooks";
+import { useToast } from "@/components/ToastProvider";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -62,6 +63,7 @@ const PricingPage = () => {
     });
 
   const pricingPlans = pricingData?.data || [];
+  const toast = useToast();
   const hasActiveSubscription =
     subscriptionData?.data?.hasActiveSubscription || false;
   const currentSubscription = subscriptionData?.data?.subscription;
@@ -94,7 +96,7 @@ const PricingPage = () => {
 
     // Check if user already has an active subscription
     if (hasActiveSubscription) {
-      alert(
+      toast.info(
         "You already have an active subscription. Please cancel your current subscription before purchasing a new one."
       );
       return;

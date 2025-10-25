@@ -26,6 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { useToast } from "@/components/ToastProvider";
 
 type PurchaseStatus =
   | "pending"
@@ -152,6 +153,8 @@ export default function PurchasesPage() {
   const [updateStatus, { isLoading: isUpdating }] =
     useUpdatePurchaseStatusMutation();
 
+  const toast = useToast();
+
   const purchases: Purchase[] = useMemo(() => data?.data || [], [data?.data]);
   const analytics = analyticsData?.data?.overview;
 
@@ -220,13 +223,13 @@ export default function PurchasesPage() {
       setSelectedPurchaseForNotes(null);
       setPendingStatusChange(null);
       setAdminNotes("");
-      alert(`Status updated to ${status} successfully!`);
+      toast.success(`Status updated to ${status} successfully!`);
     } catch (error) {
       const message =
         error && typeof error === "object" && "data" in error
           ? (error as { data?: { message?: string } }).data?.message
           : "Failed to update status";
-      alert(message || "Failed to update status");
+      toast.error(message || "Failed to update status");
     }
   };
 

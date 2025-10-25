@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { Purchase, DesignForDownload } from "@/types/dashboard";
+import { useToast } from "@/components/ToastProvider";
 
 export default function AvailableDownloadsPage() {
   const [page, setPage] = useState(1);
@@ -67,6 +68,7 @@ export default function AvailableDownloadsPage() {
   const [downloadDesign, { isLoading: downloadLoading }] =
     useDownloadDesignMutation();
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const toast = useToast();
 
   // Reset page when filters change
   useEffect(() => {
@@ -90,18 +92,16 @@ export default function AvailableDownloadsPage() {
 
   const hasActiveSubscription = !!activeSubscription;
 
-  console.log(hasActiveSubscription);
-
   // Get purchased designs - extract the design IDs from COMPLETED individual purchases
   const purchasedDesignIds = new Set(
     purchases
       .filter(
-        (p: Purchase) =>
-          p.purchaseType === "individual" &&
-          p.design &&
-          p.status === "completed" // Only completed purchases
+        (purchase: Purchase) =>
+          purchase.purchaseType === "individual" &&
+          purchase.design &&
+          purchase.status === "completed" // Only completed purchases
       )
-      .map((p) => p.design)
+      .map((p: any) => p.design?._id)
       .filter(Boolean)
   );
 
@@ -109,7 +109,6 @@ export default function AvailableDownloadsPage() {
   const purchasedDesigns = allDesigns.filter((design) =>
     purchasedDesignIds.has(design._id)
   );
-
   // Combine purchased designs with all designs if subscription
   const availableDesigns =
     filter === "purchased"
@@ -141,14 +140,15 @@ export default function AvailableDownloadsPage() {
             : result.data.remainingDownloads === -1
             ? "Unlimited downloads available"
             : `${result.data.remainingDownloads} downloads remaining`;
-
-        alert(`Download started for "${title}"!\n${remainingInfo}`);
+        toast.success(`Download started for "${title}"! ${remainingInfo}`);
       } else {
-        alert(result.message || "Download started successfully!");
+        toast.info(result.message || "Download started successfully!");
       }
     } catch (error) {
       const apiError = error as { data?: { message?: string } };
-      alert(apiError?.data?.message || "Download failed. Please try again.");
+      toast.error(
+        apiError?.data?.message || "Download failed. Please try again."
+      );
     } finally {
       setDownloadingId(null);
     }

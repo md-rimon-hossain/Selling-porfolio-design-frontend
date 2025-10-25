@@ -4,6 +4,8 @@ import "./globals.css";
 import ReduxProvider from "@/store/ReduxProvider";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import ConditionalLayout from "../components/ConditionalLayout";
+import ToastProvider from "@/components/ToastProvider";
+import ConfirmProvider from "@/components/ConfirmProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +35,13 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <AuthWrapper>
-            <ConditionalLayout>{children}</ConditionalLayout>
+            <ToastProvider>
+              <ConfirmProvider>
+                <ConditionalLayout>{children}</ConditionalLayout>
+              </ConfirmProvider>
+            </ToastProvider>
           </AuthWrapper>
-        </ReduxProvider>5
+        </ReduxProvider>
       </body>
     </html>
   );

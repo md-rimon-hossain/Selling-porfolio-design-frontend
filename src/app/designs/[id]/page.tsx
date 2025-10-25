@@ -26,7 +26,15 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useDesignDownloadAccess } from "@/hooks/useDesignDownloadAccess";
+import {
+  useCreateReviewMutation,
+  useUpdateReviewMutation,
+  useDeleteReviewMutation,
+} from "@/services/api";
+import { Edit, Trash2 } from "lucide-react";
 import { LikeButton } from "@/components/LikeButton";
+import { useToast } from "@/components/ToastProvider";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 export default function DesignDetailPage() {
   const params = useParams();
@@ -39,20 +47,130 @@ export default function DesignDetailPage() {
   const { data: designData, isLoading, error } = useGetDesignQuery(designId);
   const design: Design = designData?.data;
 
-  // Fetch reviews
-  const { data: reviewsData } = useGetDesignReviewsQuery({
-    designId,
-    page: 1,
-    limit: 100,
-  });
+  // Fetch reviews (with refetch so we can refresh after create/update/delete)
+  const { data: reviewsData, refetch: refetchReviews } =
+    useGetDesignReviewsQuery({
+      designId,
+      page: 1,
+      limit: 100,
+    });
 
   const statistics = reviewsData?.data?.statistics;
   const reviews = reviewsData?.data?.reviews || [];
 
+  // Review mutations
+  const [createReview] = useCreateReviewMutation();
+  const [updateReview] = useUpdateReviewMutation();
+  const [deleteReview] = useDeleteReviewMutation();
+
+  const currentUserId = (user && user?._id) || "";
+
+  // Detect existing review by current user for this design (support both _id and id)
+  const existingReview = reviews.find(
+    (r: any) =>
+      r.reviewer?._id === currentUserId || r.reviewer?.id === currentUserId
+  );
+
+  // Local modal state for writing/editing review on design page
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<any>(
+    existingReview || null
+  );
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    comment: "",
+  });
+
+  // Keep editingReview in sync when reviews load or current user changes
+  React.useEffect(() => {
+    const found = reviews.find(
+      (r: any) =>
+        r.reviewer?._id === currentUserId || r.reviewer?.id === currentUserId
+    );
+    setEditingReview(found || null);
+    if (found) {
+      setReviewForm({
+        rating: found.rating || 5,
+        comment: found.comment || "",
+      });
+    }
+  }, [reviews, currentUserId]);
+
+  const openWriteModal = () => {
+    setEditingReview(existingReview || null);
+    if (existingReview) {
+      setReviewForm({
+        rating: existingReview.rating || 5,
+        comment: existingReview.comment || "",
+      });
+    } else {
+      setReviewForm({ rating: 5, comment: "" });
+    }
+    setReviewModalOpen(true);
+  };
+
+  const toast = useToast();
+  const confirmDialog = useConfirm();
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (reviewForm.comment.trim().length < 10) {
+      toast.error("Comment must be at least 10 characters long");
+      return;
+    }
+    try {
+      if (editingReview) {
+        const reviewId = editingReview._id || editingReview.id;
+        await updateReview({
+          id: reviewId,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+        }).unwrap();
+        toast.success("Review updated successfully");
+      } else {
+        await createReview({
+          designId,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+        }).unwrap();
+        toast.success("Review submitted successfully");
+      }
+      setReviewModalOpen(false);
+      await refetchReviews();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "An error occurred");
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    const ok = await confirmDialog.confirm(
+      "Are you sure you want to delete this review?",
+      {
+        title: "Delete review",
+        confirmLabel: "Delete",
+        cancelLabel: "Cancel",
+      }
+    );
+    if (!ok) return;
+    try {
+      await deleteReview(id).unwrap();
+      toast.success("Review deleted successfully");
+      await refetchReviews();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "An error occurred");
+    }
+  };
+
   // Check download access
   const { access, isLoading: accessLoading } =
     useDesignDownloadAccess(designId);
-  console.log(access);
+
+  const canReview =
+    Boolean(user) &&
+    (access?.canDownload ||
+      access?.status === "completed" ||
+      access?.reason === "subscription");
+
   const [downloadDesign, { isLoading: downloadLoading }] =
     useDownloadDesignMutation();
 
@@ -70,10 +188,12 @@ export default function DesignDetailPage() {
       if (result.data?.downloadUrl) {
         window.open(result.data.downloadUrl, "_blank");
       }
-      alert("Download started successfully!");
+      toast.success("Download started successfully!");
     } catch (error) {
       const apiError = error as { data?: { message?: string } };
-      alert(apiError?.data?.message || "Download failed. Please try again.");
+      toast.error(
+        apiError?.data?.message || "Download failed. Please try again."
+      );
     }
   };
 
@@ -344,6 +464,16 @@ export default function DesignDetailPage() {
                     </span>
                   </div>
                 )}
+                {canReview && (
+                  <div>
+                    <button
+                      onClick={openWriteModal}
+                      className="ml-3 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md"
+                    >
+                      {editingReview ? "Edit your review" : "Write a review"}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Rating Distribution */}
@@ -354,7 +484,9 @@ export default function DesignDetailPage() {
                     <div className="space-y-2">
                       {[5, 4, 3, 2, 1].map((rating) => {
                         const count =
-                          Number(statistics.ratingDistribution?.[rating]) || 0;
+                          Number(statistics.ratingDistribution[0]?.[rating]) ||
+                          0;
+
                         const percentage =
                           statistics.totalReviews > 0
                             ? (count / statistics.totalReviews) * 100
@@ -385,6 +517,75 @@ export default function DesignDetailPage() {
                 )}
 
               {/* Reviews List */}
+              {reviewModalOpen && (
+                <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded">
+                  <form onSubmit={handleReviewSubmit} className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <label className="text-sm font-medium">Rating</label>
+                      <select
+                        value={reviewForm.rating}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            rating: Number(e.target.value),
+                          })
+                        }
+                        className="border border-gray-200 rounded px-2 py-1 text-sm"
+                      >
+                        {[5, 4, 3, 2, 1].map((r) => (
+                          <option key={r} value={r}>
+                            {r} Star{r > 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <textarea
+                        value={reviewForm.comment}
+                        onChange={(e) =>
+                          setReviewForm({
+                            ...reviewForm,
+                            comment: e.target.value,
+                          })
+                        }
+                        placeholder="Write your review"
+                        className="w-full border border-gray-200 rounded px-3 py-2 text-sm h-28"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-3 py-2 rounded"
+                      >
+                        {editingReview ? "Update Review" : "Submit Review"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewModalOpen(false)}
+                        className="text-sm px-3 py-2 rounded border border-gray-200"
+                      >
+                        Cancel
+                      </button>
+                      {editingReview && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteReview(
+                              editingReview._id || editingReview.id
+                            )
+                          }
+                          className="text-sm px-3 py-2 rounded border border-red-200 text-red-600"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              )}
+
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {reviews.slice(0, 5).map((review: any) => (
@@ -398,6 +599,12 @@ export default function DesignDetailPage() {
                             <span className="font-semibold text-gray-900">
                               {review.reviewer.name}
                             </span>
+                            {(review.reviewer?._id === currentUserId ||
+                              review.reviewer?.id === currentUserId) && (
+                              <span className="ml-2 inline-flex items-center text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                                You reviewed
+                              </span>
+                            )}
                             <div className="flex items-center">
                               {[...Array(5)].map((_, i) => (
                                 <Star
@@ -417,9 +624,36 @@ export default function DesignDetailPage() {
                             </h4>
                           )}
                         </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                          {review.reviewer?._id === currentUserId && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingReview(review);
+                                  setReviewForm({
+                                    rating: review.rating || 5,
+                                    comment: review.comment || "",
+                                  });
+                                  setReviewModalOpen(true);
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteReview(review._id || review.id)
+                                }
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm text-gray-700">{review.comment}</p>
                     </div>
@@ -488,7 +722,9 @@ export default function DesignDetailPage() {
                   <div className="w-full h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                     <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
                   </div>
-                ) : access.canDownload ? (
+                ) : access.canDownload ||
+                  access.status === "pending" ||
+                  access.status === "completed" ? (
                   <>
                     <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2">
@@ -498,30 +734,42 @@ export default function DesignDetailPage() {
                             {access.message}
                           </p>
                           <p className="text-xs text-green-700">
-                            {access.reason === "subscription"
-                              ? "Included with subscription"
-                              : "You own this design"}
+                            {access.reason === "subscription" &&
+                            access.status === "completed"
+                              ? "Included with subscription access"
+                              : access.reason === "subscription" &&
+                                access.status === "pending"
+                              ? "Your subscription is pending"
+                              : access.reason === "purchased" &&
+                                access.status === "pending"
+                              ? "Your individual purchase is pending now when complete You can download the design"
+                              : access.reason === "purchased" &&
+                                access.status === "completed"
+                              ? "You purchased this design. You own this design"
+                              : " "}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <Button
-                      onClick={handleDownload}
-                      disabled={downloadLoading}
-                      className="w-full bg-green-600 hover:bg-green-700 text-sm font-semibold"
-                    >
-                      {downloadLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-4 h-4 mr-2" />
-                          Download Now
-                        </>
-                      )}
-                    </Button>
+                    {access.status === "completed" ? (
+                      <Button
+                        onClick={handleDownload}
+                        disabled={downloadLoading}
+                        className="w-full bg-green-600 hover:bg-green-700 text-sm font-semibold"
+                      >
+                        {downloadLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Now
+                          </>
+                        )}
+                      </Button>
+                    ) : null}
                   </>
                 ) : (
                   <>

@@ -22,6 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { useToast } from "@/components/ToastProvider";
+import { useConfirm } from "@/components/ConfirmProvider";
 
 export default function DesignsPage() {
   const [page, setPage] = useState(1);
@@ -60,6 +62,8 @@ export default function DesignsPage() {
   const [createDesign, { isLoading: isCreating }] = useCreateDesignMutation();
   const [updateDesign, { isLoading: isUpdating }] = useUpdateDesignMutation();
   const [deleteDesign] = useDeleteDesignMutation();
+  const toast = useToast();
+  const { confirm } = useConfirm();
 
   const [showModal, setShowModal] = useState(false);
   const [editingDesign, setEditingDesign] = useState<any>(null);
@@ -105,14 +109,14 @@ export default function DesignsPage() {
           id: editingDesign._id,
           data: formData,
         }).unwrap();
-        alert("Design updated successfully!");
+        toast.success("Design updated successfully!");
       } else {
         await createDesign(formData).unwrap();
-        alert("Design created successfully!");
+        toast.success("Design created successfully!");
       }
       handleCloseModal();
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 
@@ -146,12 +150,17 @@ export default function DesignsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this design?")) return;
+    const confirmed = await confirm(
+      "Are you sure you want to delete this design?",
+      { title: "Delete design" }
+    );
+    if (!confirmed) return;
+
     try {
       await deleteDesign(id).unwrap();
-      alert("Design deleted successfully!");
+      toast.success("Design deleted successfully!");
     } catch (error: any) {
-      alert(error?.data?.message || "An error occurred");
+      toast.error(error?.data?.message || "An error occurred");
     }
   };
 
