@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://compressed-shona-neglectfully.ngrok-free.dev/api",
     credentials: "include", // sends httpOnly cookies
   }),
   tagTypes: [
