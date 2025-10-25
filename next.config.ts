@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       "https://api.dicebear.com",
       "api.dicebear.com",
       "plus.unsplash.com",
+      "https://www.pexels.com",
+      "www.pexels.com",
+      "images.pexels.com"
     ],
   },
 };
