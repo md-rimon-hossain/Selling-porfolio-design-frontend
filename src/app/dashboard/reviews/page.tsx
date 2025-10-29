@@ -46,10 +46,12 @@ function DesignReviewCard({
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
       {/* Design Header with Image */}
       <div className="flex items-start gap-4 p-6 border-b border-gray-100">
-        {design.previewImageUrl && (
+        {((design as any)?.previewImageUrls?.[0] || design.previewImageUrl) && (
           <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600">
             <Image
-              src={design.previewImageUrl}
+              src={
+                (design as any)?.previewImageUrls?.[0] || design.previewImageUrl
+              }
               alt={design.title}
               fill
               className="object-cover"
@@ -64,7 +66,11 @@ function DesignReviewCard({
           </Link>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-sm font-semibold text-gray-900">
-              ${design.price?.toFixed(2)}
+              $
+              {((design as any).discountedPrice != null
+                ? (design as any).discountedPrice
+                : (design as any).basePrice ?? design.price ?? 0
+              ).toFixed(2)}
             </span>
           </div>
 

@@ -42,10 +42,112 @@ export default function DesignDetailPage() {
   const user = useAppSelector((state) => state.auth.user);
   const designId = params.id as string;
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
   const { data: designData, isLoading, error } = useGetDesignQuery(designId);
-  const design: Design = designData?.data;
+
+  // Debug lifecycle: shows id, loading state, any error, and returned payload
+  React.useEffect(() => {
+    console.log({ designId, isLoading, error, designData });
+  }, [designId, isLoading, error, designData]);
+
+  // Support both shapes: API sometimes returns { data: { ... } } or the design object directly
+  const design: Design | undefined = ((designData as any)?.data ??
+    designData) as any;
+
+  // Helpers - backend sends new fields; align safely with current TS Design type
+  const mainCategory = (design as any)?.mainCategory;
+  const subCategory = (design as any)?.subCategory;
+  // images from backend (support array or single URL)
+  const previewImages: string[] =
+    (design as any)?.previewImageUrls ??
+    ((design as any)?.previewImageUrl ? [(design as any).previewImageUrl] : []);
+
+  // ensure we reset gallery index when design changes
+  React.useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [design?._id]);
+
+  // current hero image for gallery
+  const heroImage = previewImages[currentImageIndex] || "";
+
+  // build a consistent category link for breadcrumb / badges
+  const categoryQueryLink =
+    mainCategory?.id || mainCategory?._id
+      ? `/designs?mainCategory=${mainCategory?.id ?? mainCategory?._id}`
+      : subCategory?.id || subCategory?._id
+      ? `/designs?subCategory=${subCategory?.id ?? subCategory?._id}`
+      : "/designs";
+
+  // Lightbox / fullscreen preview state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoom, setZoom] = useState<number>(1);
+
+  // Pan / drag state for lightbox (px)
+  const [translate, setTranslate] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const draggingRef = React.useRef(false);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const pointerStartRef = React.useRef<{ x: number; y: number } | null>(null);
+  const translateStartRef = React.useRef<{ x: number; y: number } | null>(null);
+  const imageWrapperRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Prevent background scroll while lightbox is open
+  React.useEffect(() => {
+    if (lightboxOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      // also prevent touchmove on mobile
+      const prevent = (e: TouchEvent) => e.preventDefault();
+      document.addEventListener("touchmove", prevent, { passive: false });
+      return () => {
+        document.body.style.overflow = prev;
+        document.removeEventListener("touchmove", prevent as any);
+      };
+    }
+    return;
+  }, [lightboxOpen]);
+
+  // Reset zoom when switching images or closing
+  React.useEffect(() => {
+    setZoom(1);
+    setTranslate({ x: 0, y: 0 });
+  }, [currentImageIndex, lightboxOpen]);
+
+  // When zoom returns to 1, reset translate so image recenters
+  React.useEffect(() => {
+    if (zoom <= 1) setTranslate({ x: 0, y: 0 });
+  }, [zoom]);
+
+  // Keyboard handlers for lightbox: Esc to close, arrows to navigate, +/- to zoom
+  React.useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "ArrowLeft")
+        setCurrentImageIndex(
+          (i) => (i - 1 + previewImages.length) % previewImages.length
+        );
+      if (e.key === "ArrowRight")
+        setCurrentImageIndex((i) => (i + 1) % previewImages.length);
+      if (e.key === "+" || e.key === "=") setZoom((z) => Math.min(4, z + 0.25));
+      if (e.key === "-" || e.key === "_") setZoom((z) => Math.max(1, z - 0.25));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen, previewImages.length]);
+
+  const displayPrice =
+    typeof (design as any)?.discountedPrice === "number" &&
+    (design as any).discountedPrice >= 0
+      ? (design as any)?.discountedPrice
+      : (design as any)?.basePrice ?? (design as any)?.basePrice ?? 0;
+
+  const designerName =
+    (design as any)?.designer?.name || (design as any)?.designerName || "";
 
   // Fetch reviews (with refetch so we can refresh after create/update/delete)
   const { data: reviewsData, refetch: refetchReviews } =
@@ -261,10 +363,10 @@ export default function DesignDetailPage() {
             </Link>
             <span className="text-gray-400">/</span>
             <Link
-              href={`/designs?category=${design.category._id}`}
+              href={categoryQueryLink}
               className="text-gray-600 hover:text-blue-600 transition-colors"
             >
-              {design.category.name}
+              {mainCategory?.name || subCategory?.name || "Category"}
             </Link>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium truncate max-w-xs">
@@ -280,12 +382,13 @@ export default function DesignDetailPage() {
             {/* Main Image */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden group">
               <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
-                {design.previewImageUrl ? (
+                {heroImage ? (
                   <>
                     <Image
-                      src={design.previewImageUrl}
-                      alt={design.title}
+                      src={heroImage}
+                      alt={`${design.title} preview ${currentImageIndex + 1}`}
                       fill
+                      priority={true}
                       className={`object-cover transition-all duration-500 ${
                         imageLoaded
                           ? "opacity-100 scale-100"
@@ -296,6 +399,42 @@ export default function DesignDetailPage() {
                         const target = e.target as HTMLImageElement;
                         target.style.display = "none";
                       }}
+                    />
+
+                    {/* Prev / Next controls */}
+                    {previewImages.length > 1 && (
+                      <>
+                        <button
+                          aria-label="Previous image"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) =>
+                                (i - 1 + previewImages.length) %
+                                previewImages.length
+                            )
+                          }
+                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          aria-label="Next image"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) => (i + 1) % previewImages.length
+                            )
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+                    {/* open lightbox on click */}
+                    <button
+                      aria-label="Open fullscreen"
+                      onClick={() => setLightboxOpen(true)}
+                      className="absolute inset-0 w-full h-full bg-transparent"
                     />
                   </>
                 ) : (
@@ -320,7 +459,7 @@ export default function DesignDetailPage() {
                 {/* Like Button */}
                 <div className="absolute top-4 right-4">
                   <LikeButton
-                    designId={design._id}
+                    designId={design._id!}
                     initialLikesCount={design.likesCount}
                     variant="icon"
                     size="lg"
@@ -330,12 +469,209 @@ export default function DesignDetailPage() {
                 </div>
               </div>
 
+              {/* Image Thumbnails */}
+              {previewImages.length > 1 && (
+                <div className="flex items-center gap-2 mt-3 overflow-x-auto p-2">
+                  {previewImages.map((src, idx) => (
+                    <button
+                      key={src + idx}
+                      onClick={() => {
+                        setCurrentImageIndex(idx);
+                        setImageLoaded(false);
+                      }}
+                      className={`flex-shrink-0 w-20 h-12 rounded overflow-hidden border ${
+                        idx === currentImageIndex
+                          ? "ring-2 ring-blue-500"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <Image
+                        src={src}
+                        alt={`${design.title} thumb ${idx + 1}`}
+                        width={160}
+                        height={96}
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Lightbox Overlay */}
+              {lightboxOpen && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-6"
+                  onClick={(e) => {
+                    // close when clicking outside the image container
+                    if (e.target === e.currentTarget) setLightboxOpen(false);
+                  }}
+                >
+                  <button
+                    aria-label="Close fullscreen"
+                    onClick={() => setLightboxOpen(false)}
+                    className="absolute top-6 right-6 z-60 text-white bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full p-2"
+                  >
+                    ✕
+                  </button>
+
+                  <div className="relative max-w-[95vw] max-h-[95vh]">
+                    <div
+                      ref={imageWrapperRef}
+                      // pointer handlers for drag/pan
+                      onPointerDown={(e) => {
+                        // only start dragging when zoomed in
+                        if (zoom <= 1) return;
+                        try {
+                          (e.currentTarget as Element).setPointerCapture(
+                            e.pointerId
+                          );
+                        } catch (_err) {}
+                        draggingRef.current = true;
+                        setIsDragging(true);
+                        pointerStartRef.current = {
+                          x: e.clientX,
+                          y: e.clientY,
+                        };
+                        translateStartRef.current = {
+                          x: translate.x,
+                          y: translate.y,
+                        };
+                      }}
+                      onPointerMove={(e) => {
+                        if (
+                          !draggingRef.current ||
+                          !pointerStartRef.current ||
+                          !translateStartRef.current
+                        )
+                          return;
+                        const dx = e.clientX - pointerStartRef.current.x;
+                        const dy = e.clientY - pointerStartRef.current.y;
+                        setTranslate({
+                          x: translateStartRef.current.x + dx,
+                          y: translateStartRef.current.y + dy,
+                        });
+                      }}
+                      onPointerUp={(e) => {
+                        try {
+                          (e.currentTarget as Element).releasePointerCapture(
+                            e.pointerId
+                          );
+                        } catch (_) {}
+                        draggingRef.current = false;
+                        setIsDragging(false);
+                        pointerStartRef.current = null;
+                        translateStartRef.current = null;
+                      }}
+                      onPointerCancel={(e) => {
+                        try {
+                          (e.currentTarget as Element).releasePointerCapture(
+                            e.pointerId
+                          );
+                        } catch (_) {}
+                        draggingRef.current = false;
+                        setIsDragging(false);
+                        pointerStartRef.current = null;
+                        translateStartRef.current = null;
+                      }}
+                      className={`max-w-full max-h-full block mx-auto touch-none ${
+                        zoom > 1
+                          ? isDragging
+                            ? "cursor-grabbing"
+                            : "cursor-grab"
+                          : ""
+                      }`}
+                      style={{
+                        // ensure wrapper limits and makes container interactive
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
+                      <Image
+                        src={previewImages[currentImageIndex] || heroImage}
+                        alt={`${design.title} large view`}
+                        width={1920}
+                        height={1080}
+                        className="object-contain"
+                        style={{
+                          transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`,
+                          transition: isDragging
+                            ? "none"
+                            : "transform 120ms ease",
+                          touchAction: "none",
+                        }}
+                        onWheel={(e) => {
+                          // simple wheel zoom: ctrl/wheel or wheel delta
+                          const delta = (e as unknown as WheelEvent).deltaY;
+                          if (delta > 0)
+                            setZoom((z) => Math.max(1, +(z - 0.1).toFixed(2)));
+                          else
+                            setZoom((z) => Math.min(4, +(z + 0.1).toFixed(2)));
+                        }}
+                      />
+                    </div>
+
+                    {/* Prev/Next inside lightbox */}
+                    {previewImages.length > 1 && (
+                      <>
+                        <button
+                          aria-label="Previous"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) =>
+                                (i - 1 + previewImages.length) %
+                                previewImages.length
+                            )
+                          }
+                          className="absolute left-0 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-30 rounded-r p-3"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          aria-label="Next"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) => (i + 1) % previewImages.length
+                            )
+                          }
+                          className="absolute right-0 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-30 rounded-l p-3"
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+
+                    {/* Zoom controls */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                      <button
+                        onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
+                        className="bg-white text-gray-800 rounded px-3 py-1 shadow"
+                      >
+                        -
+                      </button>
+                      <div className="text-white text-sm px-2">
+                        {Math.round(zoom * 100)}%
+                      </div>
+                      <button
+                        onClick={() => setZoom((z) => Math.min(4, z + 0.25))}
+                        className="bg-white text-gray-800 rounded px-3 py-1 shadow"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Stats Bar */}
               <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-t border-gray-200">
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
                     <LikeButton
-                      designId={design._id}
+                      designId={design._id!}
                       initialLikesCount={design.likesCount}
                       variant="compact"
                       size="sm"
@@ -356,81 +692,58 @@ export default function DesignDetailPage() {
                       ? statistics.averageRating.toFixed(1)
                       : "0.0"}
                   </p>
-                  <span className="text-xs text-gray-600">Rating</span>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">
-                    {statistics?.totalReviews || 0}
-                  </p>
-                  <span className="text-xs text-gray-600">Reviews</span>
                 </div>
               </div>
             </div>
-
-            {/* Description */}
-            <div className="bg-white rounded-lg border border-gray-200 p-5">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">
-                Description
-              </h2>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {design.description}
-              </p>
-            </div>
-
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Tools */}
-              {design.usedTools && design.usedTools.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Wrench className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-bold text-gray-900">Tools Used</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {design.usedTools.map((tool, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded font-medium"
-                      >
-                        {tool}
-                      </span>
-                    ))}
-                  </div>
+            {/* Tools */}
+            {design.usedTools && design.usedTools.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Wrench className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-bold text-gray-900">Tools Used</h3>
                 </div>
-              )}
-
-              {/* Effects */}
-              {design.effectsUsed && design.effectsUsed.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h3 className="font-bold text-gray-900">Effects</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {design.effectsUsed.map((effect, index) => (
-                      <span
-                        key={index}
-                        className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium"
-                      >
-                        {effect}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {design.usedTools.map((tool, index) => (
+                    <span
+                      key={index}
+                      className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded font-medium"
+                    >
+                      {tool}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Process */}
-              {design.processDescription && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5 md:col-span-2">
-                  <h3 className="font-bold text-gray-900 mb-3">
-                    Design Process
-                  </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {design.processDescription}
-                  </p>
+            {/* Effects */}
+            {design.effectsUsed && design.effectsUsed.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <h3 className="font-bold text-gray-900">Effects</h3>
                 </div>
-              )}
-            </div>
+                <div className="flex flex-wrap gap-2">
+                  {design.effectsUsed.map((effect, index) => (
+                    <span
+                      key={index}
+                      className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium"
+                    >
+                      {effect}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Process */}
+            {design.processDescription && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5 md:col-span-2">
+                <h3 className="font-bold text-gray-900 mb-3">Design Process</h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {design.processDescription}
+                </p>
+              </div>
+            )}
 
             {/* Reviews Section */}
             <div
@@ -675,16 +988,15 @@ export default function DesignDetailPage() {
               )}
             </div>
           </div>
-
           {/* Right Column - Purchase Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-20 space-y-4">
               {/* Title & Category */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Link href={`/designs?category=${design.category._id}`}>
+                  <Link href={categoryQueryLink}>
                     <span className="bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded">
-                      {design.category.name}
+                      {mainCategory?.name || subCategory?.name || "Category"}
                     </span>
                   </Link>
                   {design.complexityLevel && (
@@ -696,11 +1008,11 @@ export default function DesignDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
                   {design.title}
                 </h1>
-                {design.designerName && (
+                {designerName && (
                   <p className="text-sm text-gray-600">
                     by{" "}
                     <span className="font-semibold text-blue-600">
-                      {design.designerName}
+                      {designerName}
                     </span>
                   </p>
                 )}
@@ -710,7 +1022,7 @@ export default function DesignDetailPage() {
               <div className="py-4 border-y border-gray-200">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-blue-600">
-                    ${design.price}
+                    ${displayPrice}
                   </span>
                   <span className="text-sm text-gray-500">USD</span>
                 </div>
@@ -778,7 +1090,7 @@ export default function DesignDetailPage() {
                       className="w-full bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase for ${design.price}
+                      Purchase for ${displayPrice}
                     </Button>
                     <p className="text-center text-xs text-gray-600">
                       or{" "}
@@ -828,13 +1140,17 @@ export default function DesignDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Created</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(design.createdAt).toLocaleDateString()}
+                      {design?.createdAt
+                        ? new Date(design.createdAt).toLocaleDateString()
+                        : "-"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Updated</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(design.updatedAt).toLocaleDateString()}
+                      {design?.updatedAt
+                        ? new Date(design.updatedAt).toLocaleDateString()
+                        : "-"}
                     </span>
                   </div>
                 </div>
@@ -849,24 +1165,23 @@ export default function DesignDetailPage() {
             </div>
           </div>
         </div>
+        {/* Purchase Modal */}
+        {design && (
+          <PurchaseModal
+            isOpen={purchaseModalOpen}
+            onClose={() => setPurchaseModalOpen(false)}
+            design={{
+              _id: design._id!,
+              title: design.title,
+              description: design.description,
+              price: displayPrice,
+              previewImageUrl: previewImages[0] || "",
+              category: mainCategory || subCategory || null,
+            }}
+            purchaseType="individual"
+          />
+        )}
       </div>
-
-      {/* Purchase Modal */}
-      {design && (
-        <PurchaseModal
-          isOpen={purchaseModalOpen}
-          onClose={() => setPurchaseModalOpen(false)}
-          design={{
-            _id: design._id,
-            title: design.title,
-            description: design.description,
-            price: design.price,
-            previewImageUrl: design.previewImageUrl,
-            category: design.category,
-          }}
-          purchaseType="individual"
-        />
-      )}
     </div>
   );
 }

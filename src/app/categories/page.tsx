@@ -6,19 +6,47 @@ import { useGetCategoriesQuery } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+interface Subcategory {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  parentCategory: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Category {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  subcategories: Subcategory[];
 }
 
 export default function CategoriesPage() {
   const { data: categoriesData, isLoading: categoriesLoading } =
     useGetCategoriesQuery();
-  const categories: Category[] = categoriesData?.data || [];
+  const rawCategories = categoriesData?.data || [];
+  const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
+    id: c.id ?? c._id,
+    name: c.name,
+    description: c.description ?? "",
+    isActive: !!c.isActive,
+    createdAt: c.createdAt ?? c.created_at ?? "",
+    updatedAt: c.updatedAt ?? c.updated_at ?? "",
+    subcategories: (c.subcategories || []).map((sc: any) => ({
+      id: sc.id ?? sc._id,
+      name: sc.name,
+      description: sc.description ?? "",
+      isActive: !!sc.isActive,
+      parentCategory: sc.parentCategory ?? null,
+      createdAt: sc.createdAt ?? sc.created_at ?? "",
+      updatedAt: sc.updatedAt ?? sc.updated_at ?? "",
+    })),
+  }));
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -379,40 +407,64 @@ export default function CategoriesPage() {
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {filteredCategories.map((category, index) => (
-                  <Link
-                    key={category._id}
-                    href={`/designs?category=${category._id}`}
-                    className="group"
+                  <div
+                    key={category.id}
+                    className="group bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
                   >
-                    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-                      {/* Icon Header with Gradient */}
-                      <div
-                        className={`relative h-32 bg-gradient-to-br ${
-                          gradients[index % gradients.length]
-                        } flex items-center justify-center`}
-                      >
-                        <div className="text-white">
-                          {icons[index % icons.length]}
-                        </div>
+                    {/* Icon Header with Gradient */}
+                    <div
+                      className={`relative h-32 bg-gradient-to-br ${
+                        gradients[index % gradients.length]
+                      } flex items-center justify-center`}
+                    >
+                      <div className="text-white">
+                        {icons[index % icons.length]}
                       </div>
+                    </div>
 
-                      {/* Content */}
-                      <div className="p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                            {category.name}
-                          </h3>
-                          {category.isActive && (
-                            <span className="flex items-center gap-1 text-xs font-medium text-green-600">
-                              <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                              Active
-                            </span>
-                          )}
+                    {/* Content */}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          {category.name}
+                        </h3>
+                        {category.isActive && (
+                          <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                        {category.description}
+                      </p>
+                      {category.subcategories.length > 0 && (
+                        <div className="mt-2">
+                          <span className="text-xs font-semibold text-gray-500">
+                            Subcategories:
+                          </span>
+                          <ul className="list-disc ml-4 mt-1">
+                            {category.subcategories.map((subcat) => (
+                              <li
+                                key={subcat.id}
+                                className="text-xs text-gray-600"
+                              >
+                                <Link
+                                  href={`/designs?subCategory=${subcat.id}`}
+                                  className="hover:underline text-blue-600"
+                                >
+                                  {subcat.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                          {category.description}
-                        </p>
-                        <div className="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700">
+                      )}
+                      <div className="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700 mt-2">
+                        <Link
+                          href={`/designs?mainCategory=${category.id}`}
+                          className="flex items-center gap-1"
+                        >
                           <span>Explore</span>
                           <svg
                             className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
@@ -427,10 +479,10 @@ export default function CategoriesPage() {
                               d="M9 5l7 7-7 7"
                             />
                           </svg>
-                        </div>
+                        </Link>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
@@ -440,8 +492,8 @@ export default function CategoriesPage() {
               <div className="space-y-3">
                 {filteredCategories.map((category, index) => (
                   <Link
-                    key={category._id}
-                    href={`/designs?category=${category._id}`}
+                    key={category.id}
+                    href={`/designs?mainCategory=${category.id}`}
                     className="group block"
                   >
                     <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200">

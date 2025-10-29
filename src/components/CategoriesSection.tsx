@@ -7,16 +7,42 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Layers } from "lucide-react";
 
-interface Category {
-  _id: string;
+interface Subcategory {
+  id: string;
   name: string;
   description: string;
   isActive: boolean;
+  parentCategory: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  subcategories: Subcategory[];
 }
 
 export const CategoriesSection: React.FC = () => {
   const { data: categoriesData, isLoading, error } = useGetCategoriesQuery();
-  const categories: Category[] = categoriesData?.data || [];
+  const rawCategories = categoriesData?.data || [];
+  const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
+    id: c.id ?? c._id,
+    name: c.name,
+    description: c.description ?? "",
+    isActive: !!c.isActive,
+    createdAt: c.createdAt ?? "",
+    updatedAt: c.updatedAt ?? "",
+    subcategories: (c.subcategories || []).map((sc: any) => ({
+      id: sc.id ?? sc._id,
+      name: sc.name,
+      description: sc.description ?? "",
+      isActive: !!sc.isActive,
+      parentCategory: sc.parentCategory ?? null,
+    })),
+  }));
 
   if (isLoading) {
     return (
@@ -98,11 +124,7 @@ export const CategoriesSection: React.FC = () => {
       {/* Categories Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {categories.slice(0, 8).map((category, index) => (
-          <Link
-            key={category._id}
-            href={`/designs?category=${category._id}`}
-            className="group"
-          >
+          <div key={category.id} className="group">
             <div
               className={`relative overflow-hidden rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 p-6 h-40 ${
                 colors[index % colors.length]
@@ -116,15 +138,38 @@ export const CategoriesSection: React.FC = () => {
                   <p className="text-sm opacity-80 line-clamp-2">
                     {category.description}
                   </p>
+                  {category.subcategories.length > 0 && (
+                    <div className="mt-2">
+                      <span className="text-xs font-semibold text-gray-500">
+                        Subcategories:
+                      </span>
+                      <ul className="list-disc ml-4 mt-1">
+                        {category.subcategories.map((subcat) => (
+                          <li key={subcat.id} className="text-xs text-gray-600">
+                            <Link
+                              href={`/designs?subCategory=${subcat.id}`}
+                              className="hover:underline text-blue-600"
+                            >
+                              {subcat.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-
-                <div className="flex items-center text-sm font-medium">
-                  <span>Explore</span>
-                  <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                <div className="flex items-center text-sm font-medium mt-2">
+                  <Link
+                    href={`/designs?mainCategory=${category.id}`}
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                  >
+                    <span>Explore</span>
+                    <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 

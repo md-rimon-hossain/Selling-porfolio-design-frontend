@@ -117,18 +117,18 @@ const FeaturedDesigns: React.FC = () => {
             <Link href={`/designs/${design._id}`}>
               {/* Design Image */}
               <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                {design.previewImageUrl ? (
+                {design.previewImageUrls && design.previewImageUrls[0] ? (
                   <Image
-                    src={design.previewImageUrl}
+                    src={design.previewImageUrls[0]}
                     alt={design.title}
                     fill
                     className={`object-cover transition-all duration-300 group-hover:scale-105 ${
-                      loadedImages[design._id] ? "opacity-100" : "opacity-0"
+                      loadedImages[design._id!] ? "opacity-100" : "opacity-0"
                     }`}
                     onLoad={() =>
                       setLoadedImages((prev) => ({
                         ...prev,
-                        [design._id]: true,
+                        [design._id!]: true,
                       }))
                     }
                     onError={(e) => {
@@ -157,11 +157,26 @@ const FeaturedDesigns: React.FC = () => {
                 {/* Badges */}
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
                   <span className="bg-white text-gray-700 px-3 py-1 rounded-full text-xs font-medium shadow-sm">
-                    {design.category.name}
+                    {design.mainCategory?.name ||
+                      design.subCategory?.name ||
+                      "Uncategorized"}
                   </span>
-                  <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
-                    ${design.price}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                      $
+                      {typeof design.discountedPrice === "number" &&
+                      design.discountedPrice >= 0
+                        ? design.discountedPrice
+                        : design.basePrice ?? 0}
+                    </span>
+                    <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-sm">
+                      $
+                      {typeof design.basePrice === "number" &&
+                      design.basePrice >= 0
+                        ? design.basePrice
+                        : design.basePrice ?? 0}
+                    </span>
+                  </div>
                 </div>
 
                 {design.complexityLevel && (
@@ -182,9 +197,9 @@ const FeaturedDesigns: React.FC = () => {
                 </h3>
               </Link>
 
-              {design.designerName && (
+              {design.designer.name && (
                 <p className="text-sm text-gray-600 mb-3">
-                  by {design.designerName}
+                  by {design.designer.name}
                 </p>
               )}
 
@@ -202,8 +217,9 @@ const FeaturedDesigns: React.FC = () => {
                       className={`w-4 h-4 ${
                         i <
                         Math.round(
-                          design.avgRating && design.avgRating > 0
-                            ? design.avgRating
+                          (design as any).avgRating &&
+                            (design as any).avgRating > 0
+                            ? (design as any).avgRating
                             : 0
                         )
                           ? "text-yellow-400 fill-yellow-400"
@@ -213,14 +229,15 @@ const FeaturedDesigns: React.FC = () => {
                   ))}
                 </div>
                 <span className="text-sm font-medium text-gray-700">
-                  {design.avgRating && design.avgRating > 0
-                    ? design.avgRating.toFixed(1)
+                  {(design as any).avgRating && (design as any).avgRating > 0
+                    ? (design as any).avgRating.toFixed(1)
                     : "0.0"}
                 </span>
-                {design.totalReviews && design.totalReviews > 0 ? (
+                {(design as any).totalReviews &&
+                (design as any).totalReviews > 0 ? (
                   <span className="text-xs text-gray-500">
-                    ({design.totalReviews}{" "}
-                    {design.totalReviews === 1 ? "review" : "reviews"})
+                    ({(design as any).totalReviews}{" "}
+                    {(design as any).totalReviews === 1 ? "review" : "reviews"})
                   </span>
                 ) : (
                   <span className="text-xs text-gray-500">(0 review)</span>
@@ -245,7 +262,7 @@ const FeaturedDesigns: React.FC = () => {
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <LikeButton
-                    designId={design._id}
+                    designId={design._id!}
                     initialLikesCount={design.likesCount}
                     variant="compact"
                     size="md"

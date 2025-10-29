@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://compressed-shona-neglectfully.ngrok-free.dev/api",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
     credentials: "include", // sends httpOnly cookies
   }),
   tagTypes: [
@@ -183,7 +183,8 @@ export const api = createApi({
     getDesigns: builder.query<
       any,
       | {
-          category?: string;
+          mainCategory?: string;
+          subCategory?: string;
           complexityLevel?: string;
           status?: string;
           minPrice?: number;
@@ -199,7 +200,10 @@ export const api = createApi({
 
         const searchParams = new URLSearchParams();
 
-        if (params.category) searchParams.append("category", params.category);
+        if (params.mainCategory)
+          searchParams.append("mainCategory", params.mainCategory);
+        if (params.subCategory)
+          searchParams.append("subCategory", params.subCategory);
         if (params.complexityLevel)
           searchParams.append("complexityLevel", params.complexityLevel);
         if (params.status) searchParams.append("status", params.status);

@@ -332,6 +332,29 @@ export default function AvailableDownloadsPage() {
             const isPurchased = purchasedDesignIds.has(design._id);
             const isDownloading = downloadingId === design._id;
 
+            // Safe helpers to support new backend shape while keeping compatibility
+            const preview =
+              (design as any)?.previewImageUrls?.[0] ||
+              (design as any)?.previewImageUrl ||
+              "";
+
+            const categoryName =
+              (design as any)?.mainCategory?.name ||
+              (design as any)?.subCategory?.name ||
+              design.category?.name ||
+              "Uncategorized";
+
+            const displayPrice =
+              (design as any)?.discountedPrice ??
+              (design as any)?.basePrice ??
+              (design as any)?.price ??
+              0;
+
+            const designerName =
+              (design as any)?.designer?.name ||
+              (design as any)?.designerName ||
+              "";
+
             return (
               <div
                 key={design._id}
@@ -342,9 +365,9 @@ export default function AvailableDownloadsPage() {
                   href={`/designs/${design._id}`}
                   className="block relative aspect-video overflow-hidden bg-gray-100"
                 >
-                  {design.previewImageUrl ? (
+                  {preview ? (
                     <Image
-                      src={design.previewImageUrl}
+                      src={preview}
                       alt={design.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -387,7 +410,7 @@ export default function AvailableDownloadsPage() {
                       {new Date(design.createdAt).toLocaleDateString()}
                     </span>
                     <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
-                      {design.category?.name}
+                      {categoryName}
                     </span>
                   </div>
 

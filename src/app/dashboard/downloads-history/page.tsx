@@ -294,9 +294,13 @@ export default function DownloadsHistoryPage() {
                 href={`/designs/${download.design._id}`}
                 className="block relative aspect-video overflow-hidden bg-gray-100"
               >
-                {download.design.previewImageUrl ? (
+                {(download.design as any)?.previewImageUrls?.[0] ||
+                download.design.previewImageUrl ? (
                   <Image
-                    src={download.design.previewImageUrl}
+                    src={
+                      (download.design as any)?.previewImageUrls?.[0] ||
+                      download.design.previewImageUrl
+                    }
                     alt={download.design.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -332,9 +336,12 @@ export default function DownloadsHistoryPage() {
                   </h3>
                 </Link>
 
-                {download.design.designerName && (
+                {((download.design as any)?.designer?.name ||
+                  download.design.designerName) && (
                   <p className="text-sm text-gray-600 mb-3">
-                    by {download.design.designerName}
+                    by{" "}
+                    {(download.design as any)?.designer?.name ||
+                      download.design.designerName}
                   </p>
                 )}
 

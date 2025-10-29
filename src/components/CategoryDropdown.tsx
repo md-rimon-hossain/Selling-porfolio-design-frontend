@@ -4,7 +4,22 @@ import React, { useState, useEffect, useRef } from "react";
 import { useGetCategoriesQuery, useGetDesignsQuery } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Category } from "@/lib/allTypes";
+// Local Category type to match backend response
+interface Subcategory {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  parentCategory: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  subcategories: Subcategory[];
+}
 import { Grid3x3, ChevronDown, ArrowRight } from "lucide-react";
 
 export const CategoryDropdown: React.FC = () => {
@@ -16,14 +31,27 @@ export const CategoryDropdown: React.FC = () => {
 
   const { data: allDesignsData } = useGetDesignsQuery({});
 
-  const categories: Category[] = categoriesData?.data || [];
+  const rawCategories = categoriesData?.data || [];
+  const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
+    id: c.id ?? c._id,
+    name: c.name,
+    description: c.description ?? "",
+    isActive: !!c.isActive,
+    subcategories: (c.subcategories || []).map((sc: any) => ({
+      id: sc.id ?? sc._id,
+      name: sc.name,
+      description: sc.description ?? "",
+      isActive: !!sc.isActive,
+      parentCategory: sc.parentCategory ?? null,
+    })),
+  }));
   const allDesigns = allDesignsData?.data || [];
 
   const getCategoryDesignCount = (categoryId: string) => {
-    return allDesigns.filter(
-      (design: { category?: { _id: string } }) =>
-        design.category?._id === categoryId
-    ).length;
+    return allDesigns.filter((design: any) => {
+      const cat = design.category || design.mainCategory || design.subCategory;
+      return cat?._id === categoryId || cat?.id === categoryId || false;
+    }).length;
   };
 
   useEffect(() => {
@@ -86,32 +114,55 @@ export const CategoryDropdown: React.FC = () => {
               <div className="max-h-96 overflow-y-auto">
                 <div className="px-2 py-2 space-y-1">
                   {categories.map((category) => {
-                    const designCount = getCategoryDesignCount(category._id);
+                    const designCount = getCategoryDesignCount(category.id);
                     return (
-                      <Link
-                        key={category._id}
-                        href={`/designs?category=${category._id}`}
-                        onClick={() => setIsOpen(false)}
-                        className="group block px-3 py-2.5 rounded-md hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                              {category.name}
-                            </h4>
-                            <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">
-                              {category.description}
-                            </p>
+                      <div key={category.id}>
+                        <Link
+                          href={`/designs?mainCategory=${category.id}`}
+                          onClick={() => setIsOpen(false)}
+                          className="group block px-3 py-2.5 rounded-md hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                {category.name}
+                              </h4>
+                              <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">
+                                {category.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="px-2 py-1 bg-gray-100 group-hover:bg-blue-50 text-gray-700 group-hover:text-blue-600 text-xs font-medium rounded transition-colors">
+                                {designCount}
+                              </span>
+                              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+                            </div>
                           </div>
-
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="px-2 py-1 bg-gray-100 group-hover:bg-blue-50 text-gray-700 group-hover:text-blue-600 text-xs font-medium rounded transition-colors">
-                              {designCount}
+                        </Link>
+                        {category.subcategories.length > 0 && (
+                          <div className="ml-4 mt-1">
+                            <span className="text-xs font-semibold text-gray-500">
+                              Subcategories:
                             </span>
-                            <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+                            <ul className="list-disc ml-4">
+                              {category.subcategories.map((subcat) => (
+                                <li
+                                  key={subcat.id}
+                                  className="text-xs text-gray-600"
+                                >
+                                  <Link
+                                    href={`/designs?subCategory=${subcat.id}`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="hover:underline text-blue-600"
+                                  >
+                                    {subcat.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        </div>
-                      </Link>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
