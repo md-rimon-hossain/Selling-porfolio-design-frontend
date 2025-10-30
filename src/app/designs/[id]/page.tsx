@@ -36,6 +36,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { LikeButton } from "@/components/LikeButton";
 import { useToast } from "@/components/ToastProvider";
 import { useConfirm } from "@/components/ConfirmProvider";
+import ImageLightbox from "@/components/ImageLightbox";
 
 export default function DesignDetailPage() {
   const params = useParams();
@@ -48,8 +49,6 @@ export default function DesignDetailPage() {
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
   const { data: designData, isLoading, error } = useGetDesignQuery(designId);
-
-  console.log(designData);
 
   // Support both shapes: API sometimes returns { data: { ... } } or the design object directly
   const design: Design | undefined = ((designData as any)?.data ??
@@ -86,69 +85,6 @@ export default function DesignDetailPage() {
 
   // Lightbox / fullscreen preview state
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [zoom, setZoom] = useState<number>(1);
-
-  // Pan / drag state for lightbox (px)
-  const [translate, setTranslate] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-
-  const draggingRef = React.useRef(false);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const pointerStartRef = React.useRef<{ x: number; y: number } | null>(null);
-  const translateStartRef = React.useRef<{ x: number; y: number } | null>(null);
-  const imageWrapperRef = React.useRef<HTMLDivElement | null>(null);
-
-  // Prevent background scroll while lightbox is open
-  useEffect(() => {
-    if (lightboxOpen) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      // also prevent touchmove on mobile
-      const prevent = (e: TouchEvent) => e.preventDefault();
-      document.addEventListener("touchmove", prevent, { passive: false });
-      return () => {
-        document.body.style.overflow = prev;
-        document.removeEventListener("touchmove", prevent as any);
-      };
-    }
-    return;
-  }, [lightboxOpen]);
-
-  // Reset zoom when switching images or closing (guard updates to avoid redundant re-renders)
-  useEffect(() => {
-    setZoom((prev) => (prev === 1 ? prev : 1));
-    setTranslate((prev) =>
-      prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }
-    );
-  }, [currentImageIndex, lightboxOpen]);
-
-  // When zoom returns to 1, reset translate so image recenters (guarded)
-  useEffect(() => {
-    if (zoom <= 1)
-      setTranslate((prev) =>
-        prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }
-      );
-  }, [zoom]);
-
-  // Keyboard handlers for lightbox: Esc to close, arrows to navigate, +/- to zoom
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxOpen(false);
-      if (e.key === "ArrowLeft")
-        setCurrentImageIndex(
-          (i) => (i - 1 + previewImages.length) % previewImages.length
-        );
-      if (e.key === "ArrowRight")
-        setCurrentImageIndex((i) => (i + 1) % previewImages.length);
-      if (e.key === "+" || e.key === "=") setZoom((z) => Math.min(4, z + 0.25));
-      if (e.key === "-" || e.key === "_") setZoom((z) => Math.max(1, z - 0.25));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxOpen, previewImages.length]);
 
   const designerName =
     (design as any)?.designer?.name || (design as any)?.designerName || "";
@@ -170,7 +106,8 @@ export default function DesignDetailPage() {
   const [deleteReview] = useDeleteReviewMutation();
 
   // Download mutation
-  const [downloadDesign, { isLoading: isDownloading }] = useDownloadDesignMutation();
+  const [downloadDesign, { isLoading: isDownloading }] =
+    useDownloadDesignMutation();
 
   const currentUserId = (user && user?._id) || "";
 
@@ -310,8 +247,8 @@ export default function DesignDetailPage() {
 
       // Create download link and trigger download
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -548,178 +485,15 @@ export default function DesignDetailPage() {
                 </div>
               )}
 
-              {/* Lightbox Overlay */}
-              {lightboxOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 p-6"
-                  onClick={(e) => {
-                    // close when clicking outside the image container
-                    if (e.target === e.currentTarget) setLightboxOpen(false);
-                  }}
-                >
-                  <button
-                    aria-label="Close fullscreen"
-                    onClick={() => setLightboxOpen(false)}
-                    className="absolute top-6 right-6 z-60 text-white bg-black bg-opacity-30 hover:bg-opacity-50 rounded-full p-2"
-                  >
-                    ✕
-                  </button>
-
-                  <div className="relative max-w-[95vw] max-h-[95vh]">
-                    <div
-                      ref={imageWrapperRef}
-                      // pointer handlers for drag/pan
-                      onPointerDown={(e) => {
-                        // only start dragging when zoomed in
-                        if (zoom <= 1) return;
-                        try {
-                          (e.currentTarget as Element).setPointerCapture(
-                            e.pointerId
-                          );
-                        } catch (_err) {}
-                        draggingRef.current = true;
-                        setIsDragging(true);
-                        pointerStartRef.current = {
-                          x: e.clientX,
-                          y: e.clientY,
-                        };
-                        translateStartRef.current = {
-                          x: translate.x,
-                          y: translate.y,
-                        };
-                      }}
-                      onPointerMove={(e) => {
-                        if (
-                          !draggingRef.current ||
-                          !pointerStartRef.current ||
-                          !translateStartRef.current
-                        )
-                          return;
-                        const dx = e.clientX - pointerStartRef.current.x;
-                        const dy = e.clientY - pointerStartRef.current.y;
-                        const newX = translateStartRef.current.x + dx;
-                        const newY = translateStartRef.current.y + dy;
-                        // Functional setState that avoids re-setting identical values
-                        setTranslate((prev) =>
-                          prev.x === newX && prev.y === newY
-                            ? prev
-                            : { x: newX, y: newY }
-                        );
-                      }}
-                      onPointerUp={(e) => {
-                        try {
-                          (e.currentTarget as Element).releasePointerCapture(
-                            e.pointerId
-                          );
-                        } catch (_) {}
-                        draggingRef.current = false;
-                        setIsDragging(false);
-                        pointerStartRef.current = null;
-                        translateStartRef.current = null;
-                      }}
-                      onPointerCancel={(e) => {
-                        try {
-                          (e.currentTarget as Element).releasePointerCapture(
-                            e.pointerId
-                          );
-                        } catch (_) {}
-                        draggingRef.current = false;
-                        setIsDragging(false);
-                        pointerStartRef.current = null;
-                        translateStartRef.current = null;
-                      }}
-                      className={`max-w-full max-h-full block mx-auto touch-none ${
-                        zoom > 1
-                          ? isDragging
-                            ? "cursor-grabbing"
-                            : "cursor-grab"
-                          : ""
-                      }`}
-                      style={{
-                        // ensure wrapper limits and makes container interactive
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    >
-                      <Image
-                        src={previewImages[currentImageIndex] || heroImage}
-                        alt={`${design.title} large view`}
-                        width={1920}
-                        height={1080}
-                        className="object-contain"
-                        style={{
-                          transform: `translate(${translate.x}px, ${translate.y}px) scale(${zoom})`,
-                          transition: isDragging
-                            ? "none"
-                            : "transform 120ms ease",
-                          touchAction: "none",
-                        }}
-                        onWheel={(e) => {
-                          // simple wheel zoom: ctrl/wheel or wheel delta
-                          const delta = (e as unknown as WheelEvent).deltaY;
-                          if (delta > 0)
-                            setZoom((z) => Math.max(1, +(z - 0.1).toFixed(2)));
-                          else
-                            setZoom((z) => Math.min(4, +(z + 0.1).toFixed(2)));
-                        }}
-                      />
-                    </div>
-
-                    {/* Prev/Next inside lightbox */}
-                    {previewImages.length > 1 && (
-                      <>
-                        <button
-                          aria-label="Previous"
-                          onClick={() =>
-                            setCurrentImageIndex(
-                              (i) =>
-                                (i - 1 + previewImages.length) %
-                                previewImages.length
-                            )
-                          }
-                          className="absolute left-0 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-30 rounded-r p-3"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          aria-label="Next"
-                          onClick={() =>
-                            setCurrentImageIndex(
-                              (i) => (i + 1) % previewImages.length
-                            )
-                          }
-                          className="absolute right-0 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-30 rounded-l p-3"
-                        >
-                          ›
-                        </button>
-                      </>
-                    )}
-
-                    {/* Zoom controls */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                      <button
-                        onClick={() => setZoom((z) => Math.max(1, z - 0.25))}
-                        className="bg-white text-gray-800 rounded px-3 py-1 shadow"
-                      >
-                        -
-                      </button>
-                      <div className="text-white text-sm px-2">
-                        {Math.round(zoom * 100)}%
-                      </div>
-                      <button
-                        onClick={() => setZoom((z) => Math.min(4, z + 0.25))}
-                        className="bg-white text-gray-800 rounded px-3 py-1 shadow"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Image Lightbox */}
+              <ImageLightbox
+                images={previewImages}
+                isOpen={lightboxOpen}
+                currentIndex={currentImageIndex}
+                onClose={() => setLightboxOpen(false)}
+                onIndexChange={setCurrentImageIndex}
+                alt={design.title}
+              />
 
               {/* Stats Bar */}
               <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-t border-gray-200">

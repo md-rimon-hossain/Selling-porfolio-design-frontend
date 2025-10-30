@@ -8,6 +8,7 @@ export interface Purchase {
     title: string;
     price: number;
   };
+  
   pricingPlan?: {
     _id: string;
     name: string;

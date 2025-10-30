@@ -162,7 +162,13 @@ export const api = createApi({
     }),
     updateCategory: builder.mutation<
       any,
-      { id: string; name: string; description: string; isActive?: boolean }
+      {
+        id: string;
+        name: string;
+        description: string;
+        parentCategory: string | null;
+        isActive?: boolean;
+      }
     >({
       query: ({ id, ...data }) => ({
         url: `/categories/${id}`,

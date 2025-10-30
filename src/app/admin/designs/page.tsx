@@ -75,6 +75,10 @@ export default function DesignsPage() {
   const [downloadableFile, setDownloadableFile] = useState<File | null>(null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isGeneratingPreviews, setIsGeneratingPreviews] = useState(false);
+  // Track existing preview image URLs the user marked for deletion
+  const [deletePreviewImages, setDeletePreviewImages] = useState<string[]>([]);
+  // Track whether user requested to delete the existing downloadable file
+  const [deleteDownloadableFile, setDeleteDownloadableFile] = useState(false);
 
   // Tag input states
   const [tagInput, setTagInput] = useState("");
@@ -189,7 +193,8 @@ export default function DesignsPage() {
       return;
     }
 
-    if (!previewImages || previewImages.length === 0) {
+    if (!previewImages  && designs.previewImageUrls.length === 0) {
+      console.log(previewImages);
       toast.error("Please add at least one preview image");
       return;
     }
@@ -225,6 +230,21 @@ export default function DesignsPage() {
       if (downloadableFile) {
         formDataToSend.append("files", downloadableFile);
       }
+
+      // Append deletion flags so backend can delete existing assets when requested
+      // send deletePreviewImages as JSON string (server preprocesses arrays)
+      if (deletePreviewImages && deletePreviewImages.length > 0) {
+        formDataToSend.append(
+          "deletePreviewImages",
+          JSON.stringify(deletePreviewImages)
+        );
+      }
+
+      // Always include deleteDownloadableFile flag (backend will ignore if not relevant)
+      formDataToSend.append(
+        "deleteDownloadableFile",
+        String(deleteDownloadableFile)
+      );
 
       if (editingDesign) {
         await updateDesign({
@@ -328,7 +348,7 @@ export default function DesignsPage() {
     });
   };
 
-  console.log(formData);
+
 
   return (
     <div className="space-y-6">
@@ -1103,14 +1123,40 @@ export default function DesignsPage() {
                             <button
                               type="button"
                               onClick={() => {
-                                const newImages = previewImages.filter(
-                                  (_, i) => i !== index
-                                );
-                                const newPreviews = imagePreviews.filter(
-                                  (_, i) => i !== index
-                                );
-                                setPreviewImages(newImages);
-                                setImagePreviews(newPreviews);
+                                // If this preview is a data URL, it's a newly selected File.
+                                // If it's a remote URL (http/https), it's an existing preview that must be marked for deletion.
+                                const isDataUrl =
+                                  String(preview).startsWith("data:");
+
+                                if (isDataUrl) {
+                                  // Remove the corresponding File entry (by index among previewImages)
+                                  const newFiles = previewImages.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  const newPreviews = imagePreviews.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setPreviewImages(newFiles);
+                                  setImagePreviews(newPreviews);
+                                } else {
+                                  // Existing URL: mark for deletion and remove from visible previews
+                                  setDeletePreviewImages((prev) => [
+                                    ...prev,
+                                    preview,
+                                  ]);
+                                  const newPreviews = imagePreviews.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setImagePreviews(newPreviews);
+                                  // Also if there are no previewFiles selected, ensure previewImages stays empty
+                                  if (
+                                    previewImages.length > newPreviews.length
+                                  ) {
+                                    setPreviewImages((prev) =>
+                                      prev.slice(0, newPreviews.length)
+                                    );
+                                  }
+                                }
                               }}
                               className="absolute hover:cursor-pointer -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                             >
@@ -1173,6 +1219,7 @@ export default function DesignsPage() {
                       }}
                       className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent hover:border-blue-400 transition-colors"
                     />
+                    {/* Show newly selected downloadable file (file input) */}
                     {downloadableFile && (
                       <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -1257,7 +1304,12 @@ export default function DesignsPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => setDownloadableFile(null)}
+                          onClick={() => {
+                            // User removed the newly selected file
+                            setDownloadableFile(null);
+                            // ensure we don't accidentally send a delete flag for existing file when a new file was selected and then removed
+                            setDeleteDownloadableFile(false);
+                          }}
                           className="text-red-500 hover:text-red-700 p-1"
                         >
                           <svg
@@ -1276,6 +1328,75 @@ export default function DesignsPage() {
                         </button>
                       </div>
                     )}
+
+                    {/* If editing an existing design and there's an existing downloadable file, show it with delete option */}
+                    {!downloadableFile &&
+                      editingDesign?.downloadableFile &&
+                      !deleteDownloadableFile && (
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {editingDesign.downloadableFile?.secure_url
+                                ?.split("/")
+                                .pop() ||
+                                editingDesign.downloadableFile?.public_id}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {editingDesign.downloadableFile?.file_size
+                                ? `${(
+                                    Number(
+                                      editingDesign.downloadableFile.file_size
+                                    ) /
+                                    1024 /
+                                    1024
+                                  ).toFixed(1)} MB`
+                                : "Unknown size"}{" "}
+                              •{" "}
+                              {editingDesign.downloadableFile?.file_format ||
+                                "Unknown format"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Mark existing downloadable file for deletion
+                              setDeleteDownloadableFile(true);
+                              // Also clear any newly selected file (shouldn't be present)
+                              setDownloadableFile(null);
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     <p className="text-sm text-gray-600">
                       {!downloadableFile
                         ? "Select a downloadable file (ZIP, RAR, PSD, AI, PDF, PNG, JPG)"

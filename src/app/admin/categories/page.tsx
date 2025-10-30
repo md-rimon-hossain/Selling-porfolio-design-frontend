@@ -43,6 +43,7 @@ interface FormErrors {
 }
 
 import { useEffect, useRef } from "react";
+import { useToast } from "@/components/ToastProvider";
 // Simple debounce hook for search
 // ...existing code...
 function useDebounce<T>(value: T, delay: number): T {
@@ -59,6 +60,8 @@ export default function CategoriesPage() {
   const [activeTab, setActiveTab] = useState<"parent" | "sub" | "all">("all");
   // Track if modal is for subcategory creation
   const [isSubcategoryMode, setIsSubcategoryMode] = useState(false);
+
+  const toast = useToast();
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
@@ -158,15 +161,13 @@ export default function CategoriesPage() {
           name: formData.name,
           description: formData.description,
           isActive: formData.isActive,
-          parentCategory: formData.parentCategory
-            ? categories.find((cat) => cat.id === formData.parentCategory)
-            : null,
+          parentCategory: formData.parentCategory, // Already a string | null
         };
         await updateCategory(updateData).unwrap();
-        setSuccess("Category updated successfully!");
+        toast.success("Category updated successfully!");
       } else {
         await createCategory(formData).unwrap();
-        setSuccess("Category created successfully!");
+        toast.success("Category created successfully!");
       }
       setShowModal(false);
       setFormData({

@@ -22,7 +22,7 @@ export default function ConditionalLayout({
   }
 
   if (hideHeaderWhenDashboard) {
-    return <>{children} <Footer/></>;
+    return <>{children} </>;
   }
 
   return (
