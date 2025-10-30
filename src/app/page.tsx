@@ -181,7 +181,7 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="lg"
-                className="text-base px-8 py-6 border-2 border-white text-white hover:bg-white/10"
+                className="text-base bg-white/10 px-8 py-6 border-2 border-white text-white hover:bg-white/10"
               >
                 Explore Designs
               </Button>

@@ -41,9 +41,9 @@ export default function DesignsPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const itemsPerPage = 12;
- const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: categoriesData } = useGetCategoriesQuery();
 
- // Normalize categories and subcategories
+  // Normalize categories and subcategories
   const rawCategories = categoriesData?.data || [];
   const categories = (rawCategories as any[]).map((c: any) => ({
     id: c.id ?? c._id,
@@ -54,10 +54,8 @@ export default function DesignsPage() {
     })),
   }));
 
-    
-  
-    const mainCategory = selectedCategory || undefined;
-    const subCategory = selectedSubcategory || undefined;
+  const mainCategory = selectedCategory || undefined;
+  const subCategory = selectedSubcategory || undefined;
   const queryParams = {
     page: currentPage,
     limit: itemsPerPage,
@@ -74,12 +72,10 @@ export default function DesignsPage() {
 
   const { data: designsResponse, isLoading: designsLoading } =
     useGetDesignsQuery(queryParams);
- 
 
   const designs: Design[] = designsResponse?.data || [];
   const pagination = designsResponse?.pagination || {};
 
- 
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
@@ -137,6 +133,12 @@ export default function DesignsPage() {
   };
 
   const handleSubcategorySelect = (subcategoryId: string) => {
+    const parentCategory = categories.find((cat) =>
+      cat.subcategories.some((sub: any) => sub.id === subcategoryId)
+    );
+    if (parentCategory) {
+      setSelectedCategory(parentCategory.id);
+    }
     setSelectedSubcategory(subcategoryId);
     setCurrentPage(1);
   };
@@ -164,20 +166,6 @@ export default function DesignsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Breadcrumb */}
-        <nav className="mb-4">
-          <div className="flex items-center space-x-2 text-sm">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              Home
-            </Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-900 font-medium">Designs</span>
-          </div>
-        </nav>
-
         {/* Page Header with Search */}
         <div className="mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
@@ -185,9 +173,25 @@ export default function DesignsPage() {
               <h1 className="text-3xl font-bold text-gray-900 mb-1">
                 Discover Designs
               </h1>
-              <p className="text-sm text-gray-600">
-                {pagination.totalItems || 0} designs available
-              </p>
+
+              <div className="flex w-full items-center justify-between">
+                <nav className="">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Link
+                      href="/"
+                      className="text-gray-600 hover:text-blue-600 transition-colors"
+                    >
+                      Home
+                    </Link>
+                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-900 font-medium">Designs</span>
+                  </div>
+                </nav>
+                <p className="text-sm text-gray-600">
+                  {pagination.totalItems || 0} designs available
+                </p>
+                {/* Breadcrumb */}
+              </div>
             </div>
 
             {/* View Mode Toggle */}
@@ -306,7 +310,7 @@ export default function DesignsPage() {
               showFilters ? "block" : "hidden lg:block"
             }`}
           >
-            <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-4">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-20">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                 {activeFiltersCount > 0 && (
@@ -340,7 +344,7 @@ export default function DesignsPage() {
                             {cat.name}
                           </span>
                         </label>
-                        {cat.subcategories.length > 0 &&  (
+                        {cat.subcategories.length > 0 && (
                           <div className="ml-6 mt-1 space-y-1">
                             {cat.subcategories.map((subcat: any) => (
                               <label
@@ -351,7 +355,9 @@ export default function DesignsPage() {
                                   type="radio"
                                   name="subCategory"
                                   checked={selectedSubcategory === subcat.id}
-                                  onChange={() => handleSubcategorySelect(subcat.id)}
+                                  onChange={() =>
+                                    handleSubcategorySelect(subcat.id)
+                                  }
                                   className="form-radio h-4 w-4 text-purple-600"
                                 />
                                 <span className="text-gray-700">
@@ -449,9 +455,11 @@ export default function DesignsPage() {
                           </button>
                         </span>
                       )}
-                      {selectedCategory && (
+                      {selectedCategory &&
                         (() => {
-                          const cat = categories.find((c) => c.id === selectedCategory);
+                          const cat = categories.find(
+                            (c) => c.id === selectedCategory
+                          );
                           return cat ? (
                             <span
                               key={cat.id}
@@ -478,12 +486,16 @@ export default function DesignsPage() {
                               </button>
                             </span>
                           ) : null;
-                        })()
-                      )}
-                      {selectedSubcategory && selectedCategory && (
+                        })()}
+                      {selectedSubcategory &&
+                        selectedCategory &&
                         (() => {
-                          const cat = categories.find((c) => c.id === selectedCategory);
-                          const subcat = cat?.subcategories.find((sc: any) => sc.id === selectedSubcategory);
+                          const cat = categories.find(
+                            (c) => c.id === selectedCategory
+                          );
+                          const subcat = cat?.subcategories.find(
+                            (sc: any) => sc.id === selectedSubcategory
+                          );
                           return subcat ? (
                             <span
                               key={subcat.id}
@@ -510,8 +522,7 @@ export default function DesignsPage() {
                               </button>
                             </span>
                           ) : null;
-                        })()
-                      )}
+                        })()}
                       {selectedComplexities.map((level) => (
                         <span
                           key={level}
@@ -573,379 +584,188 @@ export default function DesignsPage() {
               <>
                 {/* Grid View */}
                 {viewMode === "grid" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {designs.map((design) => {
-                      const preview =
-                        (design as any)?.previewImageUrls?.[0] ||
-                        (design as any)?.previewImageUrl ||
-                        "";
-                      const categoryObj =
-                        (design as any)?.mainCategory ||
-                        (design as any)?.category ||
-                        (design as any)?.subCategory ||
-                        null;
-                      const displayPrice =
-                        typeof (design as any)?.discountedPrice === "number" &&
-                        (design as any).discountedPrice >= 0
-                          ? (design as any).discountedPrice
-                          : (design as any).basePrice ??
-                            (design as any).price ??
-                            0;
-                      const designerName =
-                        (design as any)?.designer?.name ||
-                        (design as any)?.designerName;
+                  <div className="overflow-y-auto max-h-[calc(100vh-200px)] scroll-smooth  scrollbar-hide">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 pr-2 pb-32">
+                      {designs.map((design) => {
+                        const preview =
+                          (design as any)?.previewImageUrls?.[0] ||
+                          (design as any)?.previewImageUrl ||
+                          "";
+                        const categoryObj =
+                          (design as any)?.mainCategory ||
+                          (design as any)?.category ||
+                          (design as any)?.subCategory ||
+                          null;
+                        const displayPrice =
+                          typeof (design as any)?.discountedPrice ===
+                            "number" && (design as any).discountedPrice >= 0
+                            ? (design as any).discountedPrice
+                            : (design as any).basePrice ??
+                              (design as any).price ??
+                              0;
+                        const designerName =
+                          (design as any)?.designer?.name ||
+                          (design as any)?.designerName;
 
-                      return (
-                        <Link
-                          key={design._id!}
-                          href={`/designs/${design._id!}`}
-                          className="group"
-                        >
-                          <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200">
-                            {/* Image */}
-                            <div className="relative h-44 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
-                              {preview ? (
-                                <Image
-                                  src={preview}
-                                  alt={design.title}
-                                  fill
-                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = "none";
-                                  }}
-                                />
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <span className="text-5xl font-bold text-gray-400">
-                                    {design.title.charAt(0)}
-                                  </span>
-                                </div>
-                              )}
-
-                              {/* Badges */}
-                              <div className="absolute top-3 left-3 flex gap-2">
-                                {design.complexityLevel && (
-                                  <span className="bg-green-500 text-white text-xs px-2.5 py-1 rounded-md font-semibold shadow-sm">
-                                    {design.complexityLevel}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Price Badge */}
-                              <div className="absolute top-3 right-3">
-                                <span className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md font-semibold shadow-sm">
-                                  ${displayPrice}
-                                </span>
-                              </div>
-
-                              {/* Quick Actions (Hover) */}
-                              <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <LikeButton
-                                  designId={design._id!}
-                                  initialLikesCount={design.likesCount}
-                                  variant="icon"
-                                  size="md"
-                                  showCount={false}
-                                  className="bg-white hover:bg-gray-50 shadow-sm"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-5">
-                              {/* Category */}
-                              <span className="inline-block bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-md font-semibold mb-2">
-                                {categoryObj?.name || "Category"}
-                              </span>
-
-                              {/* Title */}
-                              <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                                {design.title}
-                              </h3>
-
-                              {/* Designer */}
-                              {designerName && (
-                                <p className="text-sm text-gray-600 mb-3 flex items-center gap-1">
-                                  <svg
-                                    className="w-4 h-4 text-blue-600"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                  </svg>
-                                  {designerName}
-                                </p>
-                              )}
-
-                              {/* Rating */}
-                              {(() => {
-                                const avgRating =
-                                  (design as any)?.avgRating ??
-                                  (design as any)?.statistics?.averageRating ??
-                                  0;
-                                const totalReviews =
-                                  (design as any)?.totalReviews ??
-                                  (design as any)?.statistics?.totalReviews ??
-                                  0;
-
-                                return (
-                                  <div className="flex items-center gap-2 mb-3">
-                                    <div className="flex items-center">
-                                      {[...Array(5)].map((_, i) => (
-                                        <Star
-                                          key={i}
-                                          className={`w-4 h-4 ${
-                                            i < Math.round(avgRating)
-                                              ? "text-yellow-400 fill-yellow-400"
-                                              : "text-gray-300"
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-700">
-                                      {avgRating && avgRating > 0
-                                        ? avgRating.toFixed(1)
-                                        : "0.0"}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                      (
-                                      {totalReviews && totalReviews > 0
-                                        ? totalReviews
-                                        : 0}
-                                      )
-                                    </span>
-                                  </div>
-                                );
-                              })()}
-
-                              {/* Stats */}
-                              <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                                <LikeButton
-                                  designId={design._id!}
-                                  initialLikesCount={design.likesCount}
-                                  variant="compact"
-                                  size="md"
-                                  showCount={true}
-                                />
-                                <div className="flex items-center gap-1">
-                                  <svg
-                                    className="w-4 h-4 text-blue-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-                                    />
-                                  </svg>
-                                  <span className="font-semibold">
-                                    {design.downloadCount || 0}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Tags */}
-                              {design.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-3">
-                                  {design.tags.slice(0, 2).map((tag) => (
-                                    <span
-                                      key={tag}
-                                      className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-md font-medium"
-                                    >
-                                      #{tag}
-                                    </span>
-                                  ))}
-                                  {design.tags.length > 2 && (
-                                    <span className="text-xs text-gray-400 px-2 py-1">
-                                      +{design.tags.length - 2}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* CTA */}
-                              <Button className="w-full bg-blue-600 hover:bg-blue-700 font-semibold rounded-lg">
-                                View Details
-                              </Button>
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* List View */}
-                {viewMode === "list" && (
-                  <div className="space-y-4">
-                    {designs.map((design) => {
-                      const preview =
-                        (design as any)?.previewImageUrls?.[0] ||
-                        (design as any)?.previewImageUrl ||
-                        "";
-                      const categoryObj =
-                        (design as any)?.mainCategory ||
-                        (design as any)?.category ||
-                        (design as any)?.subCategory ||
-                        null;
-                      const displayPrice =
-                        typeof (design as any)?.discountedPrice === "number" &&
-                        (design as any).discountedPrice >= 0
-                          ? (design as any).discountedPrice
-                          : (design as any).basePrice ??
-                            (design as any).price ??
-                            0;
-                      const designerName =
-                        (design as any)?.designer?.name ||
-                        (design as any)?.designerName;
-
-                      return (
-                        <Link
-                          key={design._id!}
-                          href={`/designs/${design._id!}`}
-                          className="group block"
-                        >
-                          <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md border border-gray-200 transition-all duration-300">
-                            <div className="flex gap-6">
+                        return (
+                          <Link
+                            key={design._id!}
+                            href={`/designs/${design._id!}`}
+                            className="group"
+                          >
+                            <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200">
                               {/* Image */}
-                              <div className="flex-shrink-0 w-48 h-32 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden relative">
+                              <div className="relative h-44 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
                                 {preview ? (
                                   <Image
                                     src={preview}
                                     alt={design.title}
                                     fill
                                     className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => {
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      target.style.display = "none";
+                                    }}
                                   />
                                 ) : (
                                   <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-4xl font-bold text-gray-400">
+                                    <span className="text-5xl font-bold text-gray-400">
                                       {design.title.charAt(0)}
                                     </span>
                                   </div>
                                 )}
+
+                                {/* Badges */}
+                                <div className="absolute top-3 left-3 flex gap-2">
+                                  {design.complexityLevel && (
+                                    <span className="bg-green-500 text-white text-xs px-2.5 py-1 rounded-md font-semibold shadow-sm">
+                                      {design.complexityLevel}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Price Badge */}
+                                <div className="absolute top-3 right-3">
+                                  <span className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md font-semibold shadow-sm">
+                                    ${displayPrice}
+                                  </span>
+                                </div>
+
+                                {/* Quick Actions (Hover) */}
+                                <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <LikeButton
+                                    designId={design._id!}
+                                    initialLikesCount={design.likesCount}
+                                    variant="icon"
+                                    size="md"
+                                    showCount={false}
+                                    className="bg-white hover:bg-gray-50 shadow-sm"
+                                  />
+                                </div>
                               </div>
 
                               {/* Content */}
-                              <div className="flex-1 flex flex-col justify-between">
-                                <div>
-                                  <div className="flex items-start justify-between mb-2">
-                                    <div>
-                                      <span className="inline-block bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-md font-semibold mb-2">
-                                        {categoryObj?.name || "Category"}
-                                      </span>
-                                      <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                                        {design.title}
-                                      </h3>
-                                    </div>
-                                    <span className="text-2xl font-bold text-blue-600">
-                                      ${displayPrice}
-                                    </span>
-                                  </div>
+                              <div className="p-5">
+                                {/* Category */}
+                                <span className="inline-block bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-md font-semibold mb-2">
+                                  {categoryObj?.name || "Category"}
+                                </span>
 
-                                  <p className="text-gray-600 mb-3 line-clamp-2">
-                                    {design.description}
+                                {/* Title */}
+                                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                                  {design.title}
+                                </h3>
+
+                                {/* Designer */}
+                                {designerName && (
+                                  <p className="text-sm text-gray-600 mb-3 flex items-center gap-1">
+                                    <svg
+                                      className="w-4 h-4 text-blue-600"
+                                      fill="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                    </svg>
+                                    {designerName}
                                   </p>
+                                )}
 
-                                  {/* Rating */}
-                                  {(() => {
-                                    const avgRating =
-                                      (design as any)?.avgRating ??
-                                      (design as any)?.statistics
-                                        ?.averageRating ??
-                                      0;
-                                    const totalReviews =
-                                      (design as any)?.totalReviews ??
-                                      (design as any)?.statistics
-                                        ?.totalReviews ??
-                                      0;
+                                {/* Rating */}
+                                {(() => {
+                                  const avgRating =
+                                    (design as any)?.avgRating ??
+                                    (design as any)?.statistics
+                                      ?.averageRating ??
+                                    0;
+                                  const totalReviews =
+                                    (design as any)?.totalReviews ??
+                                    (design as any)?.statistics?.totalReviews ??
+                                    0;
 
-                                    return (
-                                      <div className="flex items-center gap-2 mb-3">
-                                        <div className="flex items-center">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`w-4 h-4 ${
-                                                i < Math.round(avgRating)
-                                                  ? "text-yellow-400 fill-yellow-400"
-                                                  : "text-gray-300"
-                                              }`}
-                                            />
-                                          ))}
-                                        </div>
-                                        <span className="text-sm font-medium text-gray-700">
-                                          {avgRating && avgRating > 0
-                                            ? avgRating.toFixed(1)
-                                            : 0}
-                                        </span>
-                                        {totalReviews && totalReviews > 0 && (
-                                          <span className="text-sm text-gray-500">
-                                            ({totalReviews}{" "}
-                                            {totalReviews === 1
-                                              ? "review"
-                                              : "reviews"}
-                                            )
-                                          </span>
-                                        )}
+                                  return (
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="flex items-center">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`w-4 h-4 ${
+                                              i < Math.round(avgRating)
+                                                ? "text-yellow-400 fill-yellow-400"
+                                                : "text-gray-300"
+                                            }`}
+                                          />
+                                        ))}
                                       </div>
-                                    );
-                                  })()}
-
-                                  <div className="flex items-center gap-6 text-sm">
-                                    {designerName && (
-                                      <div className="flex items-center gap-1 text-blue-600 font-semibold">
-                                        <svg
-                                          className="w-4 h-4"
-                                          fill="currentColor"
-                                          viewBox="0 0 24 24"
-                                        >
-                                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                        </svg>
-                                        {designerName}
-                                      </div>
-                                    )}
-                                    {design.complexityLevel && (
-                                      <span className="bg-green-50 text-green-700 px-2.5 py-1 rounded-md text-xs font-semibold">
-                                        {design.complexityLevel}
+                                      <span className="text-sm font-medium text-gray-700">
+                                        {avgRating && avgRating > 0
+                                          ? avgRating.toFixed(1)
+                                          : "0.0"}
                                       </span>
-                                    )}
-                                    <div className="flex items-center gap-1 text-gray-500">
-                                      <LikeButton
-                                        designId={design._id!}
-                                        initialLikesCount={design.likesCount}
-                                        variant="compact"
-                                        size="md"
-                                        showCount={true}
+                                      <span className="text-xs text-gray-500">
+                                        (
+                                        {totalReviews && totalReviews > 0
+                                          ? totalReviews
+                                          : 0}
+                                        )
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
+
+                                {/* Stats */}
+                                <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                                  <LikeButton
+                                    designId={design._id!}
+                                    initialLikesCount={design.likesCount}
+                                    variant="compact"
+                                    size="md"
+                                    showCount={true}
+                                  />
+                                  <div className="flex items-center gap-1">
+                                    <svg
+                                      className="w-4 h-4 text-blue-500"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
                                       />
-                                    </div>
-                                    <div className="flex items-center gap-1 text-gray-500">
-                                      <svg
-                                        className="w-4 h-4 text-blue-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
-                                        />
-                                      </svg>
-                                      <span className="font-semibold">
-                                        {design.downloadCount || 0}
-                                      </span>
-                                    </div>
+                                    </svg>
+                                    <span className="font-semibold">
+                                      {design.downloadCount || 0}
+                                    </span>
                                   </div>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-4">
-                                  <div className="flex flex-wrap gap-1">
-                                    {design.tags.slice(0, 4).map((tag) => (
+                                {/* Tags */}
+                                {design.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mb-3">
+                                    {design.tags.slice(0, 2).map((tag) => (
                                       <span
                                         key={tag}
                                         className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-md font-medium"
@@ -953,20 +773,217 @@ export default function DesignsPage() {
                                         #{tag}
                                       </span>
                                     ))}
+                                    {design.tags.length > 2 && (
+                                      <span className="text-xs text-gray-400 px-2 py-1">
+                                        +{design.tags.length - 2}
+                                      </span>
+                                    )}
                                   </div>
-                                  <Button
-                                    size="sm"
-                                    className="bg-blue-600 hover:bg-blue-700 font-semibold rounded-lg"
-                                  >
-                                    View Details →
-                                  </Button>
+                                )}
+
+                                {/* CTA */}
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 font-semibold rounded-lg">
+                                  View Details
+                                </Button>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* List View */}
+                {viewMode === "list" && (
+                  <div className="overflow-y-auto max-h-[calc(100vh-350px)] scroll-smooth scrollbar-hide">
+                    <div className="space-y-4 pr-2">
+                      {designs.map((design) => {
+                        const preview =
+                          (design as any)?.previewImageUrls?.[0] ||
+                          (design as any)?.previewImageUrl ||
+                          "";
+                        const categoryObj =
+                          (design as any)?.mainCategory ||
+                          (design as any)?.category ||
+                          (design as any)?.subCategory ||
+                          null;
+                        const displayPrice =
+                          typeof (design as any)?.discountedPrice ===
+                            "number" && (design as any).discountedPrice >= 0
+                            ? (design as any).discountedPrice
+                            : (design as any).basePrice ??
+                              (design as any).price ??
+                              0;
+                        const designerName =
+                          (design as any)?.designer?.name ||
+                          (design as any)?.designerName;
+
+                        return (
+                          <Link
+                            key={design._id!}
+                            href={`/designs/${design._id!}`}
+                            className="group block"
+                          >
+                            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md border border-gray-200 transition-all duration-300">
+                              <div className="flex gap-6">
+                                {/* Image */}
+                                <div className="flex-shrink-0 w-48 h-32 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden relative">
+                                  {preview ? (
+                                    <Image
+                                      src={preview}
+                                      alt={design.title}
+                                      fill
+                                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <span className="text-4xl font-bold text-gray-400">
+                                        {design.title.charAt(0)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Content */}
+                                <div className="flex-1 flex flex-col justify-between">
+                                  <div>
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div>
+                                        <span className="inline-block bg-blue-50 text-blue-600 text-xs px-2.5 py-1 rounded-md font-semibold mb-2">
+                                          {categoryObj?.name || "Category"}
+                                        </span>
+                                        <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                          {design.title}
+                                        </h3>
+                                      </div>
+                                      <span className="text-2xl font-bold text-blue-600">
+                                        ${displayPrice}
+                                      </span>
+                                    </div>
+
+                                    <p className="text-gray-600 mb-3 line-clamp-2">
+                                      {design.description}
+                                    </p>
+
+                                    {/* Rating */}
+                                    {(() => {
+                                      const avgRating =
+                                        (design as any)?.avgRating ??
+                                        (design as any)?.statistics
+                                          ?.averageRating ??
+                                        0;
+                                      const totalReviews =
+                                        (design as any)?.totalReviews ??
+                                        (design as any)?.statistics
+                                          ?.totalReviews ??
+                                        0;
+
+                                      return (
+                                        <div className="flex items-center gap-2 mb-3">
+                                          <div className="flex items-center">
+                                            {[...Array(5)].map((_, i) => (
+                                              <Star
+                                                key={i}
+                                                className={`w-4 h-4 ${
+                                                  i < Math.round(avgRating)
+                                                    ? "text-yellow-400 fill-yellow-400"
+                                                    : "text-gray-300"
+                                                }`}
+                                              />
+                                            ))}
+                                          </div>
+                                          <span className="text-sm font-medium text-gray-700">
+                                            {avgRating && avgRating > 0
+                                              ? avgRating.toFixed(1)
+                                              : 0}
+                                          </span>
+                                          {totalReviews && totalReviews > 0 && (
+                                            <span className="text-sm text-gray-500">
+                                              ({totalReviews}{" "}
+                                              {totalReviews === 1
+                                                ? "review"
+                                                : "reviews"}
+                                              )
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })()}
+
+                                    <div className="flex items-center gap-6 text-sm">
+                                      {designerName && (
+                                        <div className="flex items-center gap-1 text-blue-600 font-semibold">
+                                          <svg
+                                            className="w-4 h-4"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                          </svg>
+                                          {designerName}
+                                        </div>
+                                      )}
+                                      {design.complexityLevel && (
+                                        <span className="bg-green-50 text-green-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+                                          {design.complexityLevel}
+                                        </span>
+                                      )}
+                                      <div className="flex items-center gap-1 text-gray-500">
+                                        <LikeButton
+                                          designId={design._id!}
+                                          initialLikesCount={design.likesCount}
+                                          variant="compact"
+                                          size="md"
+                                          showCount={true}
+                                        />
+                                      </div>
+                                      <div className="flex items-center gap-1 text-gray-500">
+                                        <svg
+                                          className="w-4 h-4 text-blue-500"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                                          />
+                                        </svg>
+                                        <span className="font-semibold">
+                                          {design.downloadCount || 0}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center justify-between mt-4">
+                                    <div className="flex flex-wrap gap-1">
+                                      {design.tags.slice(0, 4).map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded-md font-medium"
+                                        >
+                                          #{tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      className="bg-blue-600 hover:bg-blue-700 font-semibold rounded-lg"
+                                    >
+                                      View Details →
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

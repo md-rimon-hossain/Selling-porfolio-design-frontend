@@ -29,14 +29,23 @@ interface PricingPlan {
 
 interface Design {
   _id: string;
-  title: string;
-  description: string;
-  price: number;
+  title: string | undefined;
+  description: string | undefined;
+  price: number | undefined; // discountedPrice
+  basePrice?: number | undefined;
   previewImageUrl?: string;
   category: {
-    _id: string;
-    name: string;
+    _id: string | null;
+    name: string | undefined;
   };
+}
+
+interface Course {
+  _id: string;
+  title: string;
+  description?: string;
+  price: number;
+  previewImageUrl?: string;
 }
 
 interface PurchaseModalProps {
@@ -44,6 +53,7 @@ interface PurchaseModalProps {
   onClose: () => void;
   plan?: PricingPlan;
   design?: Design;
+  course?: Course;
   purchaseType: "subscription" | "individual";
 }
 
@@ -52,6 +62,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   onClose,
   plan,
   design,
+  course,
   purchaseType,
 }) => {
   const [createPurchase, { isLoading }] = useCreatePurchaseMutation();
@@ -73,16 +84,23 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
       ? plan?.description || ""
       : design?.description || "";
   const originalPrice =
-    purchaseType === "subscription" ? plan?.price || 0 : design?.price || 0;
+    purchaseType === "subscription"
+      ? plan?.price || 0
+      : design?.basePrice || design?.price || 0;
   const hasDiscount =
-    purchaseType === "subscription" &&
-    plan?.discountPercentage &&
-    plan.discountPercentage > 0;
+    purchaseType === "subscription"
+      ? plan?.discountPercentage && plan.discountPercentage > 0
+      : (design?.basePrice && design.basePrice > (design.price || 0)) || false;
+  const discountPercentage =
+    purchaseType === "subscription" && plan?.discountPercentage
+      ? plan.discountPercentage
+      : hasDiscount && design?.basePrice && design.price
+      ? Math.round(((design.basePrice - design.price) / design.basePrice) * 100)
+      : 0;
 
   // Payment form state
-  const [paymentMethod, setPaymentMethod] = useState<
-    "credit_card" | "paypal" | "stripe" | "bank_transfer" | "free"
-  >("credit_card");
+  const [paymentMethod, setPaymentMethod] =
+    useState<"credit_card">("credit_card");
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: "",
     expiryDate: "",
@@ -101,23 +119,22 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
   const [currency, setCurrency] = useState("USD");
   const [notes, setNotes] = useState("");
+  const [userTransactionId, setUserTransactionId] = useState("");
 
   if (!isOpen) return null;
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate payment details
-    if (paymentMethod === "credit_card") {
-      if (
-        !paymentDetails.cardNumber ||
-        !paymentDetails.expiryDate ||
-        !paymentDetails.cvv ||
-        !paymentDetails.cardholderName
-      ) {
-        setErrorMessage("Please fill in all payment details");
-        return;
-      }
+    // Validate credit card details
+    if (
+      !paymentDetails.cardNumber ||
+      !paymentDetails.expiryDate ||
+      !paymentDetails.cvv ||
+      !paymentDetails.cardholderName
+    ) {
+      setErrorMessage("Please fill in all credit card details");
+      return;
     }
 
     setStep("billing");
@@ -147,9 +164,14 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
         ...(purchaseType === "individual" && design
           ? { design: design._id }
           : {}),
+        ...(purchaseType === "individual" &&
+        !design &&
+        typeof course !== "undefined" &&
+        course
+          ? { course: (course as any)._id }
+          : {}),
         paymentMethod,
-        paymentDetails:
-          paymentMethod === "credit_card" ? paymentDetails : undefined,
+        paymentDetails,
         currency,
         billingAddress,
         notes,
@@ -178,8 +200,8 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   const resetAndClose = () => {
     setStep("payment");
     setErrorMessage("");
-    setPaymentMethod("credit_card");
     setCurrency("USD");
+    setUserTransactionId("");
     setPaymentDetails({
       cardNumber: "",
       expiryDate: "",
@@ -198,103 +220,161 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-gradient-to-br from-slate-900 to-purple-900 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-purple-500/30">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-gray-200">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-800/90 to-pink-800/90 backdrop-blur-md px-6 py-4 border-b border-white/10 flex justify-between items-center z-10">
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-xl font-bold text-gray-900">
               {purchaseType === "subscription"
                 ? "Subscribe to Plan"
                 : "Purchase Design"}
             </h2>
-            <p className="text-sm text-gray-300 capitalize">
+            <p className="text-sm text-gray-600 capitalize">
               {itemName} - ${formatPrice(itemPrice)}
             </p>
           </div>
           <button
             onClick={resetAndClose}
-            className="text-white hover:text-gray-300 transition-colors p-2 hover:bg-white/10 rounded-full"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-lg"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
           {/* Progress Indicator */}
           {step !== "success" && step !== "error" && (
-            <div className="mb-8">
-              <div className="flex items-center justify-center space-x-4">
+            <div className="mb-4">
+              <div className="flex items-center justify-center space-x-2">
                 <div
                   className={`flex items-center ${
-                    step === "payment" ? "text-purple-400" : "text-green-400"
+                    step === "payment" ? "text-blue-600" : "text-green-600"
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step === "payment" ? "bg-purple-500" : "bg-green-500"
-                    } text-white font-bold`}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                      step === "payment" ? "bg-blue-600" : "bg-green-600"
+                    } text-white font-semibold text-xs`}
                   >
                     {step === "payment" ? "1" : "✓"}
                   </div>
-                  <span className="ml-2 text-sm font-medium">Payment</span>
+                  <span className="ml-1 text-xs font-medium text-gray-700">
+                    Payment
+                  </span>
                 </div>
-                <div className="w-20 h-1 bg-white/20 rounded-full">
+                <div className="w-8 h-0.5 bg-gray-200">
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${
+                    className={`h-full transition-all duration-300 ${
                       step === "billing"
-                        ? "bg-purple-500 w-full"
-                        : "bg-gray-500 w-0"
+                        ? "bg-blue-600 w-full"
+                        : "bg-gray-300 w-0"
                     }`}
                   ></div>
                 </div>
                 <div
                   className={`flex items-center ${
-                    step === "billing" ? "text-purple-400" : "text-gray-500"
+                    step === "billing" ? "text-blue-600" : "text-gray-400"
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step === "billing" ? "bg-purple-500" : "bg-white/20"
-                    } text-white font-bold`}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                      step === "billing" ? "bg-blue-600" : "bg-gray-200"
+                    } text-white font-semibold text-xs`}
                   >
                     2
                   </div>
-                  <span className="ml-2 text-sm font-medium">Billing</span>
+                  <span className="ml-1 text-xs font-medium text-gray-700">
+                    Billing
+                  </span>
                 </div>
               </div>
             </div>
           )}
 
           {/* Order Summary */}
-          <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/10">
-            <h3 className="text-lg font-bold text-white mb-4">Order Summary</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-gray-300">
-                <span className="capitalize">{itemName}</span>
-                <span className="font-medium">
-                  ${formatPrice(originalPrice)}
-                </span>
+          <div className="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Order Summary
+            </h3>
+
+            {/* Item Details */}
+            {purchaseType === "individual" && design && (
+              <div className="flex items-start gap-3 mb-3 p-3 bg-white rounded-lg border border-gray-100 relative">
+                {hasDiscount && discountPercentage > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    {discountPercentage}% OFF
+                  </div>
+                )}
+                {design.previewImageUrl && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={design.previewImageUrl}
+                      alt={design.title}
+                      className="w-12 h-12 object-cover rounded-lg border border-gray-200"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-gray-900 font-semibold text-base truncate">
+                    {design.title}
+                  </h4>
+                  {design.category?.name && (
+                    <p className="text-blue-600 text-sm font-medium">
+                      {design.category.name}
+                    </p>
+                  )}
+                  {design.description && (
+                    <p className="text-gray-600 text-sm line-clamp-2">
+                      {design.description}
+                    </p>
+                  )}
+                </div>
               </div>
-              {hasDiscount && (
-                <div className="flex justify-between text-green-400">
-                  <span>Discount ({plan!.discountPercentage}%)</span>
-                  <span>-${formatPrice(originalPrice - itemPrice)}</span>
+            )}
+
+            {/* Pricing */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-gray-700">
+                <span className="capitalize font-medium">{itemName}</span>
+                {hasDiscount ? (
+                  <div className="text-right">
+                    <span className="line-through text-gray-500 text-sm">
+                      ${formatPrice(originalPrice)}
+                    </span>
+                    <span className="text-gray-900 font-semibold ml-2">
+                      ${formatPrice(itemPrice)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="font-semibold">
+                    ${formatPrice(originalPrice)}
+                  </span>
+                )}
+              </div>
+              {hasDiscount && discountPercentage > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span className="font-medium">
+                    Discount ({discountPercentage}%)
+                  </span>
+                  <span className="font-semibold">
+                    -${formatPrice(originalPrice - itemPrice)}
+                  </span>
                 </div>
               )}
-              <div className="border-t border-white/20 pt-3 flex justify-between text-white font-bold text-xl">
+              <div className="border-t border-gray-200 pt-2 flex justify-between text-gray-900 font-bold text-lg">
                 <span>Total</span>
                 <span>${formatPrice(itemPrice)}</span>
               </div>
               {purchaseType === "subscription" && plan && (
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   Billed {plan.duration} •{" "}
                   {plan.maxDownloads === -1 ? "Unlimited" : plan.maxDownloads}{" "}
                   downloads
                 </p>
               )}
               {purchaseType === "individual" && design && (
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   One-time purchase • Lifetime access
                 </p>
               )}
@@ -303,19 +383,26 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
           {/* Success State */}
           {step === "success" && (
-            <div className="text-center py-12">
-              <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-white mb-4">
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Purchase Successful! 🎉
               </h3>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-600 mb-1">
                 {purchaseType === "subscription"
                   ? "Your subscription is now active. You can start downloading designs!"
                   : "Your design purchase is complete. You can now download your design!"}
               </p>
+              {purchaseType === "individual" && design && hasDiscount && (
+                <p className="text-green-600 text-sm font-medium mb-4">
+                  You saved ${formatPrice(originalPrice - itemPrice)}!
+                </p>
+              )}
               <button
                 onClick={resetAndClose}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-2xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold transition-colors shadow-sm"
               >
                 {purchaseType === "subscription"
                   ? "Start Exploring"
@@ -326,22 +413,24 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
           {/* Error State */}
           {step === "error" && (
-            <div className="text-center py-12">
-              <AlertCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-white mb-4">
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Purchase Failed
               </h3>
-              <p className="text-gray-300 mb-6">{errorMessage}</p>
-              <div className="flex gap-4 justify-center">
+              <p className="text-gray-600 mb-4">{errorMessage}</p>
+              <div className="flex gap-3 justify-center">
                 <button
                   onClick={() => setStep("payment")}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-2xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold transition-colors"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={resetAndClose}
-                  className="bg-white/10 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-white/20 transition-all duration-300"
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg font-semibold transition-colors"
                 >
                   Cancel
                 </button>
@@ -351,75 +440,14 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
           {/* Payment Form */}
           {step === "payment" && (
-            <form onSubmit={handlePaymentSubmit} className="space-y-6">
+            <form onSubmit={handlePaymentSubmit} className="space-y-4">
               <div>
-                <label className="block text-white font-semibold mb-3">
-                  Payment Method
+                <label className="block text-gray-900 font-semibold mb-3">
+                  Credit Card Information
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("credit_card")}
-                    className={`p-3 rounded-xl border-2 transition-all ${
-                      paymentMethod === "credit_card"
-                        ? "border-purple-500 bg-purple-500/20"
-                        : "border-white/20 bg-white/5 hover:border-white/40"
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5 mx-auto mb-1 text-white" />
-                    <span className="text-xs text-white font-medium">
-                      Credit Card
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("paypal")}
-                    className={`p-3 rounded-xl border-2 transition-all ${
-                      paymentMethod === "paypal"
-                        ? "border-purple-500 bg-purple-500/20"
-                        : "border-white/20 bg-white/5 hover:border-white/40"
-                    }`}
-                  >
-                    <Building2 className="w-5 h-5 mx-auto mb-1 text-white" />
-                    <span className="text-xs text-white font-medium">
-                      PayPal
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("stripe")}
-                    className={`p-3 rounded-xl border-2 transition-all ${
-                      paymentMethod === "stripe"
-                        ? "border-purple-500 bg-purple-500/20"
-                        : "border-white/20 bg-white/5 hover:border-white/40"
-                    }`}
-                  >
-                    <CreditCard className="w-5 h-5 mx-auto mb-1 text-white" />
-                    <span className="text-xs text-white font-medium">
-                      Stripe
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("bank_transfer")}
-                    className={`p-3 rounded-xl border-2 transition-all ${
-                      paymentMethod === "bank_transfer"
-                        ? "border-purple-500 bg-purple-500/20"
-                        : "border-white/20 bg-white/5 hover:border-white/40"
-                    }`}
-                  >
-                    <Building2 className="w-5 h-5 mx-auto mb-1 text-white" />
-                    <span className="text-xs text-white font-medium">
-                      Bank Transfer
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {paymentMethod === "credit_card" && (
-                <>
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-gray-700 font-medium mb-2">
                       Cardholder Name
                     </label>
                     <input
@@ -431,13 +459,13 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                           cardholderName: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
                       placeholder="John Doe"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">
+                    <label className="block text-gray-700 font-medium mb-2">
                       Card Number
                     </label>
                     <input
@@ -449,14 +477,14 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                           cardNumber: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
                       placeholder="1234 5678 9012 3456"
                       required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-white font-semibold mb-2">
+                      <label className="block text-gray-700 font-medium mb-2">
                         Expiry Date
                       </label>
                       <input
@@ -468,13 +496,13 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                             expiryDate: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
                         placeholder="MM/YY"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-white font-semibold mb-2">
+                      <label className="block text-gray-700 font-medium mb-2">
                         CVV
                       </label>
                       <input
@@ -486,18 +514,18 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                             cvv: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
                         placeholder="123"
                         maxLength={4}
                         required
                       />
                     </div>
                   </div>
-                </>
-              )}
+                </div>
+              </div>
 
               {errorMessage && (
-                <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 flex items-center text-red-300">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center text-red-700">
                   <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
                   <span className="text-sm">{errorMessage}</span>
                 </div>
@@ -506,7 +534,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center justify-center space-x-2"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 shadow-sm"
               >
                 <span>Continue to Billing</span>
               </button>
@@ -515,138 +543,145 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
           {/* Billing Form */}
           {step === "billing" && (
-            <form onSubmit={handleBillingSubmit} className="space-y-6">
+            <form onSubmit={handleBillingSubmit} className="space-y-4">
               <div>
-                <label className="block text-white font-semibold mb-2">
-                  Street Address
+                <label className="block text-gray-900 font-semibold mb-3">
+                  Billing Address
                 </label>
-                <input
-                  type="text"
-                  value={billingAddress.street}
-                  onChange={(e) =>
-                    setBillingAddress({
-                      ...billingAddress,
-                      street: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                  placeholder="123 Main Street"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white font-semibold mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={billingAddress.city}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        city: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                    placeholder="New York"
-                    required
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Street Address
+                    </label>
+                    <input
+                      type="text"
+                      value={billingAddress.street}
+                      onChange={(e) =>
+                        setBillingAddress({
+                          ...billingAddress,
+                          street: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                      placeholder="123 Main Street"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        City
+                      </label>
+                      <input
+                        type="text"
+                        value={billingAddress.city}
+                        onChange={(e) =>
+                          setBillingAddress({
+                            ...billingAddress,
+                            city: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        placeholder="New York"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        State
+                      </label>
+                      <input
+                        type="text"
+                        value={billingAddress.state}
+                        onChange={(e) =>
+                          setBillingAddress({
+                            ...billingAddress,
+                            state: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        placeholder="NY"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        ZIP Code
+                      </label>
+                      <input
+                        type="text"
+                        value={billingAddress.zipCode}
+                        onChange={(e) =>
+                          setBillingAddress({
+                            ...billingAddress,
+                            zipCode: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        placeholder="10001"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        value={billingAddress.country}
+                        onChange={(e) =>
+                          setBillingAddress({
+                            ...billingAddress,
+                            country: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                        placeholder="United States"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Notes (Optional)
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+                      placeholder="Any special requests or notes..."
+                      rows={2}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-white font-semibold mb-2">
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    value={billingAddress.state}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        state: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                    placeholder="NY"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white font-semibold mb-2">
-                    ZIP Code
-                  </label>
-                  <input
-                    type="text"
-                    value={billingAddress.zipCode}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        zipCode: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                    placeholder="10001"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-white font-semibold mb-2">
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    value={billingAddress.country}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        country: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                    placeholder="United States"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-white font-semibold mb-2">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/50"
-                  placeholder="Any special requests or notes..."
-                  rows={3}
-                />
               </div>
 
               {errorMessage && (
-                <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4 flex items-center text-red-300">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center text-red-700">
                   <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
                   <span className="text-sm">{errorMessage}</span>
                 </div>
               )}
 
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setStep("payment")}
                   disabled={isLoading}
-                  className="flex-1 bg-white/10 text-white py-4 rounded-2xl font-bold hover:bg-white/20 transition-all duration-300"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center justify-center space-x-2"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 shadow-sm"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Processing...</span>
                     </>
                   ) : (
@@ -659,9 +694,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
           {/* Security Badge */}
           {step !== "success" && step !== "error" && (
-            <div className="mt-6 text-center text-sm text-gray-400">
+            <div className="mt-4 text-center text-sm text-gray-500">
               <p>
-                🔒 Secure payment • Your information is encrypted and secure
+                🔒 Secure payment • Your information is encrypted and protected
               </p>
             </div>
           )}

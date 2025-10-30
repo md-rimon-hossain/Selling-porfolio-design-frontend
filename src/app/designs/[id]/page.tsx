@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   useGetDesignQuery,
   useDownloadDesignMutation,
@@ -22,6 +22,7 @@ import {
   Calendar,
   Package,
   Tag,
+  FileText,
   Wrench,
   Sparkles,
 } from "lucide-react";
@@ -40,6 +41,7 @@ export default function DesignDetailPage() {
   const params = useParams();
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
+
   const designId = params.id as string;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -47,10 +49,7 @@ export default function DesignDetailPage() {
 
   const { data: designData, isLoading, error } = useGetDesignQuery(designId);
 
-  // Debug lifecycle: shows id, loading state, any error, and returned payload
-  React.useEffect(() => {
-    console.log({ designId, isLoading, error, designData });
-  }, [designId, isLoading, error, designData]);
+  console.log(designData);
 
   // Support both shapes: API sometimes returns { data: { ... } } or the design object directly
   const design: Design | undefined = ((designData as any)?.data ??
@@ -59,26 +58,31 @@ export default function DesignDetailPage() {
   // Helpers - backend sends new fields; align safely with current TS Design type
   const mainCategory = (design as any)?.mainCategory;
   const subCategory = (design as any)?.subCategory;
+
   // images from backend (support array or single URL)
-  const previewImages: string[] =
-    (design as any)?.previewImageUrls ??
-    ((design as any)?.previewImageUrl ? [(design as any).previewImageUrl] : []);
+  const previewImages: string[] = useMemo(() => {
+    const urls = (design as any)?.previewImageUrls;
+    if (Array.isArray(urls) && urls.length) return urls as string[];
+    const single = (design as any)?.previewImageUrl;
+    return single ? [single] : [];
+  }, [design]);
 
   // ensure we reset gallery index when design changes
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentImageIndex(0);
   }, [design?._id]);
 
   // current hero image for gallery
   const heroImage = previewImages[currentImageIndex] || "";
 
-  // build a consistent category link for breadcrumb / badges
-  const categoryQueryLink =
-    mainCategory?.id || mainCategory?._id
-      ? `/designs?mainCategory=${mainCategory?.id ?? mainCategory?._id}`
-      : subCategory?.id || subCategory?._id
-      ? `/designs?subCategory=${subCategory?.id ?? subCategory?._id}`
-      : "/designs";
+  // build a consistent category link for breadcrumb / badges (memoized)
+  const categoryQueryLink = useMemo(() => {
+    if (mainCategory?.id || mainCategory?._id)
+      return `/designs?mainCategory=${mainCategory?.id ?? mainCategory?._id}`;
+    if (subCategory?.id || subCategory?._id)
+      return `/designs?subCategory=${subCategory?.id ?? subCategory?._id}`;
+    return "/designs";
+  }, [mainCategory, subCategory]);
 
   // Lightbox / fullscreen preview state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -89,6 +93,7 @@ export default function DesignDetailPage() {
     x: 0,
     y: 0,
   });
+
   const draggingRef = React.useRef(false);
   const [isDragging, setIsDragging] = React.useState(false);
   const pointerStartRef = React.useRef<{ x: number; y: number } | null>(null);
@@ -96,7 +101,7 @@ export default function DesignDetailPage() {
   const imageWrapperRef = React.useRef<HTMLDivElement | null>(null);
 
   // Prevent background scroll while lightbox is open
-  React.useEffect(() => {
+  useEffect(() => {
     if (lightboxOpen) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
@@ -111,19 +116,24 @@ export default function DesignDetailPage() {
     return;
   }, [lightboxOpen]);
 
-  // Reset zoom when switching images or closing
-  React.useEffect(() => {
-    setZoom(1);
-    setTranslate({ x: 0, y: 0 });
+  // Reset zoom when switching images or closing (guard updates to avoid redundant re-renders)
+  useEffect(() => {
+    setZoom((prev) => (prev === 1 ? prev : 1));
+    setTranslate((prev) =>
+      prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }
+    );
   }, [currentImageIndex, lightboxOpen]);
 
-  // When zoom returns to 1, reset translate so image recenters
-  React.useEffect(() => {
-    if (zoom <= 1) setTranslate({ x: 0, y: 0 });
+  // When zoom returns to 1, reset translate so image recenters (guarded)
+  useEffect(() => {
+    if (zoom <= 1)
+      setTranslate((prev) =>
+        prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }
+      );
   }, [zoom]);
 
   // Keyboard handlers for lightbox: Esc to close, arrows to navigate, +/- to zoom
-  React.useEffect(() => {
+  useEffect(() => {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightboxOpen(false);
@@ -139,12 +149,6 @@ export default function DesignDetailPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [lightboxOpen, previewImages.length]);
-
-  const displayPrice =
-    typeof (design as any)?.discountedPrice === "number" &&
-    (design as any).discountedPrice >= 0
-      ? (design as any)?.discountedPrice
-      : (design as any)?.basePrice ?? (design as any)?.basePrice ?? 0;
 
   const designerName =
     (design as any)?.designer?.name || (design as any)?.designerName || "";
@@ -165,6 +169,9 @@ export default function DesignDetailPage() {
   const [updateReview] = useUpdateReviewMutation();
   const [deleteReview] = useDeleteReviewMutation();
 
+  // Download mutation
+  const [downloadDesign, { isLoading: isDownloading }] = useDownloadDesignMutation();
+
   const currentUserId = (user && user?._id) || "";
 
   // Detect existing review by current user for this design (support both _id and id)
@@ -184,7 +191,7 @@ export default function DesignDetailPage() {
   });
 
   // Keep editingReview in sync when reviews load or current user changes
-  React.useEffect(() => {
+  useEffect(() => {
     const found = reviews.find(
       (r: any) =>
         r.reviewer?._id === currentUserId || r.reviewer?.id === currentUserId
@@ -213,6 +220,17 @@ export default function DesignDetailPage() {
 
   const toast = useToast();
   const confirmDialog = useConfirm();
+
+  // Helper: format bytes into a human readable string (B / KB / MB / GB)
+  const formatBytes = (bytes?: number, decimals = 2) => {
+    const b = Number(bytes ?? 0);
+    if (!b) return `0.00 B`;
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(b) / Math.log(1024));
+    const val = b / Math.pow(1024, i);
+    // reduce decimals as unit grows (keeps display tidy)
+    return `${val.toFixed(Math.max(0, decimals - i))} ${units[i]}`;
+  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,31 +291,64 @@ export default function DesignDetailPage() {
       access?.status === "completed" ||
       access?.reason === "subscription");
 
-  const [downloadDesign, { isLoading: downloadLoading }] =
-    useDownloadDesignMutation();
-
-  const handlePurchaseClick = () => {
+  const handlePurchaseClick = useCallback(() => {
     if (!user) {
       router.push("/login");
       return;
     }
     setPurchaseModalOpen(true);
-  };
+  }, [user, router]);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     try {
-      const result = await downloadDesign(designId).unwrap();
-      if (result.data?.downloadUrl) {
-        window.open(result.data.downloadUrl, "_blank");
-      }
-      toast.success("Download started successfully!");
+      // Use RTK Query mutation for download - it returns blob directly
+      const blob = await downloadDesign(designId).unwrap();
+
+      // Extract filename from the blob response (we'll need to get headers differently)
+      // For now, create a default filename
+      const filename = `design-${designId}.zip`;
+
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Download completed successfully!");
     } catch (error) {
-      const apiError = error as { data?: { message?: string } };
-      toast.error(
-        apiError?.data?.message || "Download failed. Please try again."
-      );
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Download failed. Please try again.";
+      toast.error(errorMessage);
     }
-  };
+  }, [designId, downloadDesign, toast]);
+
+  const purchaseDesign = useMemo(() => {
+    return {
+      _id: design?._id!,
+      title: design?.title,
+      description: design?.description,
+      price: design?.discountedPrice as number,
+      basePrice: design?.basePrice as number,
+      previewImageUrl: previewImages[0] || "",
+      category: mainCategory || subCategory || null,
+    };
+  }, [
+    design?._id,
+    design?.title,
+    design?.description,
+    design?.discountedPrice,
+    design?.basePrice,
+    previewImages,
+    mainCategory,
+    subCategory,
+  ]);
 
   if (isLoading) {
     return (
@@ -546,10 +597,14 @@ export default function DesignDetailPage() {
                           return;
                         const dx = e.clientX - pointerStartRef.current.x;
                         const dy = e.clientY - pointerStartRef.current.y;
-                        setTranslate({
-                          x: translateStartRef.current.x + dx,
-                          y: translateStartRef.current.y + dy,
-                        });
+                        const newX = translateStartRef.current.x + dx;
+                        const newY = translateStartRef.current.y + dy;
+                        // Functional setState that avoids re-setting identical values
+                        setTranslate((prev) =>
+                          prev.x === newX && prev.y === newY
+                            ? prev
+                            : { x: newX, y: newY }
+                        );
                       }}
                       onPointerUp={(e) => {
                         try {
@@ -692,6 +747,13 @@ export default function DesignDetailPage() {
                       ? statistics.averageRating.toFixed(1)
                       : "0.0"}
                   </p>
+                  <span className="text-xs text-gray-600">Avg Rating</span>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-gray-900">
+                    {statistics?.totalReviews || 0}
+                  </p>
+                  <span className="text-xs text-gray-600">Reviews</span>
                 </div>
               </div>
             </div>
@@ -1018,11 +1080,17 @@ export default function DesignDetailPage() {
                 )}
               </div>
 
-              {/* Price */}
-              <div className="py-4 border-y border-gray-200">
+              {/* discounted price */}
+              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-blue-600">
-                    ${displayPrice}
+                    ${design?.discountedPrice?.toFixed(2) || 0}
+                  </span>
+                  <span className="text-sm text-gray-500">USD</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-medium text-gray-500 line-through">
+                    ${design?.basePrice.toFixed(2) || 0}
                   </span>
                   <span className="text-sm text-gray-500">USD</span>
                 </div>
@@ -1066,13 +1134,13 @@ export default function DesignDetailPage() {
                     {access.status === "completed" ? (
                       <Button
                         onClick={handleDownload}
-                        disabled={downloadLoading}
+                        disabled={isDownloading}
                         className="w-full bg-green-600 hover:bg-green-700 text-sm font-semibold"
                       >
-                        {downloadLoading ? (
+                        {isDownloading ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Downloading...
+                            Preparing Download...
                           </>
                         ) : (
                           <>
@@ -1090,7 +1158,7 @@ export default function DesignDetailPage() {
                       className="w-full bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase for ${displayPrice}
+                      Purchase for ${design?.discountedPrice?.toFixed(2) || 0}
                     </Button>
                     <p className="text-center text-xs text-gray-600">
                       or{" "}
@@ -1104,6 +1172,48 @@ export default function DesignDetailPage() {
                     </p>
                   </>
                 )}
+              </div>
+
+              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-50 rounded-md">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Download details
+                    </p>
+                    {design?.downloadableFile ? (
+                      <dl className="mt-2 text-sm text-gray-600 grid grid-cols-1 gap-1">
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">File name</dt>
+                          <dd className="truncate">
+                            {(design.downloadableFile as any).file_name || "—"}
+                          </dd>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">Format</dt>
+                          <dd className="uppercase">
+                            {(design.downloadableFile as any).file_format ||
+                              "—"}
+                          </dd>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">Size</dt>
+                          <dd>
+                            {formatBytes(
+                              (design.downloadableFile as any).file_size
+                            )}
+                          </dd>
+                        </div>
+                      </dl>
+                    ) : (
+                      <p className="text-sm text-gray-500 mt-1">
+                        No downloadable file information available
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Tags */}
@@ -1170,14 +1280,7 @@ export default function DesignDetailPage() {
           <PurchaseModal
             isOpen={purchaseModalOpen}
             onClose={() => setPurchaseModalOpen(false)}
-            design={{
-              _id: design._id!,
-              title: design.title,
-              description: design.description,
-              price: displayPrice,
-              previewImageUrl: previewImages[0] || "",
-              category: mainCategory || subCategory || null,
-            }}
+            design={purchaseDesign}
             purchaseType="individual"
           />
         )}

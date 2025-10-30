@@ -36,6 +36,7 @@ export interface Design {
   };
   /** To classify the product (e.g., "Logo", "UI Kit"). */
   designType: "Logo" | "Poster" | "UI Kit" | "Presentation" | "Other";
+  
   description: string;
   /** A list of public URLs for images that showcase the design (gallery, mockups). */
   previewImageUrls: string[];

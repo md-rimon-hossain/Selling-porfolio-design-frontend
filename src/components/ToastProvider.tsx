@@ -9,7 +9,7 @@ import React, {
   useEffect,
 } from "react";
 
-type ToastType = "success" | "error" | "info";
+type ToastType = "success" | "error" | "info" | "warning";
 
 type ToastItem = {
   id: string;
@@ -33,6 +33,7 @@ type ToastContextType = {
   success: (message: string, title?: string) => void;
   error: (message: string, title?: string) => void;
   info: (message: string, title?: string) => void;
+  warning: (message: string, title?: string) => void;
 };
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -130,9 +131,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
       toast({ title, message, type: "info" }),
     [toast]
   );
+  const warning = useCallback(
+    (message: string, title?: string) =>
+      toast({ title, message, type: "warning" }),
+    [toast]
+  );
 
   return (
-    <ToastContext.Provider value={{ toast, success, error, info }}>
+    <ToastContext.Provider value={{ toast, success, error, info, warning }}>
       {children}
       {/* Toast container */}
       <div
@@ -246,11 +252,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
                   );
                 }
               }}
-              className={`w-full border px-4 py-3 rounded shadow-sm flex items-start gap-3 focus:outline-none transform transition-all duration-200 bg-white border-gray-200 ${
+              className={`w-full border px-4 py-3 rounded shadow-sm flex items-start gap-3 focus:outline-none transform transition-all duration-200 ${
                 t.type === "success"
                   ? "bg-green-50 border-green-200"
                   : t.type === "error"
                   ? "bg-red-50 border-red-200"
+                  : t.type === "warning"
+                  ? "bg-yellow-50 border-yellow-200"
                   : "bg-white border-gray-200"
               }`}
             >
@@ -266,7 +274,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
                 {duration > 0 && (
                   <div className="w-full h-1 mt-3 bg-black/5 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-blue-500 to-green-400 transition-all"
+                      className={`h-full transition-all ${
+                        t.type === "success"
+                          ? "bg-gradient-to-r from-green-500 to-green-400"
+                          : t.type === "error"
+                          ? "bg-gradient-to-r from-red-500 to-red-400"
+                          : t.type === "warning"
+                          ? "bg-gradient-to-r from-yellow-500 to-orange-400"
+                          : "bg-gradient-to-r from-blue-500 to-green-400"
+                      }`}
                       style={{
                         width: `${percent}%`,
                         transitionProperty: "width",

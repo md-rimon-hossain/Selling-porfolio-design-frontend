@@ -342,19 +342,27 @@ export const api = createApi({
       {
         purchaseType: "individual" | "subscription";
         design?: string;
+        course?: string;
         pricingPlan?: string;
         paymentMethod:
           | "credit_card"
           | "paypal"
           | "stripe"
           | "bank_transfer"
-          | "free";
-        paymentDetails?: {
-          cardNumber?: string;
-          expiryDate?: string;
-          cvv?: string;
-          cardholderName?: string;
-        };
+          | "free"
+          | "bkash"
+          | "nagad"
+          | "rocket";
+        // transaction id provided by user for MFS payments
+        userProvidedTransactionId?: string;
+        paymentDetails?:
+          | Record<string, unknown>
+          | {
+              cardNumber?: string;
+              expiryDate?: string;
+              cvv?: string;
+              cardholderName?: string;
+            };
         currency?: string;
         billingAddress: {
           street: string;
@@ -386,7 +394,10 @@ export const api = createApi({
           | "paypal"
           | "stripe"
           | "bank_transfer"
-          | "free";
+          | "free"
+          | "bkash"
+          | "nagad"
+          | "rocket";
         minAmount?: number;
         maxAmount?: number;
         startDate?: string;
@@ -621,6 +632,7 @@ export const api = createApi({
       query: (designId) => ({
         url: `/downloads/design/${designId}`,
         method: "POST",
+        responseHandler: (response) => response.blob(), // Return blob directly
       }),
       invalidatesTags: ["Downloads"],
     }),

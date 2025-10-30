@@ -19,6 +19,7 @@ import {
   Users,
   Activity,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminDashboard() {
 
@@ -240,27 +241,27 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href="/admin/designs/new"
+          <Link
+            href="/admin/designs"
             className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white hover:shadow-lg transform hover:scale-105 transition-all"
           >
             <Package className="w-6 h-6 mr-3" />
             <span className="font-bold">Add New Design</span>
-          </a>
-          <a
-            href="/admin/pricing-plans/new"
+          </Link>
+          <Link
+            href="/admin/pricing-plans"
             className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 text-white hover:shadow-lg transform hover:scale-105 transition-all"
           >
             <DollarSign className="w-6 h-6 mr-3" />
             <span className="font-bold">Create Pricing Plan</span>
-          </a>
-          <a
-            href="/admin/categories/new"
+          </Link>
+          <Link
+            href="/admin/categories"
             className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600 text-white hover:shadow-lg transform hover:scale-105 transition-all"
           >
             <Users className="w-6 h-6 mr-3" />
             <span className="font-bold">Add Category</span>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
