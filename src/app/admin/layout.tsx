@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import {
@@ -26,6 +26,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -108,13 +109,22 @@ export default function AdminLayout({
             <div className="space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center px-3 py-3 text-gray-700 rounded-lg hover:bg-purple-50 hover:text-purple-600 transition-colors group"
+                    className={`flex items-center px-3 py-3 rounded-lg transition-colors group ${
+                      isActive
+                        ? "bg-purple-600 text-white shadow-sm"
+                        : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                    }`}
                   >
-                    <Icon className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
+                    <Icon
+                      className={`w-5 h-5 mr-3 ${
+                        isActive ? "text-white" : "group-hover:scale-110"
+                      } transition-transform`}
+                    />
                     <span className="font-medium">{item.name}</span>
                   </Link>
                 );

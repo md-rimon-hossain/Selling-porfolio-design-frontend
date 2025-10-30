@@ -249,7 +249,7 @@ export default function DashboardPage() {
                         <span className="text-sm text-gray-600">
                           Total Downloaded
                         </span>
-                        
+
                         <span className="text-2xl font-bold text-blue-600">
                           {downloadStats?.totalDownloaded || 0}
                         </span>
@@ -674,9 +674,13 @@ export default function DashboardPage() {
                     {/* Design Preview Image */}
                     <div className="relative flex-shrink-0">
                       <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200 border-2 border-white shadow-md">
-                        {download.design.previewImageUrl ? (
+                        {(download.design as any)?.previewImageUrls?.[0] ||
+                        download.design.previewImageUrl ? (
                           <img
-                            src={download.design.previewImageUrl}
+                            src={
+                              (download.design as any)?.previewImageUrls?.[0] ||
+                              download.design.previewImageUrl
+                            }
                             alt={download.design.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           />
@@ -702,7 +706,8 @@ export default function DashboardPage() {
                           <p className="text-sm text-gray-600 flex items-center mt-1">
                             <span className="text-gray-500">by</span>
                             <span className="ml-1 font-medium">
-                              {download.design.designerName}
+                              {(download.design as any)?.designer?.name ||
+                                download.design.designerName}
                             </span>
                           </p>
                         </div>
@@ -739,7 +744,13 @@ export default function DashboardPage() {
                           <div>
                             <p className="text-xs text-gray-500">Price</p>
                             <p className="text-sm font-medium text-gray-900">
-                              ${download.design.price?.toFixed(2)}
+                              $
+                              {((download.design as any).discountedPrice != null
+                                ? (download.design as any).discountedPrice
+                                : (download.design as any).basePrice ??
+                                  download.design.price ??
+                                  0
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </div>

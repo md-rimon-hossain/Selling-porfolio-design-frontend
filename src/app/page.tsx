@@ -145,7 +145,7 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section className="py-20 bg-white">
+      <section className="bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <CategoriesSection />
         </div>
@@ -181,7 +181,7 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="lg"
-                className="text-base px-8 py-6 border-2 border-white text-white hover:bg-white/10"
+                className="text-base bg-white/10 px-8 py-6 border-2 border-white text-white hover:bg-white/10"
               >
                 Explore Designs
               </Button>

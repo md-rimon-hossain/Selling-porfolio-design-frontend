@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   useGetDesignQuery,
   useDownloadDesignMutation,
@@ -22,6 +22,7 @@ import {
   Calendar,
   Package,
   Tag,
+  FileText,
   Wrench,
   Sparkles,
 } from "lucide-react";
@@ -35,17 +36,58 @@ import { Edit, Trash2 } from "lucide-react";
 import { LikeButton } from "@/components/LikeButton";
 import { useToast } from "@/components/ToastProvider";
 import { useConfirm } from "@/components/ConfirmProvider";
+import ImageLightbox from "@/components/ImageLightbox";
 
 export default function DesignDetailPage() {
   const params = useParams();
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
+
   const designId = params.id as string;
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
   const { data: designData, isLoading, error } = useGetDesignQuery(designId);
-  const design: Design = designData?.data;
+
+  // Support both shapes: API sometimes returns { data: { ... } } or the design object directly
+  const design: Design | undefined = ((designData as any)?.data ??
+    designData) as any;
+
+  // Helpers - backend sends new fields; align safely with current TS Design type
+  const mainCategory = (design as any)?.mainCategory;
+  const subCategory = (design as any)?.subCategory;
+
+  // images from backend (support array or single URL)
+  const previewImages: string[] = useMemo(() => {
+    const urls = (design as any)?.previewImageUrls;
+    if (Array.isArray(urls) && urls.length) return urls as string[];
+    const single = (design as any)?.previewImageUrl;
+    return single ? [single] : [];
+  }, [design]);
+
+  // ensure we reset gallery index when design changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [design?._id]);
+
+  // current hero image for gallery
+  const heroImage = previewImages[currentImageIndex] || "";
+
+  // build a consistent category link for breadcrumb / badges (memoized)
+  const categoryQueryLink = useMemo(() => {
+    if (mainCategory?.id || mainCategory?._id)
+      return `/designs?mainCategory=${mainCategory?.id ?? mainCategory?._id}`;
+    if (subCategory?.id || subCategory?._id)
+      return `/designs?subCategory=${subCategory?.id ?? subCategory?._id}`;
+    return "/designs";
+  }, [mainCategory, subCategory]);
+
+  // Lightbox / fullscreen preview state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const designerName =
+    (design as any)?.designer?.name || (design as any)?.designerName || "";
 
   // Fetch reviews (with refetch so we can refresh after create/update/delete)
   const { data: reviewsData, refetch: refetchReviews } =
@@ -62,6 +104,10 @@ export default function DesignDetailPage() {
   const [createReview] = useCreateReviewMutation();
   const [updateReview] = useUpdateReviewMutation();
   const [deleteReview] = useDeleteReviewMutation();
+
+  // Download mutation
+  const [downloadDesign, { isLoading: isDownloading }] =
+    useDownloadDesignMutation();
 
   const currentUserId = (user && user?._id) || "";
 
@@ -82,7 +128,7 @@ export default function DesignDetailPage() {
   });
 
   // Keep editingReview in sync when reviews load or current user changes
-  React.useEffect(() => {
+  useEffect(() => {
     const found = reviews.find(
       (r: any) =>
         r.reviewer?._id === currentUserId || r.reviewer?.id === currentUserId
@@ -111,6 +157,17 @@ export default function DesignDetailPage() {
 
   const toast = useToast();
   const confirmDialog = useConfirm();
+
+  // Helper: format bytes into a human readable string (B / KB / MB / GB)
+  const formatBytes = (bytes?: number, decimals = 2) => {
+    const b = Number(bytes ?? 0);
+    if (!b) return `0.00 B`;
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(b) / Math.log(1024));
+    const val = b / Math.pow(1024, i);
+    // reduce decimals as unit grows (keeps display tidy)
+    return `${val.toFixed(Math.max(0, decimals - i))} ${units[i]}`;
+  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,31 +228,64 @@ export default function DesignDetailPage() {
       access?.status === "completed" ||
       access?.reason === "subscription");
 
-  const [downloadDesign, { isLoading: downloadLoading }] =
-    useDownloadDesignMutation();
-
-  const handlePurchaseClick = () => {
+  const handlePurchaseClick = useCallback(() => {
     if (!user) {
       router.push("/login");
       return;
     }
     setPurchaseModalOpen(true);
-  };
+  }, [user, router]);
 
-  const handleDownload = async () => {
+  const handleDownload = useCallback(async () => {
     try {
-      const result = await downloadDesign(designId).unwrap();
-      if (result.data?.downloadUrl) {
-        window.open(result.data.downloadUrl, "_blank");
-      }
-      toast.success("Download started successfully!");
+      // Use RTK Query mutation for download - it returns blob directly
+      const blob = await downloadDesign(designId).unwrap();
+
+      // Extract filename from the blob response (we'll need to get headers differently)
+      // For now, create a default filename
+      const filename = `design-${designId}.zip`;
+
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Download completed successfully!");
     } catch (error) {
-      const apiError = error as { data?: { message?: string } };
-      toast.error(
-        apiError?.data?.message || "Download failed. Please try again."
-      );
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Download failed. Please try again.";
+      toast.error(errorMessage);
     }
-  };
+  }, [designId, downloadDesign, toast]);
+
+  const purchaseDesign = useMemo(() => {
+    return {
+      _id: design?._id!,
+      title: design?.title,
+      description: design?.description,
+      price: design?.discountedPrice as number,
+      basePrice: design?.basePrice as number,
+      previewImageUrl: previewImages[0] || "",
+      category: mainCategory || subCategory || null,
+    };
+  }, [
+    design?._id,
+    design?.title,
+    design?.description,
+    design?.discountedPrice,
+    design?.basePrice,
+    previewImages,
+    mainCategory,
+    subCategory,
+  ]);
 
   if (isLoading) {
     return (
@@ -261,10 +351,10 @@ export default function DesignDetailPage() {
             </Link>
             <span className="text-gray-400">/</span>
             <Link
-              href={`/designs?category=${design.category._id}`}
+              href={categoryQueryLink}
               className="text-gray-600 hover:text-blue-600 transition-colors"
             >
-              {design.category.name}
+              {mainCategory?.name || subCategory?.name || "Category"}
             </Link>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium truncate max-w-xs">
@@ -280,12 +370,13 @@ export default function DesignDetailPage() {
             {/* Main Image */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden group">
               <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
-                {design.previewImageUrl ? (
+                {heroImage ? (
                   <>
                     <Image
-                      src={design.previewImageUrl}
-                      alt={design.title}
+                      src={heroImage}
+                      alt={`${design.title} preview ${currentImageIndex + 1}`}
                       fill
+                      priority={true}
                       className={`object-cover transition-all duration-500 ${
                         imageLoaded
                           ? "opacity-100 scale-100"
@@ -296,6 +387,42 @@ export default function DesignDetailPage() {
                         const target = e.target as HTMLImageElement;
                         target.style.display = "none";
                       }}
+                    />
+
+                    {/* Prev / Next controls */}
+                    {previewImages.length > 1 && (
+                      <>
+                        <button
+                          aria-label="Previous image"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) =>
+                                (i - 1 + previewImages.length) %
+                                previewImages.length
+                            )
+                          }
+                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          aria-label="Next image"
+                          onClick={() =>
+                            setCurrentImageIndex(
+                              (i) => (i + 1) % previewImages.length
+                            )
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
+                        >
+                          ›
+                        </button>
+                      </>
+                    )}
+                    {/* open lightbox on click */}
+                    <button
+                      aria-label="Open fullscreen"
+                      onClick={() => setLightboxOpen(true)}
+                      className="absolute inset-0 w-full h-full bg-transparent"
                     />
                   </>
                 ) : (
@@ -320,7 +447,7 @@ export default function DesignDetailPage() {
                 {/* Like Button */}
                 <div className="absolute top-4 right-4">
                   <LikeButton
-                    designId={design._id}
+                    designId={design._id!}
                     initialLikesCount={design.likesCount}
                     variant="icon"
                     size="lg"
@@ -330,12 +457,50 @@ export default function DesignDetailPage() {
                 </div>
               </div>
 
+              {/* Image Thumbnails */}
+              {previewImages.length > 1 && (
+                <div className="flex items-center gap-2 mt-3 overflow-x-auto p-2">
+                  {previewImages.map((src, idx) => (
+                    <button
+                      key={src + idx}
+                      onClick={() => {
+                        setCurrentImageIndex(idx);
+                        setImageLoaded(false);
+                      }}
+                      className={`flex-shrink-0 w-20 h-12 rounded overflow-hidden border ${
+                        idx === currentImageIndex
+                          ? "ring-2 ring-blue-500"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <Image
+                        src={src}
+                        alt={`${design.title} thumb ${idx + 1}`}
+                        width={160}
+                        height={96}
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Image Lightbox */}
+              <ImageLightbox
+                images={previewImages}
+                isOpen={lightboxOpen}
+                currentIndex={currentImageIndex}
+                onClose={() => setLightboxOpen(false)}
+                onIndexChange={setCurrentImageIndex}
+                alt={design.title}
+              />
+
               {/* Stats Bar */}
               <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-t border-gray-200">
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-1">
                     <LikeButton
-                      designId={design._id}
+                      designId={design._id!}
                       initialLikesCount={design.likesCount}
                       variant="compact"
                       size="sm"
@@ -356,7 +521,7 @@ export default function DesignDetailPage() {
                       ? statistics.averageRating.toFixed(1)
                       : "0.0"}
                   </p>
-                  <span className="text-xs text-gray-600">Rating</span>
+                  <span className="text-xs text-gray-600">Avg Rating</span>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-gray-900">
@@ -366,71 +531,55 @@ export default function DesignDetailPage() {
                 </div>
               </div>
             </div>
-
-            {/* Description */}
-            <div className="bg-white rounded-lg border border-gray-200 p-5">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">
-                Description
-              </h2>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                {design.description}
-              </p>
-            </div>
-
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Tools */}
-              {design.usedTools && design.usedTools.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Wrench className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-bold text-gray-900">Tools Used</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {design.usedTools.map((tool, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded font-medium"
-                      >
-                        {tool}
-                      </span>
-                    ))}
-                  </div>
+            {/* Tools */}
+            {design.usedTools && design.usedTools.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Wrench className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-bold text-gray-900">Tools Used</h3>
                 </div>
-              )}
-
-              {/* Effects */}
-              {design.effectsUsed && design.effectsUsed.length > 0 && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-purple-600" />
-                    <h3 className="font-bold text-gray-900">Effects</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {design.effectsUsed.map((effect, index) => (
-                      <span
-                        key={index}
-                        className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium"
-                      >
-                        {effect}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-2">
+                  {design.usedTools.map((tool, index) => (
+                    <span
+                      key={index}
+                      className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded font-medium"
+                    >
+                      {tool}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Process */}
-              {design.processDescription && (
-                <div className="bg-white rounded-lg border border-gray-200 p-5 md:col-span-2">
-                  <h3 className="font-bold text-gray-900 mb-3">
-                    Design Process
-                  </h3>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {design.processDescription}
-                  </p>
+            {/* Effects */}
+            {design.effectsUsed && design.effectsUsed.length > 0 && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <h3 className="font-bold text-gray-900">Effects</h3>
                 </div>
-              )}
-            </div>
+                <div className="flex flex-wrap gap-2">
+                  {design.effectsUsed.map((effect, index) => (
+                    <span
+                      key={index}
+                      className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium"
+                    >
+                      {effect}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Process */}
+            {design.processDescription && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5 md:col-span-2">
+                <h3 className="font-bold text-gray-900 mb-3">Design Process</h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {design.processDescription}
+                </p>
+              </div>
+            )}
 
             {/* Reviews Section */}
             <div
@@ -675,16 +824,15 @@ export default function DesignDetailPage() {
               )}
             </div>
           </div>
-
           {/* Right Column - Purchase Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-20 space-y-4">
               {/* Title & Category */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Link href={`/designs?category=${design.category._id}`}>
+                  <Link href={categoryQueryLink}>
                     <span className="bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded">
-                      {design.category.name}
+                      {mainCategory?.name || subCategory?.name || "Category"}
                     </span>
                   </Link>
                   {design.complexityLevel && (
@@ -696,21 +844,27 @@ export default function DesignDetailPage() {
                 <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
                   {design.title}
                 </h1>
-                {design.designerName && (
+                {designerName && (
                   <p className="text-sm text-gray-600">
                     by{" "}
                     <span className="font-semibold text-blue-600">
-                      {design.designerName}
+                      {designerName}
                     </span>
                   </p>
                 )}
               </div>
 
-              {/* Price */}
-              <div className="py-4 border-y border-gray-200">
+              {/* discounted price */}
+              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-blue-600">
-                    ${design.price}
+                    ${design?.discountedPrice?.toFixed(2) || 0}
+                  </span>
+                  <span className="text-sm text-gray-500">USD</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-lg font-medium text-gray-500 line-through">
+                    ${design?.basePrice.toFixed(2) || 0}
                   </span>
                   <span className="text-sm text-gray-500">USD</span>
                 </div>
@@ -754,13 +908,13 @@ export default function DesignDetailPage() {
                     {access.status === "completed" ? (
                       <Button
                         onClick={handleDownload}
-                        disabled={downloadLoading}
+                        disabled={isDownloading}
                         className="w-full bg-green-600 hover:bg-green-700 text-sm font-semibold"
                       >
-                        {downloadLoading ? (
+                        {isDownloading ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Downloading...
+                            Preparing Download...
                           </>
                         ) : (
                           <>
@@ -778,7 +932,7 @@ export default function DesignDetailPage() {
                       className="w-full bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase for ${design.price}
+                      Purchase for ${design?.discountedPrice?.toFixed(2) || 0}
                     </Button>
                     <p className="text-center text-xs text-gray-600">
                       or{" "}
@@ -792,6 +946,48 @@ export default function DesignDetailPage() {
                     </p>
                   </>
                 )}
+              </div>
+
+              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-50 rounded-md">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">
+                      Download details
+                    </p>
+                    {design?.downloadableFile ? (
+                      <dl className="mt-2 text-sm text-gray-600 grid grid-cols-1 gap-1">
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">File name</dt>
+                          <dd className="truncate">
+                            {(design.downloadableFile as any).file_name || "—"}
+                          </dd>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">Format</dt>
+                          <dd className="uppercase">
+                            {(design.downloadableFile as any).file_format ||
+                              "—"}
+                          </dd>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <dt className="w-28 text-gray-500">Size</dt>
+                          <dd>
+                            {formatBytes(
+                              (design.downloadableFile as any).file_size
+                            )}
+                          </dd>
+                        </div>
+                      </dl>
+                    ) : (
+                      <p className="text-sm text-gray-500 mt-1">
+                        No downloadable file information available
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Tags */}
@@ -828,13 +1024,17 @@ export default function DesignDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Created</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(design.createdAt).toLocaleDateString()}
+                      {design?.createdAt
+                        ? new Date(design.createdAt).toLocaleDateString()
+                        : "-"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Updated</span>
                     <span className="font-medium text-gray-900">
-                      {new Date(design.updatedAt).toLocaleDateString()}
+                      {design?.updatedAt
+                        ? new Date(design.updatedAt).toLocaleDateString()
+                        : "-"}
                     </span>
                   </div>
                 </div>
@@ -849,24 +1049,16 @@ export default function DesignDetailPage() {
             </div>
           </div>
         </div>
+        {/* Purchase Modal */}
+        {design && (
+          <PurchaseModal
+            isOpen={purchaseModalOpen}
+            onClose={() => setPurchaseModalOpen(false)}
+            design={purchaseDesign}
+            purchaseType="individual"
+          />
+        )}
       </div>
-
-      {/* Purchase Modal */}
-      {design && (
-        <PurchaseModal
-          isOpen={purchaseModalOpen}
-          onClose={() => setPurchaseModalOpen(false)}
-          design={{
-            _id: design._id,
-            title: design.title,
-            description: design.description,
-            price: design.price,
-            previewImageUrl: design.previewImageUrl,
-            category: design.category,
-          }}
-          purchaseType="individual"
-        />
-      )}
     </div>
   );
 }

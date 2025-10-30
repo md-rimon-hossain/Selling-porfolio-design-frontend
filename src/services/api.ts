@@ -4,7 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://compressed-shona-neglectfully.ngrok-free.dev/api",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
     credentials: "include", // sends httpOnly cookies
   }),
   tagTypes: [
@@ -162,7 +162,13 @@ export const api = createApi({
     }),
     updateCategory: builder.mutation<
       any,
-      { id: string; name: string; description: string; isActive?: boolean }
+      {
+        id: string;
+        name: string;
+        description: string;
+        parentCategory: string | null;
+        isActive?: boolean;
+      }
     >({
       query: ({ id, ...data }) => ({
         url: `/categories/${id}`,
@@ -183,7 +189,8 @@ export const api = createApi({
     getDesigns: builder.query<
       any,
       | {
-          category?: string;
+          mainCategory?: string;
+          subCategory?: string;
           complexityLevel?: string;
           status?: string;
           minPrice?: number;
@@ -199,7 +206,10 @@ export const api = createApi({
 
         const searchParams = new URLSearchParams();
 
-        if (params.category) searchParams.append("category", params.category);
+        if (params.mainCategory)
+          searchParams.append("mainCategory", params.mainCategory);
+        if (params.subCategory)
+          searchParams.append("subCategory", params.subCategory);
         if (params.complexityLevel)
           searchParams.append("complexityLevel", params.complexityLevel);
         if (params.status) searchParams.append("status", params.status);
@@ -338,19 +348,27 @@ export const api = createApi({
       {
         purchaseType: "individual" | "subscription";
         design?: string;
+        course?: string;
         pricingPlan?: string;
         paymentMethod:
           | "credit_card"
           | "paypal"
           | "stripe"
           | "bank_transfer"
-          | "free";
-        paymentDetails?: {
-          cardNumber?: string;
-          expiryDate?: string;
-          cvv?: string;
-          cardholderName?: string;
-        };
+          | "free"
+          | "bkash"
+          | "nagad"
+          | "rocket";
+        // transaction id provided by user for MFS payments
+        userProvidedTransactionId?: string;
+        paymentDetails?:
+          | Record<string, unknown>
+          | {
+              cardNumber?: string;
+              expiryDate?: string;
+              cvv?: string;
+              cardholderName?: string;
+            };
         currency?: string;
         billingAddress: {
           street: string;
@@ -382,7 +400,10 @@ export const api = createApi({
           | "paypal"
           | "stripe"
           | "bank_transfer"
-          | "free";
+          | "free"
+          | "bkash"
+          | "nagad"
+          | "rocket";
         minAmount?: number;
         maxAmount?: number;
         startDate?: string;
@@ -617,6 +638,7 @@ export const api = createApi({
       query: (designId) => ({
         url: `/downloads/design/${designId}`,
         method: "POST",
+        responseHandler: (response) => response.blob(), // Return blob directly
       }),
       invalidatesTags: ["Downloads"],
     }),

@@ -122,9 +122,10 @@ export default function DesignLikersPage() {
             {/* Design Preview */}
             <div className="md:col-span-1">
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
-                {design?.previewImageUrl ? (
+                {design?.previewImageUrls &&
+                design.previewImageUrls.length > 0 ? (
                   <Image
-                    src={design.previewImageUrl}
+                    src={design.previewImageUrls[0]}
                     alt={design.title}
                     fill
                     className="object-cover"
@@ -171,9 +172,24 @@ export default function DesignLikersPage() {
 
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold">
-                    {design?.category?.name || "Uncategorized"}
+                    {design?.mainCategory?.name || "Uncategorized"}
+                    {design?.subCategory && ` > ${design.subCategory.name}`}
                   </span>
-                  <span>${design?.price}</span>
+                  <div className="flex flex-col">
+                    <span className="font-semibold">
+                      $
+                      {design?.discountedPrice &&
+                      design.discountedPrice < design.basePrice
+                        ? design.discountedPrice
+                        : design.basePrice}
+                    </span>
+                    {design?.discountedPrice &&
+                      design.discountedPrice < design.basePrice && (
+                        <span className="text-xs text-gray-500 line-through">
+                          ${design.basePrice}
+                        </span>
+                      )}
+                  </div>
                 </div>
               </div>
 

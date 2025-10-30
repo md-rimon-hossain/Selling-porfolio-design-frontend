@@ -175,9 +175,13 @@ export default function LikedDesignsPage() {
                   <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:scale-[1.02]">
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
-                      {design.previewImageUrl ? (
+                      {(design as any)?.previewImageUrls?.[0] ||
+                      design.previewImageUrl ? (
                         <Image
-                          src={design.previewImageUrl}
+                          src={
+                            (design as any)?.previewImageUrls?.[0] ||
+                            design.previewImageUrl
+                          }
                           alt={design.title}
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -274,7 +278,10 @@ export default function LikedDesignsPage() {
                             </span>
                           </div>
                           <div className="text-blue-600 font-bold">
-                            ${design.price}
+                            $
+                            {(design as any).discountedPrice != null
+                              ? (design as any).discountedPrice
+                              : (design as any).basePrice ?? design.price ?? 0}
                           </div>
                         </div>
                       </div>

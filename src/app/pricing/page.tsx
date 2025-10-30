@@ -513,7 +513,7 @@ const PricingPage = () => {
                           <span className="text-sm">
                             {plan.maxDesigns === -1
                               ? "Unlimited"
-                              : plan.maxDesigns.toLocaleString()}{" "}
+                              : plan?.maxDesigns?.toLocaleString()}{" "}
                             Designs Access
                           </span>
                         </div>

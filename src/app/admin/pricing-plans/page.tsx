@@ -21,6 +21,7 @@ export default function PricingPlansPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [currentFeature, setCurrentFeature] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -35,6 +36,23 @@ export default function PricingPlansPage() {
   const plans = data?.data || [];
   const toast = useToast();
   const confirmDialog = useConfirm();
+
+  const handleAddFeature = () => {
+    if (currentFeature.trim()) {
+      setFormData({
+        ...formData,
+        features: [...formData.features, currentFeature.trim()],
+      });
+      setCurrentFeature("");
+    }
+  };
+
+  const handleRemoveFeature = (index: number) => {
+    setFormData({
+      ...formData,
+      features: formData.features.filter((_, i) => i !== index),
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +120,7 @@ export default function PricingPlansPage() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingPlan(null);
+    setCurrentFeature("");
     setFormData({
       name: "",
       description: "",
@@ -310,20 +329,59 @@ export default function PricingPlansPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Features (one per line)
+                    Features
                   </label>
-                  <textarea
-                    rows={5}
-                    value={formData.features.join("\n")}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        features: e.target.value.split("\n").filter((f) => f),
-                      })
-                    }
-                    placeholder="Unlimited downloads&#10;Priority support&#10;Commercial license"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                  />
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={currentFeature}
+                        onChange={(e) => setCurrentFeature(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddFeature();
+                          }
+                        }}
+                        placeholder="Enter a feature..."
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleAddFeature}
+                        disabled={!currentFeature.trim()}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Add Feature
+                      </Button>
+                    </div>
+                    {formData.features.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600 font-medium">
+                          Added Features:
+                        </p>
+                        <div className="max-h-32 overflow-y-auto space-y-2">
+                          {formData.features.map((feature, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg"
+                            >
+                              <span className="text-sm text-gray-700">
+                                {feature}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFeature(index)}
+                                className="text-red-600 hover:text-red-800 ml-2"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center">
                   <input

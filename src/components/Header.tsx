@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAppSelector } from "../store/hooks";
 import { UserProfile } from "./UserProfile";
 import { AuthButtons } from "./AuthButtons";
@@ -10,7 +11,15 @@ import { Menu, X } from "lucide-react";
 
 export const Header: React.FC = () => {
   const user = useAppSelector((state) => state.auth.user);
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isActiveLink = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname?.startsWith(href);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
@@ -27,7 +36,11 @@ export const Header: React.FC = () => {
           <nav className="hidden lg:flex items-center space-x-1">
             <Link
               href="/"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActiveLink("/")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               Home
             </Link>
@@ -36,28 +49,44 @@ export const Header: React.FC = () => {
 
             <Link
               href="/designs"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActiveLink("/designs")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               Designs
             </Link>
 
             <Link
               href="/pricing"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActiveLink("/pricing")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               Pricing
             </Link>
 
             <Link
               href="/about"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActiveLink("/about")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               About
             </Link>
 
             <Link
               href="/contact"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                isActiveLink("/contact")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               Contact
             </Link>
@@ -101,7 +130,11 @@ export const Header: React.FC = () => {
           <div className="px-4 py-3 space-y-1">
             <Link
               href="/"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
@@ -109,7 +142,11 @@ export const Header: React.FC = () => {
 
             <Link
               href="/designs"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/designs")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Designs
@@ -117,7 +154,11 @@ export const Header: React.FC = () => {
 
             <Link
               href="/pricing"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/pricing")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Pricing
@@ -135,7 +176,11 @@ export const Header: React.FC = () => {
 
             <Link
               href="/about"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/about")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
@@ -143,7 +188,11 @@ export const Header: React.FC = () => {
 
             <Link
               href="/contact"
-              className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/contact")
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+              }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
