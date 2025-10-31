@@ -68,7 +68,6 @@ export const useDesignDownloadAccess = (
 
     if (subStatus?.hasActiveSubscription) {
       const remaining = subStatus?.downloadStats?.remainingDownloads ?? 0;
-      console.log(remaining);
       if (remaining === -1 || remaining > 0) {
         return {
           canDownload: true,

@@ -344,12 +344,6 @@ export default function AvailableDownloadsPage() {
               design.category?.name ||
               "Uncategorized";
 
-            const displayPrice =
-              (design as any)?.discountedPrice ??
-              (design as any)?.basePrice ??
-              (design as any)?.price ??
-              0;
-
             const designerName =
               (design as any)?.designer?.name ||
               (design as any)?.designerName ||
@@ -358,7 +352,7 @@ export default function AvailableDownloadsPage() {
             return (
               <div
                 key={design._id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
+                className="bg-white relative rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
               >
                 {/* Design Image */}
                 <Link
@@ -379,7 +373,7 @@ export default function AvailableDownloadsPage() {
                   )}
 
                   {/* Access Badge */}
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 left-2">
                     {isPurchased ? (
                       <span className="px-2.5 py-1 bg-blue-600 text-white text-xs font-semibold rounded-lg">
                         Purchased
@@ -392,6 +386,27 @@ export default function AvailableDownloadsPage() {
                     )}
                   </div>
                 </Link>
+                {/* Price Badge */}
+                <div className="absolute top-3 right-3">
+                  <span className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md font-semibold shadow-sm">
+                    {design.currencyDisplay}
+                    {typeof design.discountedPrice === "number" && design.discountedPrice >= 0
+                      ? design.discountedPrice
+                      : design.basePrice}
+                  </span>
+                </div>
+                <div className="absolute top-12 right-3">
+                  <span className="bg-white text-gray-500 text-sm px-2 py-1 rounded-md font-semibold shadow-sm line-through">
+                    {design.currencyDisplay}
+                    {typeof design.basePrice === "number" &&
+                    design.basePrice > 0 &&
+                    typeof design.discountedPrice === "number" &&
+                    design.discountedPrice >= 0 &&
+                    design.discountedPrice < design.basePrice
+                      ? design.basePrice
+                      : ""}
+                  </span>
+                </div>
 
                 {/* Design Info */}
                 <div className="p-4">

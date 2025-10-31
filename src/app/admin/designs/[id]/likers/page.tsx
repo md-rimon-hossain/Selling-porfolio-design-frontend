@@ -177,7 +177,9 @@ export default function DesignLikersPage() {
                   </span>
                   <div className="flex flex-col">
                     <span className="font-semibold">
-                      $
+                      <span className="text-xl font-bold"> {
+                        design.currencyDisplay
+                      }</span>
                       {design?.discountedPrice &&
                       design.discountedPrice < design.basePrice
                         ? design.discountedPrice

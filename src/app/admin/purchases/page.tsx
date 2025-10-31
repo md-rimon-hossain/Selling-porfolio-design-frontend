@@ -57,6 +57,8 @@ interface Purchase {
     name?: string;
     duration?: string;
   };
+  currencyDisplay?: string;
+  currencyCode?: string;  
   amount: number;
   currency?: string;
   status: PurchaseStatus;
@@ -327,12 +329,12 @@ export default function PurchasesPage() {
           {/* Total Revenue */}
           <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <DollarSign className="w-8 h-8 opacity-80" />
+              {/* < className="w-8 h-8 opacity-80" /> */}
               <ArrowUpRight className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-medium opacity-90">Total Revenue</h3>
             <p className="text-2xl font-bold mt-1">
-              ${analytics.totalRevenue?.toFixed(2) || "0.00"}
+              {purchases[0]?.currencyDisplay ?? "৳"}{analytics.totalRevenue?.toFixed(2) || "0.00"}
             </p>
             <p className="text-xs opacity-80 mt-1">All time earnings</p>
           </div>
@@ -342,7 +344,7 @@ export default function PurchasesPage() {
             <div className="flex items-center justify-between mb-2">
               <ShoppingCart className="w-8 h-8 opacity-80" />
               <span className="text-xl font-bold">
-                {analytics.totalPurchases || 0}
+                 {analytics.totalPurchases || 0}
               </span>
             </div>
             <h3 className="text-sm font-medium opacity-90">Total Purchases</h3>
@@ -390,7 +392,7 @@ export default function PurchasesPage() {
             </div>
             <h3 className="text-sm font-medium opacity-90">Avg Order Value</h3>
             <p className="text-2xl font-bold mt-1">
-              ${analytics.averageOrderValue?.toFixed(2) || "0.00"}
+              {purchases[0]?.currencyDisplay ?? "৳"}{analytics.averageOrderValue?.toFixed(2) || "0.00"}
             </p>
             <p className="text-xs opacity-80 mt-1">Per transaction</p>
           </div>
@@ -403,7 +405,7 @@ export default function PurchasesPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
             <div>
               <p className="text-2xl font-bold text-purple-600">
-                ${stats.totalRevenue.toFixed(2)}
+                {purchases[0]?.currencyDisplay ?? "৳"}{stats.totalRevenue.toFixed(2)}
               </p>
               <p className="text-xs text-gray-600">Page Revenue</p>
             </div>
@@ -530,7 +532,7 @@ export default function PurchasesPage() {
             {/* Min Amount */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min Amount ($)
+                Min Amount 
               </label>
               <input
                 type="number"
@@ -548,7 +550,7 @@ export default function PurchasesPage() {
             {/* Max Amount */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Amount ($)
+                Max Amount 
               </label>
               <input
                 type="number"
@@ -702,10 +704,10 @@ export default function PurchasesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-lg font-bold text-gray-900">
-                        ${purchase.amount?.toFixed(2) || "0.00"}
+                        {purchase.currencyDisplay ?? "৳"}{purchase.amount?.toFixed(2) || "0.00"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {purchase.currency?.toUpperCase() || "USD"}
+                        {purchase.currency?.toUpperCase() || "BDT"}
                       </p>
                     </td>
                     <td className="px-6 py-4">
@@ -886,7 +888,7 @@ export default function PurchasesPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Amount</p>
                     <p className="text-2xl font-bold text-purple-600 mt-1">
-                      ${selectedPurchase.amount?.toFixed(2) || "0.00"}
+                      {selectedPurchase.currencyDisplay}{selectedPurchase.amount?.toFixed(2) || "0.00"}
                     </p>
                   </div>
                   <div>

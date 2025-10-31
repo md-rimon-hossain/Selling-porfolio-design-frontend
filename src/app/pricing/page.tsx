@@ -31,6 +31,7 @@ interface PricingPlan {
   description: string;
   price: number;
   finalPrice: number;
+  currencyDisplay: string;
   features: string[];
   duration: string;
   maxDesigns: number;
@@ -291,7 +292,7 @@ const PricingPage = () => {
                   </p>
                 </div>
                 <p className="text-lg font-bold text-gray-900">
-                  ${currentSubscription.amount?.toFixed(2)}
+                  {currentSubscription.currencyDisplay}{currentSubscription.amount?.toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-600 mt-1 uppercase">
                   {currentSubscription.currency}
@@ -474,11 +475,11 @@ const PricingPage = () => {
                         {plan.discountPercentage &&
                           plan.discountPercentage > 0 && (
                             <span className="text-xl text-gray-400 line-through mr-2">
-                              ${formatPrice(plan.price)}
+                             {plan.currencyDisplay} {formatPrice(plan.price)}
                             </span>
                           )}
                         <span className="text-4xl font-bold text-gray-900">
-                          ${formatPrice(finalPrice)}
+                          {plan.currencyDisplay}{formatPrice(finalPrice)}
                         </span>
                         <span className="text-gray-600 ml-1">
                           /{plan.duration}
@@ -488,7 +489,7 @@ const PricingPage = () => {
                         plan.discountPercentage > 0 && (
                           <div className="mt-2">
                             <span className="text-green-600 text-sm font-medium">
-                              Save ${formatPrice(plan.price - finalPrice)} (
+                              Save {plan.currencyDisplay}{formatPrice(plan.price - finalPrice)} (
                               {plan.discountPercentage}% off)
                             </span>
                           </div>

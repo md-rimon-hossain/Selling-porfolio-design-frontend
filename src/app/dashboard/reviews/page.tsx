@@ -66,10 +66,12 @@ function DesignReviewCard({
           </Link>
           <div className="flex items-center gap-3 mt-1">
             <span className="text-sm font-semibold text-gray-900">
-              $
-              {((design as any).discountedPrice != null
-                ? (design as any).discountedPrice
-                : (design as any).basePrice ?? design.price ?? 0
+              {design.currencyDisplay || "৳"}
+              {
+             
+              (design.discountedPrice != null
+                ? design.discountedPrice
+                : design.basePrice ?? design.price ?? 0
               ).toFixed(2)}
             </span>
           </div>
@@ -270,6 +272,10 @@ export default function MyReviewsPage() {
     status: "completed",
   });
 
+  console.log(purchasesData);
+
+
+
   const [createReview] = useCreateReviewMutation();
   const [updateReview] = useUpdateReviewMutation();
   const [deleteReview] = useDeleteReviewMutation();
@@ -287,13 +293,17 @@ export default function MyReviewsPage() {
 
   const purchases = useMemo(() => purchasesData?.data || [], [purchasesData]);
 
+
   // Get current user ID
   const currentUserId = purchases[0]?.user || "";
+
+
 
   // Get all purchased designs (individual and from active subscriptions)
   const purchasedDesigns = useMemo(() => {
     const designs: any[] = [];
     const designIds = new Set<string>();
+
 
     purchases.forEach((p: any) => {
       if (
@@ -301,6 +311,7 @@ export default function MyReviewsPage() {
         p.design &&
         !designIds.has(p.design._id)
       ) {
+        console.log(p);
         designs.push(p.design);
         designIds.add(p.design._id);
       }
@@ -308,6 +319,8 @@ export default function MyReviewsPage() {
 
     return designs;
   }, [purchases]);
+
+ 
 
   // Handle edit review
   const handleEditReview = (review: any, designId: string) => {
@@ -376,6 +389,7 @@ export default function MyReviewsPage() {
       comment: "",
     });
   };
+
 
   return (
     <div className="space-y-6">

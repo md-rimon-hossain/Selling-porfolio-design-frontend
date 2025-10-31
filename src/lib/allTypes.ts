@@ -50,6 +50,8 @@ export interface Design {
   basePrice: number;
   // 💡 Discounted Price (The final price if on sale, otherwise the same as basePrice, or null/undefined)
   discountedPrice?: number;
+  currencyDisplay: string;
+  currencyCode: string;
   /** Details for the primary secure, downloadable file (e.g., the ZIP file). */
   downloadableFile: IDownloadableFile;
   /** List of files/formats included in the main download (e.g., ["AI", "EPS", "PNG"]). */

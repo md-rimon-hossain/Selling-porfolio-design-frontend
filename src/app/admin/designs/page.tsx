@@ -193,7 +193,7 @@ export default function DesignsPage() {
       return;
     }
 
-    if (!previewImages  && designs.previewImageUrls.length === 0) {
+    if (!previewImages && designs.previewImageUrls.length === 0) {
       console.log(previewImages);
       toast.error("Please add at least one preview image");
       return;
@@ -348,8 +348,6 @@ export default function DesignsPage() {
     });
   };
 
-
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -488,7 +486,7 @@ export default function DesignsPage() {
             {/* Min Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min Price ($)
+                Min Price 
               </label>
               <input
                 type="number"
@@ -507,7 +505,7 @@ export default function DesignsPage() {
             {/* Max Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Price ($)
+                Max Price 
               </label>
               <input
                 type="number"
@@ -643,7 +641,9 @@ export default function DesignsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-lg font-bold text-blue-600">
-                      $
+                      <span className="text-2xl font-bold"> {
+                        design.currencyDisplay
+                      }</span>
                       {design.discountedPrice &&
                       design.discountedPrice < design.basePrice
                         ? design.discountedPrice
@@ -652,7 +652,8 @@ export default function DesignsPage() {
                     {design.discountedPrice &&
                       design.discountedPrice < design.basePrice && (
                         <span className="text-sm text-gray-500 line-through">
-                          ${design.basePrice}
+                          {design.currencyDisplay}
+                          {design.basePrice}
                         </span>
                       )}
                   </div>

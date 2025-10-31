@@ -163,14 +163,15 @@ const FeaturedDesigns: React.FC = () => {
                   </span>
                   <div className="flex flex-col items-end gap-1">
                     <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
-                      $
+                      {design.currencyDisplay}
                       {typeof design.discountedPrice === "number" &&
                       design.discountedPrice >= 0
                         ? design.discountedPrice
                         : design.basePrice ?? 0}
+
                     </span>
                     <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-sm">
-                      $
+                      {design.currencyDisplay}
                       {typeof design.basePrice === "number" &&
                       design.basePrice >= 0
                         ? design.basePrice

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   const stats = [
     {
       name: "Total Revenue",
-      value: `$${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
+      value: `৳${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
       change: "+12.5%",
       icon: DollarSign,
       color: "from-green-600 to-emerald-600",
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">
-                      ${purchase.amount?.toFixed(2)}
+                      {purchase.currencyDisplay}{purchase.amount?.toFixed(2)}
                     </p>
                     <span
                       className={`inline-block px-2 py-1 text-xs rounded-full ${
