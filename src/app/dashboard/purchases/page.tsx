@@ -235,6 +235,7 @@ export default function MyPurchasesPage() {
               _id: string;
               purchaseType: string;
               pricingPlan?: { name: string; duration?: string };
+              currencyDisplay: string;
               design?: { title: string; _id: string };
               status: string;
               amount: number;
@@ -301,7 +302,7 @@ export default function MyPurchasesPage() {
                     <div>
                       <p className="text-xs text-gray-500">Amount</p>
                       <p className="font-bold text-gray-900 text-sm">
-                        {purchase.currency || "USD"} $
+                        {purchase.currency || "BDT"} {purchase.currencyDisplay}
                         {purchase.amount?.toFixed(2)}
                       </p>
                     </div>

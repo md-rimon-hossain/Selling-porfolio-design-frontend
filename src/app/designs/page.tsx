@@ -399,8 +399,8 @@ export default function DesignsPage() {
                   </label>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>${minPrice}</span>
-                      <span>${maxPrice}</span>
+                      <span>{designs && designs[0]?.currencyDisplay }{minPrice}</span>
+                      <span>{designs && designs[0]?.currencyDisplay }{maxPrice}</span>
                     </div>
                     <div className="space-y-2">
                       <input
@@ -596,8 +596,8 @@ export default function DesignsPage() {
                           (design as any)?.category ||
                           (design as any)?.subCategory ||
                           null;
-                       const discountedPrice = design.discountedPrice;
-                       const basePrice = design.basePrice ?? 0;
+                        const discountedPrice = design.discountedPrice;
+                        const basePrice = design.basePrice ?? 0;
                         const designerName =
                           (design as any)?.designer?.name ||
                           (design as any)?.designerName;
@@ -643,25 +643,23 @@ export default function DesignsPage() {
                                 {/* Price Badge */}
                                 <div className="absolute top-3 right-3">
                                   <span className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-md font-semibold shadow-sm">
-                                    ${
-                                      typeof discountedPrice === "number" &&
-                                      discountedPrice >= 0
-                                        ? discountedPrice
-                                        : basePrice
-                                  }
+                                    {design.currencyDisplay}
+                                    {typeof discountedPrice === "number" &&
+                                    discountedPrice >= 0
+                                      ? discountedPrice
+                                      : basePrice}
                                   </span>
                                 </div>
                                 <div className="absolute top-12 right-3">
                                   <span className="bg-white text-gray-500 text-sm px-2 py-1 rounded-md font-semibold shadow-sm line-through">
-                                    ${
-                                      typeof basePrice === "number" &&
-                                      basePrice > 0 &&
-                                      typeof discountedPrice === "number" &&
-                                      discountedPrice >= 0 &&
-                                      discountedPrice < basePrice
-                                        ? basePrice
-                                        : ""
-                                  }
+                                    {design.currencyDisplay}
+                                    {typeof basePrice === "number" &&
+                                    basePrice > 0 &&
+                                    typeof discountedPrice === "number" &&
+                                    discountedPrice >= 0 &&
+                                    discountedPrice < basePrice
+                                      ? basePrice
+                                      : ""}
                                   </span>
                                 </div>
 
@@ -866,20 +864,20 @@ export default function DesignsPage() {
                                       </div>
                                       <div className="text-right flex flex-col items-end gap-1">
                                         <span className="text-2xl font-bold text-blue-600">
-                                        $
-                                        {typeof (design as any)
-                                          ?.discountedPrice === "number" &&
+                                          {design.currencyDisplay}
+                                          {typeof (design as any)
+                                            ?.discountedPrice === "number" &&
                                           (design as any).discountedPrice >= 0
-                                          ? (design as any).discountedPrice
-                                        : design.basePrice ?? 0}
-                                      </span>
-                                      <span className="text-gray-500 text-sm line-through">
-                                        $
-                                        {typeof design.basePrice === "number" &&
-                                        design.basePrice >= 0
-                                          ? design.basePrice
-                                          : design.basePrice ?? 0}
-                                      </span>
+                                            ? (design as any).discountedPrice
+                                            : design.basePrice ?? 0}
+                                        </span>
+                                        <span className="text-gray-500 text-sm line-through">
+                                          {design.currencyDisplay}
+                                          {typeof design.basePrice ===
+                                            "number" && design.basePrice >= 0
+                                            ? design.basePrice
+                                            : design.basePrice ?? 0}
+                                        </span>
                                       </div>
                                     </div>
 

@@ -17,6 +17,7 @@ interface PricingPlan {
   description: string;
   price: number;
   finalPrice: number;
+  currencyDisplay: string;
   features: string[];
   duration: string;
   maxDesigns: number;
@@ -31,6 +32,8 @@ interface Design {
   _id: string;
   title: string | undefined;
   description: string | undefined;
+  currencyDisplay: string;
+  currencyCode: string;
   price: number | undefined; // discountedPrice
   basePrice?: number | undefined;
   previewImageUrl?: string;
@@ -73,6 +76,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   // Get item details based on purchase type
+  const currencyCode = purchaseType === "subscription" ? plan?.currencyDisplay || "৳" : design?.currencyDisplay || "৳";
   const itemPrice =
     purchaseType === "subscription"
       ? plan?.finalPrice || plan?.price || 0
@@ -117,7 +121,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
     country: "",
   });
 
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("BDT");
   const [notes, setNotes] = useState("");
   const [userTransactionId, setUserTransactionId] = useState("");
 
@@ -200,7 +204,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
   const resetAndClose = () => {
     setStep("payment");
     setErrorMessage("");
-    setCurrency("USD");
+    setCurrency("BDT");
     setUserTransactionId("");
     setPaymentDetails({
       cardNumber: "",
@@ -231,7 +235,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 : "Purchase Design"}
             </h2>
             <p className="text-sm text-gray-600 capitalize">
-              {itemName} - ${formatPrice(itemPrice)}
+              {itemName} - {currencyCode}{formatPrice(itemPrice)}
             </p>
           </div>
           <button
@@ -340,15 +344,18 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 {hasDiscount ? (
                   <div className="text-right">
                     <span className="line-through text-gray-500 text-sm">
-                      ${formatPrice(originalPrice)}
+                      {currencyCode}
+                      {formatPrice(originalPrice)}
                     </span>
                     <span className="text-gray-900 font-semibold ml-2">
-                      ${formatPrice(itemPrice)}
+                      {currencyCode}
+                      {formatPrice(itemPrice)}
                     </span>
                   </div>
                 ) : (
                   <span className="font-semibold">
-                    ${formatPrice(originalPrice)}
+                    {currencyCode}
+                    {formatPrice(originalPrice)}
                   </span>
                 )}
               </div>
@@ -358,13 +365,15 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                     Discount ({discountPercentage}%)
                   </span>
                   <span className="font-semibold">
-                    -${formatPrice(originalPrice - itemPrice)}
+                    -{currencyCode}
+                    {formatPrice(originalPrice - itemPrice)}
                   </span>
                 </div>
               )}
               <div className="border-t border-gray-200 pt-2 flex justify-between text-gray-900 font-bold text-lg">
                 <span>Total</span>
-                <span>${formatPrice(itemPrice)}</span>
+                <span>{currencyCode}
+                  {formatPrice(itemPrice)}</span>
               </div>
               {purchaseType === "subscription" && plan && (
                 <p className="text-xs text-gray-500 mt-2">
@@ -397,7 +406,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               </p>
               {purchaseType === "individual" && design && hasDiscount && (
                 <p className="text-green-600 text-sm font-medium mb-4">
-                  You saved ${formatPrice(originalPrice - itemPrice)}!
+                  You saved {currencyCode}{formatPrice(originalPrice - itemPrice)}!
                 </p>
               )}
               <button

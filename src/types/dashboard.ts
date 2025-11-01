@@ -73,6 +73,10 @@ export interface DesignForDownload {
   title: string;
   description: string;
   previewImageUrl?: string;
+  basePrice: number;
+  discountedPrice?: number;
+  currencyDisplay: string;
+  currencyCode: string;
   category?: {
     _id: string;
     name: string;

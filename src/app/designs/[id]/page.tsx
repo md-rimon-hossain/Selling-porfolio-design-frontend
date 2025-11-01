@@ -273,6 +273,9 @@ export default function DesignDetailPage() {
       description: design?.description,
       price: design?.discountedPrice as number,
       basePrice: design?.basePrice as number,
+      discountedPrice: design?.discountedPrice,
+      currencyDisplay: (design as any)?.currencyDisplay,
+      currencyCode: (design as any)?.currencyCode,
       previewImageUrl: previewImages[0] || "",
       category: mainCategory || subCategory || null,
     };
@@ -858,15 +861,21 @@ export default function DesignDetailPage() {
               <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-bold text-blue-600">
-                    ${design?.discountedPrice?.toFixed(2) || 0}
+                    {design?.currencyDisplay}
+                    {design?.discountedPrice?.toFixed(2) || 0}
                   </span>
-                  <span className="text-sm text-gray-500">USD</span>
+                  <span className="text-sm text-gray-500">
+                    {design.currencyCode}
+                  </span>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-lg font-medium text-gray-500 line-through">
-                    ${design?.basePrice.toFixed(2) || 0}
+                    {design?.currencyDisplay}
+                    {design?.basePrice.toFixed(2) || 0}
                   </span>
-                  <span className="text-sm text-gray-500">USD</span>
+                  <span className="text-sm text-gray-500">
+                    {design.currencyCode}
+                  </span>
                 </div>
               </div>
 
@@ -932,7 +941,8 @@ export default function DesignDetailPage() {
                       className="w-full bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase for ${design?.discountedPrice?.toFixed(2) || 0}
+                      Purchase for {design?.currencyDisplay}
+                      {design?.discountedPrice?.toFixed(2) || 0}
                     </Button>
                     <p className="text-center text-xs text-gray-600">
                       or{" "}

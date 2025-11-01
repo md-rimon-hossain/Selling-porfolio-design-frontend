@@ -32,6 +32,8 @@ interface DownloadHistoryItem {
   purchase: {
     _id: string;
     purchaseType: "individual" | "subscription";
+    currencyDisplay: string;
+    currencyCode: string;
     amount: number;
   };
   downloadType: "individual_purchase" | "subscription";
@@ -289,6 +291,7 @@ export default function DownloadsHistoryPage() {
               key={download._id}
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
             >
+              
               {/* Design Image */}
               <Link
                 href={`/designs/${download.design._id}`}
@@ -362,7 +365,7 @@ export default function DownloadsHistoryPage() {
                       Amount
                     </span>
                     <span className="font-bold text-green-600">
-                      ${download.purchase.amount.toFixed(2)}
+                      {download.purchase.currencyDisplay || "৳"}{download.purchase.amount.toFixed(2)}
                     </span>
                   </div>
                 </div>

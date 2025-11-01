@@ -165,12 +165,13 @@ export default function PricingPlansPage() {
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
                 <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                 <div className="flex items-baseline">
-                  <span className="text-4xl font-bold">${plan.finalPrice}</span>
+                  <span className="text-4xl font-bold">{
+                    plan.currencyDisplay}{plan.finalPrice}</span>
                   <span className="ml-2 text-blue-100">/{plan.duration}</span>
                 </div>
                 {plan.discountPercentage > 0 && (
                   <p className="mt-2 text-blue-100">
-                    <span className="line-through">${plan.price}</span>
+                    <span className="line-through">{plan.currencyDisplay}{plan.price}</span>
                     <span className="ml-2 font-semibold">
                       {plan.discountPercentage}% OFF
                     </span>
