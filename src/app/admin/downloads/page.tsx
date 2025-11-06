@@ -652,7 +652,7 @@ export default function AdminDownloadsPage() {
                       {design.title}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {design.downloadCount} downloads • $
+                      {design.downloadCount} downloads
                       {design.price?.toFixed(2)}
                     </p>
                   </div>

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   const stats = [
     {
       name: "Total Revenue",
-      value: `৳${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
+      value: `$${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
       change: "+12.5%",
       icon: DollarSign,
       color: "from-green-600 to-emerald-600",

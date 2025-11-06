@@ -19,16 +19,23 @@ export const useDesignDownloadAccess = (
 ): {
   access: DownloadAccess;
   isLoading: boolean;
+  refetch: () => void;
 } => {
   const user = useAppSelector((state) => state.auth.user);
 
   // Fetch user's purchases
-  const { data: purchasesData, isLoading: purchasesLoading } =
-    useGetMyPurchasesQuery({ limit: 100 }, { skip: !user });
+  const {
+    data: purchasesData,
+    isLoading: purchasesLoading,
+    refetch: refetchPurchases,
+  } = useGetMyPurchasesQuery({ limit: 100 }, { skip: !user });
 
   // Fetch subscription status
-  const { data: subscriptionData, isLoading: subscriptionLoading } =
-    useGetSubscriptionStatusQuery(undefined, { skip: !user });
+  const {
+    data: subscriptionData,
+    isLoading: subscriptionLoading,
+    refetch: refetchSubscription,
+  } = useGetSubscriptionStatusQuery(undefined, { skip: !user });
 
   const access = useMemo((): DownloadAccess => {
     if (!user) {
@@ -53,8 +60,9 @@ export const useDesignDownloadAccess = (
       const purchaseStatus = purchases.find(
         (purchase) =>
           purchase.purchaseType === "individual" &&
-          purchase.design?._id  === designId 
+          purchase.design?._id === designId
       )?.status as "completed" | "pending";
+
       return {
         canDownload: purchaseStatus === "completed",
         reason: "purchased",
@@ -91,5 +99,9 @@ export const useDesignDownloadAccess = (
   return {
     access,
     isLoading: purchasesLoading || subscriptionLoading,
+    refetch: () => {
+      refetchPurchases();
+      refetchSubscription();
+    },
   };
 };

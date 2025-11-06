@@ -67,6 +67,7 @@ export default function AdminLayout({
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Pricing Plans", href: "/admin/pricing-plans", icon: CreditCard },
     { name: "Purchases", href: "/admin/purchases", icon: ShoppingCart },
+    {name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
     { name: "Downloads", href: "/admin/downloads", icon: Download },
   ];

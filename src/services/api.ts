@@ -17,6 +17,7 @@ export const api = createApi({
     "Reviews",
     "Downloads",
     "Likes",
+    "Payments",
   ],
   endpoints: (builder) => ({
     // ==================== AUTH ====================
@@ -743,6 +744,101 @@ export const api = createApi({
         { type: "Likes", id: `${designId}-likers` },
       ],
     }),
+
+    // ==================== STRIPE PAYMENTS ====================
+    createPaymentIntent: builder.mutation<
+      any,
+      {
+        productType: "design" | "course" | "subscription";
+        productId: string;
+        currency?: string;
+      }
+    >({
+      query: (data) => ({
+        url: "/payments/create",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Payments"],
+    }),
+    getPaymentStatus: builder.query<any, string>({
+      query: (paymentIntentId) => `/payments/status/${paymentIntentId}`,
+      providesTags: (result, error, id) => [{ type: "Payments", id }],
+    }),
+    getUserPayments: builder.query<
+      any,
+      { page?: number; limit?: number } | undefined
+    >({
+      query: (params) => {
+        if (!params) return "/payments/my-payments";
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        return `/payments/my-payments?${searchParams.toString()}`;
+      },
+      providesTags: ["Payments"],
+    }),
+    getAllPaymentsAdmin: builder.query<
+      any,
+      {
+        page?: number;
+        limit?: number;
+        status?: "pending" | "succeeded" | "failed" | "canceled" | "refunded";
+        productType?: "design" | "course" | "subscription";
+        userId?: string;
+        startDate?: string;
+        endDate?: string;
+        sortBy?: "createdAt" | "amount" | "status";
+        sortOrder?: "asc" | "desc";
+      }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.status) searchParams.append("status", params.status);
+        if (params.productType)
+          searchParams.append("productType", params.productType);
+        if (params.userId) searchParams.append("userId", params.userId);
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
+        return `/payments/admin/all?${searchParams.toString()}`;
+      },
+      providesTags: ["Payments"],
+    }),
+    getPaymentStatisticsAdmin: builder.query<
+      any,
+      { startDate?: string; endDate?: string } | undefined
+    >({
+      query: (params) => {
+        if (!params) return "/payments/admin/statistics";
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        return `/payments/admin/statistics?${searchParams.toString()}`;
+      },
+      providesTags: ["Payments"],
+    }),
+    refundPayment: builder.mutation<
+      any,
+      {
+        paymentIntentId: string;
+        amount?: number;
+        reason?: string;
+      }
+    >({
+      query: (data) => ({
+        url: "/payments/refund",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Payments", "Purchases"],
+    }),
   }),
 });
 
@@ -807,4 +903,11 @@ export const {
   useGetMyLikesQuery,
   useCheckIfLikedQuery,
   useGetDesignLikersQuery,
+  // Stripe Payments
+  useCreatePaymentIntentMutation,
+  useGetPaymentStatusQuery,
+  useGetUserPaymentsQuery,
+  useGetAllPaymentsAdminQuery,
+  useGetPaymentStatisticsAdminQuery,
+  useRefundPaymentMutation,
 } = api;

@@ -278,7 +278,7 @@ export default function LikedDesignsPage() {
                             </span>
                           </div>
                           <div className="text-blue-600 font-bold">
-                            $
+                            {design.currencyDisplay}
                             {(design as any).discountedPrice != null
                               ? (design as any).discountedPrice
                               : (design as any).basePrice ?? design.price ?? 0}

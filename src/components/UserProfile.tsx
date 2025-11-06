@@ -106,8 +106,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             </div>
           </div>
 
-         
-
           {/* Menu Items */}
           <div className="py-2">
             <Link
@@ -127,7 +125,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               My Purchases
             </Link>
             <Link
-              href="/dashboard/downloads"
+              href="/dashboard/available-downloads"
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
