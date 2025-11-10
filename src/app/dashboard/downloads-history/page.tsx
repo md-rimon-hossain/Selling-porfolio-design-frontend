@@ -365,7 +365,7 @@ export default function DownloadsHistoryPage() {
                       Amount
                     </span>
                     <span className="font-bold text-green-600">
-                      {download.purchase.currencyDisplay || "৳"}{download.purchase.amount.toFixed(2)}
+                      {download?.purchase?.currencyDisplay || "$"}{download?.purchase?.amount.toFixed(2)}
                     </span>
                   </div>
                 </div>

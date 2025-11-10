@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useToggleLikeMutation, useCheckIfLikedQuery } from "@/services/api";
 import { useAppSelector } from "@/store/hooks";
 
@@ -17,21 +17,31 @@ export const useLike = ({
 }: UseLikeOptions) => {
   const user = useAppSelector((state) => state.auth.user);
   const isAuthenticated = !!user;
+  const isProcessingRef = useRef(false);
 
   // Check if user has already liked this design
-  const {
-    data: likeCheckData,
-    isLoading: isCheckingLike,
-    refetch: refetchLikeStatus,
-  } = useCheckIfLikedQuery(designId, {
-    skip: !isAuthenticated, // Skip if not logged in
-  });
+  const { data: likeCheckData, isLoading: isCheckingLike } =
+    useCheckIfLikedQuery(designId, {
+      skip: !isAuthenticated, // Skip if not logged in
+    });
 
   const [toggleLike, { isLoading: isTogglingLike }] = useToggleLikeMutation();
 
   // Local state for optimistic updates
   const [optimisticLiked, setOptimisticLiked] = useState<boolean | null>(null);
   const [optimisticCount, setOptimisticCount] = useState<number | null>(null);
+
+  // Store previous state for revert
+  const previousStateRef = useRef<{ liked: boolean; count: number } | null>(
+    null
+  );
+
+  // Reset optimistic state when server data changes
+  useEffect(() => {
+    if (likeCheckData?.data?.liked !== undefined && !isProcessingRef.current) {
+      setOptimisticLiked(null);
+    }
+  }, [likeCheckData?.data?.liked]);
 
   // Determine current like status
   const isLiked =
@@ -61,31 +71,50 @@ export const useLike = ({
         return;
       }
 
+      // Prevent multiple clicks while processing (use ref to avoid stale closure)
+      if (isProcessingRef.current || isTogglingLike) {
+        console.log("Already processing, ignoring click");
+        return;
+      }
+
+      isProcessingRef.current = true;
+
+      // Store current state before optimistic update
+      previousStateRef.current = {
+        liked: isLiked,
+        count: likesCount,
+      };
+
       // Optimistic update
       const newLikedState = !isLiked;
       const newCount = newLikedState ? likesCount + 1 : likesCount - 1;
 
+      console.log("Optimistic update:", { newLikedState, newCount });
       setOptimisticLiked(newLikedState);
       setOptimisticCount(newCount);
 
       try {
         const response = await toggleLike(designId).unwrap();
 
-        // Update with server response
+        console.log("Server response:", response.data);
+
+        // Update with server response (this is the source of truth)
         setOptimisticLiked(response.data.liked);
         setOptimisticCount(response.data.likesCount);
 
-        // Refetch like status to keep in sync
-        refetchLikeStatus();
-
         onSuccess?.(response.data.liked);
       } catch (error: unknown) {
-        // Revert optimistic update on error
-        setOptimisticLiked(!newLikedState);
-        setOptimisticCount(likesCount);
+        console.error("Error toggling like, reverting:", error);
 
-        console.error("Error toggling like:", error);
+        // Revert to previous state using stored ref
+        if (previousStateRef.current) {
+          setOptimisticLiked(previousStateRef.current.liked);
+          setOptimisticCount(previousStateRef.current.count);
+        }
+
         onError?.(error);
+      } finally {
+        isProcessingRef.current = false;
       }
     },
     [
@@ -93,8 +122,8 @@ export const useLike = ({
       isAuthenticated,
       isLiked,
       likesCount,
+      isTogglingLike,
       toggleLike,
-      refetchLikeStatus,
       onSuccess,
       onError,
     ]

@@ -48,7 +48,12 @@ export default function DesignDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
-  const { data: designData, isLoading, error } = useGetDesignQuery(designId);
+  const {
+    data: designData,
+    isLoading,
+    error,
+    refetch: refetchDesign,
+  } = useGetDesignQuery(designId);
 
   // Support both shapes: API sometimes returns { data: { ... } } or the design object directly
   const design: Design | undefined = ((designData as any)?.data ??
@@ -219,8 +224,11 @@ export default function DesignDetailPage() {
   };
 
   // Check download access
-  const { access, isLoading: accessLoading } =
-    useDesignDownloadAccess(designId);
+  const {
+    access,
+    isLoading: accessLoading,
+    refetch: refetchAccess,
+  } = useDesignDownloadAccess(designId);
 
   const canReview =
     Boolean(user) &&
@@ -235,6 +243,13 @@ export default function DesignDetailPage() {
     }
     setPurchaseModalOpen(true);
   }, [user, router]);
+
+  const handlePaymentSuccess = useCallback(() => {
+    // Refetch design data to update purchase status
+    refetchDesign();
+    // Refetch access status
+    refetchAccess();
+  }, [refetchDesign, refetchAccess]);
 
   const handleDownload = useCallback(async () => {
     try {
@@ -1066,6 +1081,7 @@ export default function DesignDetailPage() {
             onClose={() => setPurchaseModalOpen(false)}
             design={purchaseDesign}
             purchaseType="individual"
+            onPaymentSuccess={handlePaymentSuccess}
           />
         )}
       </div>

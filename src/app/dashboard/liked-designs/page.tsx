@@ -16,6 +16,10 @@ interface LikedDesign {
     description: string;
     previewImageUrl?: string;
     price: number;
+    basePrice?: number;
+    discountedPrice?: number;
+    currencyDisplay?: string;
+    currencyCode?: string;
     likesCount: number;
     downloadCount: number;
     category?: { name: string };
@@ -278,10 +282,13 @@ export default function LikedDesignsPage() {
                             </span>
                           </div>
                           <div className="text-blue-600 font-bold">
-                            $
-                            {(design as any).discountedPrice != null
-                              ? (design as any).discountedPrice
-                              : (design as any).basePrice ?? design.price ?? 0}
+                            {design.currencyDisplay ||
+                              `$${
+                                design.discountedPrice ??
+                                design.basePrice ??
+                                design.price ??
+                                0
+                              }`}
                           </div>
                         </div>
                       </div>

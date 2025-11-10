@@ -6,6 +6,8 @@ import { AuthWrapper } from "@/components/AuthWrapper";
 import ConditionalLayout from "../components/ConditionalLayout";
 import ToastProvider from "@/components/ToastProvider";
 import ConfirmProvider from "@/components/ConfirmProvider";
+import { SessionSync } from "@/components/SessionSync";
+import { NextAuthProvider } from "@/components/NextAuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,15 +35,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReduxProvider>
-          <AuthWrapper>
-            <ToastProvider>
-              <ConfirmProvider>
-                <ConditionalLayout>{children}</ConditionalLayout>
-              </ConfirmProvider>
-            </ToastProvider>
-          </AuthWrapper>
-        </ReduxProvider>
+        <NextAuthProvider>
+          <ReduxProvider>
+            <SessionSync />
+            <AuthWrapper>
+              <ToastProvider>
+                <ConfirmProvider>
+                  <ConditionalLayout>{children}</ConditionalLayout>
+                </ConfirmProvider>
+              </ToastProvider>
+            </AuthWrapper>
+          </ReduxProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAppDispatch } from "../store/hooks";
-import { logout as logoutAction } from "../store/features/authSlice";
+import { logout as logoutAction, User } from "../store/features/authSlice";
 import {
   useLogoutMutation,
   useGetMyPurchasesQuery,
@@ -12,21 +12,15 @@ import {
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import {
-  User,
+  User as UserIcon,
   ShoppingBag,
   Download,
   Star,
   LogOut,
   ChevronDown,
 } from "lucide-react";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
 
 interface UserProfileProps {
   user: User;
@@ -42,14 +36,25 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
 
   const handleLogout = async () => {
     try {
+      // Logout from backend API
       await logoutMutation().unwrap();
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
+      // Clear Redux state
       dispatch(logoutAction());
+
+      // Clear NextAuth session (if OAuth login)
+      await signOut({ redirect: false });
+
+      // Clear ALL storage
+      localStorage.clear();
+      sessionStorage.clear();
+
       setIsDropdownOpen(false);
-      router.push("/login");
-      window.location.href = "/login";
+
+      // Force immediate redirect and reload
+      window.location.replace("/login");
     }
   };
 
@@ -106,8 +111,6 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
             </div>
           </div>
 
-         
-
           {/* Menu Items */}
           <div className="py-2">
             <Link
@@ -115,7 +118,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
-              <User className="w-4 h-4" />
+              <UserIcon className="w-4 h-4" />
               {user.role === "admin" ? "Admin Panel" : "Dashboard"}
             </Link>
             <Link
@@ -127,7 +130,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               My Purchases
             </Link>
             <Link
-              href="/dashboard/downloads"
+              href="/dashboard/available-downloads"
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >

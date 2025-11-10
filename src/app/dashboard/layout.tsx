@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  CreditCard,
 } from "lucide-react";
 import { useLogoutMutation } from "@/services/api";
 import { logout as logoutAction } from "@/store/features/authSlice";
@@ -37,10 +38,15 @@ export default function DashboardLayout({
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
-      // Always clear state and redirect
+      // Clear Redux state
       dispatch(logoutAction());
-      router.push("/login");
-      window.location.href = "/login";
+
+      // Clear ALL storage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Force immediate redirect and reload
+      window.location.replace("/login");
     }
   };
 
@@ -59,6 +65,11 @@ export default function DashboardLayout({
   const navigation = [
     { name: "My Profile", href: "/dashboard", icon: User },
     { name: "My Purchases", href: "/dashboard/purchases", icon: ShoppingBag },
+    {
+      name: "My Payments",
+      href: "/dashboard/payment-history",
+      icon: CreditCard,
+    },
     {
       name: "Available Downloads",
       href: "/dashboard/available-downloads",

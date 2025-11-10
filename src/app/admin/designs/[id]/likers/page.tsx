@@ -188,7 +188,7 @@ export default function DesignLikersPage() {
                     {design?.discountedPrice &&
                       design.discountedPrice < design.basePrice && (
                         <span className="text-xs text-gray-500 line-through">
-                          ${design.basePrice}
+                          {design.currencyDisplay} {design.basePrice}
                         </span>
                       )}
                   </div>
