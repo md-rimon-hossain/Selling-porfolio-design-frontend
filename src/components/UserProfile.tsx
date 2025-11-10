@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAppDispatch } from "../store/hooks";
-import { logout as logoutAction } from "../store/features/authSlice";
+import { logout as logoutAction, User } from "../store/features/authSlice";
 import {
   useLogoutMutation,
   useGetMyPurchasesQuery,
@@ -14,20 +14,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import {
-  User,
+  User as UserIcon,
   ShoppingBag,
   Download,
   Star,
   LogOut,
   ChevronDown,
 } from "lucide-react";
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
 
 interface UserProfileProps {
   user: User;
@@ -125,7 +118,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsDropdownOpen(false)}
             >
-              <User className="w-4 h-4" />
+              <UserIcon className="w-4 h-4" />
               {user.role === "admin" ? "Admin Panel" : "Dashboard"}
             </Link>
             <Link
