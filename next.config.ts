@@ -10,7 +10,10 @@ const nextConfig: NextConfig = {
       "plus.unsplash.com",
       "https://www.pexels.com",
       "www.pexels.com",
-      "images.pexels.com"
+      "images.pexels.com",
+      // OAuth Provider Images
+      "lh3.googleusercontent.com", // Google profile images
+      "avatars.githubusercontent.com", // GitHub profile images
     ],
   },
 };

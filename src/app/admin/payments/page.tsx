@@ -820,8 +820,7 @@ export default function AdminPaymentsPage() {
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <p className="text-sm text-gray-600 mb-1">Payment Amount:</p>
               <p className="text-2xl font-bold text-gray-900">
-                {selectedPayment.currency} $
-                {selectedPayment.amount.toFixed(2)}
+                {selectedPayment.currency} ${selectedPayment.amount.toFixed(2)}
               </p>
               <p className="text-xs text-gray-500 mt-2">
                 Payment ID: {selectedPayment.paymentIntentId}

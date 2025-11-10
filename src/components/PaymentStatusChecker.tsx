@@ -85,9 +85,10 @@ const PaymentStatusChecker: React.FC<PaymentStatusCheckerProps> = ({
     isLoading,
     isError,
     error,
+    refetch,
   } = useGetPaymentStatusQuery(paymentIntentId, {
     skip: !shouldFetch || !paymentIntentId,
-    pollingInterval: 2000, // Poll every 2 seconds until status is final
+    pollingInterval: 3000, // Poll every 3 seconds until status is final
     skipPollingIfUnfocused: true,
   });
 
@@ -97,16 +98,25 @@ const PaymentStatusChecker: React.FC<PaymentStatusCheckerProps> = ({
     const status = paymentData.data.status;
 
     // Stop polling when payment reaches a final state
-    if (["succeeded", "failed", "canceled", "refunded"].includes(status)) {
+    if (
+      [
+        "succeeded",
+        "completed",
+        "active",
+        "failed",
+        "canceled",
+        "refunded",
+      ].includes(status)
+    ) {
       setShouldFetch(false);
 
-      if (status === "succeeded" && onSuccess) {
+      if (["succeeded", "completed", "active"].includes(status) && onSuccess) {
         onSuccess();
       } else if (["failed", "canceled"].includes(status) && onFailure) {
         onFailure();
       }
     }
-  }, [paymentData, onSuccess, onFailure]);
+  }, [paymentData, onSuccess, onFailure, refetch]);
 
   if (isLoading) {
     return (

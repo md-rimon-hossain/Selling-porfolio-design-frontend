@@ -12,6 +12,7 @@ import {
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import {
   User,
   ShoppingBag,
@@ -42,14 +43,18 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
 
   const handleLogout = async () => {
     try {
+      // Logout from backend API
       await logoutMutation().unwrap();
     } catch (error) {
       console.error("Logout API error:", error);
     } finally {
+      // Clear Redux state
       dispatch(logoutAction());
+      // Clear NextAuth session (if OAuth login)
+      await signOut({ redirect: false });
       setIsDropdownOpen(false);
+      // Redirect to login
       router.push("/login");
-      window.location.href = "/login";
     }
   };
 

@@ -209,6 +209,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
   const handlePaymentSuccess = async (paymentId: string) => {
     setPaymentIntentId(paymentId);
+    // Wait 2 seconds to give webhook time to process
+    // This prevents showing "pending" status immediately
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     setStep("success");
     // Don't refetch here - let PaymentStatusChecker handle it when status is confirmed
   };
