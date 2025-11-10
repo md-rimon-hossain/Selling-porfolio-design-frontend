@@ -708,23 +708,10 @@ export const api = createApi({
         url: `/likes/${designId}`,
         method: "POST",
       }),
-      invalidatesTags: ["Likes", "Designs"],
-      // Optimistic update for better UX
-      async onQueryStarted(designId, { dispatch, queryFulfilled }) {
-        // Optimistically update the design's like status
-        const patchResult = dispatch(
-          api.util.updateQueryData("getDesign", designId, (draft: any) => {
-            if (draft?.data) {
-              draft.data.likesCount = (draft.data.likesCount || 0) + 1;
-            }
-          })
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
+      invalidatesTags: ["Likes"],
+      // Note: Removed Designs tag invalidation and optimistic update
+      // to prevent double counting. Optimistic updates are now handled
+      // in the useLike hook for better control.
     }),
     getMyLikes: builder.query<any, { page?: number; limit?: number }>({
       query: (params) => {

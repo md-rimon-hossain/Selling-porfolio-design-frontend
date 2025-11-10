@@ -69,7 +69,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         disabled={isLoading}
         className={`${
           sizes.button
-        } rounded-full transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${
+        } rounded-full transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
           isLiked
             ? "bg-red-100 hover:bg-red-200"
             : "bg-gray-100 hover:bg-gray-200"
@@ -77,21 +77,43 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         title={isLiked ? "Unlike" : "Like"}
         aria-label={isLiked ? "Unlike this design" : "Like this design"}
       >
-        <svg
-          className={`${sizes.icon} ${
-            isLiked ? "text-red-500" : "text-gray-500"
-          } transition-colors`}
-          fill={isLiked ? "currentColor" : "none"}
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={isLiked ? 0 : 2}
-            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-          />
-        </svg>
+        {isLoading ? (
+          <svg
+            className={`${sizes.icon} animate-spin text-gray-400`}
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        ) : (
+          <svg
+            className={`${sizes.icon} ${
+              isLiked ? "text-red-500" : "text-gray-500"
+            } transition-colors`}
+            fill={isLiked ? "currentColor" : "none"}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={isLiked ? 0 : 2}
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+        )}
       </button>
     );
   }
@@ -104,7 +126,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
         disabled={isLoading}
         className={`flex items-center gap-1 ${
           sizes.text
-        } font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
+        } font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
           isLiked ? "text-red-500" : "text-gray-500"
         } ${className}`}
         title={isLiked ? "Unlike" : "Like"}
@@ -112,8 +134,85 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
           isLiked ? "unlike" : "like"
         }`}
       >
+        {isLoading ? (
+          <svg
+            className={`${sizes.icon} animate-spin`}
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        ) : (
+          <svg
+            className={`${sizes.icon} transition-colors`}
+            fill={isLiked ? "currentColor" : "none"}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={isLiked ? 0 : 2}
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+        )}
+        {showCount && <span>{likesCount}</span>}
+      </button>
+    );
+  }
+
+  // Full variant (button with icon and count)
+  return (
+    <button
+      onClick={handleToggleLike}
+      disabled={isLoading}
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+        isLiked
+          ? "bg-red-100 text-red-600 hover:bg-red-200"
+          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+      } ${className}`}
+      aria-label={`${likesCount} likes. Click to ${
+        isLiked ? "unlike" : "like"
+      }`}
+    >
+      {isLoading ? (
         <svg
-          className={`${sizes.icon} transition-colors`}
+          className={`${sizes.icon} animate-spin`}
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      ) : (
+        <svg
+          className={`${sizes.icon} transition-transform ${
+            isLiked ? "scale-110" : "scale-100"
+          }`}
           fill={isLiked ? "currentColor" : "none"}
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -125,40 +224,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
             d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
           />
         </svg>
-        {showCount && <span>{likesCount}</span>}
-      </button>
-    );
-  }
-
-  // Full variant (button with icon and count)
-  return (
-    <button
-      onClick={handleToggleLike}
-      disabled={isLoading}
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-        isLiked
-          ? "bg-red-100 text-red-600 hover:bg-red-200"
-          : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-      } ${className}`}
-      aria-label={`${likesCount} likes. Click to ${
-        isLiked ? "unlike" : "like"
-      }`}
-    >
-      <svg
-        className={`${sizes.icon} transition-transform ${
-          isLiked ? "scale-110" : "scale-100"
-        }`}
-        fill={isLiked ? "currentColor" : "none"}
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={isLiked ? 0 : 2}
-          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-        />
-      </svg>
+      )}
       <span className={sizes.text}>
         {isLiked ? "Liked" : "Like"}
         {showCount && ` (${likesCount})`}

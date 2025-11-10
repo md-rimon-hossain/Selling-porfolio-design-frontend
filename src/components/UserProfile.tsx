@@ -50,11 +50,18 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     } finally {
       // Clear Redux state
       dispatch(logoutAction());
+
       // Clear NextAuth session (if OAuth login)
       await signOut({ redirect: false });
+
+      // Clear ALL storage
+      localStorage.clear();
+      sessionStorage.clear();
+
       setIsDropdownOpen(false);
-      // Redirect to login
-      router.push("/login");
+
+      // Force immediate redirect and reload
+      window.location.replace("/login");
     }
   };
 
