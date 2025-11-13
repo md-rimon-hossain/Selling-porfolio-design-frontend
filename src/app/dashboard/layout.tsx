@@ -32,24 +32,6 @@ export default function DashboardLayout({
   // AuthWrapper now handles all redirect logic - layouts just render!
   // No more timers, no more manual redirects, no more auth checks here
 
-  const handleLogout = async () => {
-    try {
-      await logoutMutation().unwrap();
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Clear Redux state
-      dispatch(logoutAction());
-
-      // Clear ALL storage
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // Force immediate redirect and reload
-      window.location.replace("/login");
-    }
-  };
-
   // If user is null, AuthWrapper will redirect - just show loading
   if (!user) {
     return (
@@ -155,14 +137,7 @@ export default function DashboardLayout({
                 </span>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="w-full flex items-center justify-center px-3 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-medium text-sm"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
-            </button>
+           
           </div>
         </div>
       </div>
