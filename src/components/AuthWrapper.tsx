@@ -16,10 +16,17 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
+  const token = useAppSelector((state) => state.auth.token);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const { data, error, isLoading, isSuccess, isError } =
-    useGetProfileQuery(undefined);
+  // Skip profile query if user already has a token (OAuth user)
+  // For local login users, cookie will be used automatically
+  const { data, error, isLoading, isSuccess, isError } = useGetProfileQuery(
+    undefined,
+    {
+      skip: !!token, // Skip if we already have a token from OAuth
+    }
+  );
 
   console.log("AuthWrapper - Query state:", {
     hasData: !!data,
@@ -32,6 +39,13 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   });
 
   useEffect(() => {
+    // If we have a token from OAuth, mark as checked immediately
+    if (token && user) {
+      console.log("AuthWrapper - OAuth user detected, skipping profile query");
+      setAuthChecked(true);
+      return;
+    }
+
     if (data && data.data) {
       console.log("AuthWrapper - Profile data received:", data.data);
       console.log("AuthWrapper - Setting credentials in Redux");
@@ -65,7 +79,7 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       }
       setAuthChecked(true);
     }
-  }, [data, error, dispatch, user]);
+  }, [data, error, dispatch, user, token]);
 
   // Mark auth as checked when query completes (success or error)
   useEffect(() => {
