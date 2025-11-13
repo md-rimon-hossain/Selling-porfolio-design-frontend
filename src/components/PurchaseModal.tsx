@@ -253,16 +253,16 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-200 animate-in zoom-in-95 duration-300">
         {/* Stripe Trust Badge Header */}
         {step === "payment" && (
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-brand-primary to-brand-secondary px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <Lock className="w-5 h-5 text-blue-600" />
+                <Lock className="w-5 h-5 text-brand-primary" />
               </div>
               <div>
                 <p className="text-white font-bold text-sm">
                   Secured by Stripe
                 </p>
-                <p className="text-blue-100 text-xs">
+                <p className="text-orange-100 text-xs">
                   End-to-end encrypted payment
                 </p>
               </div>
@@ -279,7 +279,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
         {/* Progress Bar */}
         <div className="h-1 bg-gray-100">
           <div
-            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent transition-all duration-500 ease-out"
             style={{
               width:
                 step === "details"
@@ -323,9 +323,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           {step === "details" && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Order Summary - Compact */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+              <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 border border-red-100">
                 <div className="flex items-center gap-2 mb-3">
-                  <ShoppingBag className="w-4 h-4 text-blue-600" />
+                  <ShoppingBag className="w-4 h-4 text-brand-primary" />
                   <h3 className="text-sm font-bold text-gray-900">
                     Order Summary
                   </h3>
@@ -333,7 +333,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
                 {/* Item Details - Compact */}
                 {purchaseType === "individual" && (design || course) && (
-                  <div className="flex items-start gap-3 mb-3 p-3 bg-white rounded-lg border border-blue-100 relative">
+                  <div className="flex items-start gap-3 mb-3 p-3 bg-white rounded-lg border border-red-100 relative">
                     {hasDiscount && discountPercentage > 0 && (
                       <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
                         <Sparkles className="w-3 h-3" />
@@ -352,7 +352,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                         {itemName}
                       </h4>
                       {design?.category?.name && (
-                        <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium mt-1">
+                        <span className="inline-block px-2 py-0.5 bg-red-100 text-brand-primary rounded text-xs font-medium mt-1">
                           {design.category.name}
                         </span>
                       )}
@@ -395,7 +395,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                   )}
                   <div className="border-t border-gray-200 pt-2 flex justify-between items-center">
                     <span className="text-gray-900 font-bold">Total</span>
-                    <span className="text-xl font-bold text-blue-600">
+                    <span className="text-xl font-bold text-brand-primary">
                       {currencyDisplay}
                       {formatPrice(itemPrice)}
                     </span>
@@ -404,7 +404,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               </div>
 
               {/* What's Included - Compact */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <h4 className="font-semibold text-gray-900 mb-2 text-sm flex items-center gap-1">
                   <CheckCircle className="w-4 h-4 text-green-600" />
                   What's Included
@@ -443,11 +443,11 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               {/* Trust Badges */}
               <div className="grid grid-cols-3 gap-2 py-3 border-y border-gray-200">
                 <div className="text-center">
-                  <Shield className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                  <Shield className="w-6 h-6 text-brand-primary mx-auto mb-1" />
                   <p className="text-[10px] font-semibold text-gray-700">
                     Secured by
                   </p>
-                  <p className="text-xs font-bold text-blue-600">Stripe</p>
+                  <p className="text-xs font-bold text-brand-primary">Stripe</p>
                 </div>
                 <div className="text-center border-x border-gray-200">
                   <Lock className="w-6 h-6 text-green-600 mx-auto mb-1" />
@@ -457,16 +457,18 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                   <p className="text-xs font-bold text-green-600">SSL</p>
                 </div>
                 <div className="text-center">
-                  <CheckCircle className="w-6 h-6 text-indigo-600 mx-auto mb-1" />
+                  <CheckCircle className="w-6 h-6 text-brand-accent mx-auto mb-1" />
                   <p className="text-[10px] font-semibold text-gray-700">PCI</p>
-                  <p className="text-xs font-bold text-indigo-600">Compliant</p>
+                  <p className="text-xs font-bold text-brand-accent">
+                    Compliant
+                  </p>
                 </div>
               </div>
 
               <button
                 onClick={handleInitiatePayment}
                 disabled={isCreatingIntent}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-400 text-white py-3.5 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent disabled:from-gray-400 disabled:to-gray-400 text-white py-3.5 rounded-lg font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isCreatingIntent ? (
                   <>
@@ -491,10 +493,10 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
           {step === "processing" && (
             <div className="flex flex-col items-center justify-center py-16 animate-in fade-in zoom-in duration-500">
               <div className="relative mb-6">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center animate-pulse">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center animate-pulse">
                   <Loader2 className="w-12 h-12 animate-spin text-white" />
                 </div>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 animate-ping opacity-20" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary animate-ping opacity-20" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
                 Preparing Your Payment
@@ -552,7 +554,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 </button>
                 <button
                   onClick={() => router.push("/dashboard/purchases")}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                  className="flex-1 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
                 >
                   View Purchases
                 </button>
@@ -580,7 +582,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
               <div className="flex gap-4">
                 <button
                   onClick={() => setStep("details")}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                  className="flex-1 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent text-white px-6 py-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
                 >
                   Try Again
                 </button>

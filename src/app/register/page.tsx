@@ -204,7 +204,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
@@ -240,7 +240,7 @@ export default function RegisterPage() {
           <div className="backdrop-blur-sm bg-white/90 rounded-3xl shadow-2xl border border-white/60 overflow-hidden">
             <div className="grid lg:grid-cols-2">
               {/* Left Side - Branding */}
-              <div className="hidden lg:flex relative bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-12 items-center justify-center overflow-hidden">
+              <div className="hidden lg:flex relative bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-accent p-12 items-center justify-center overflow-hidden">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2"></div>
@@ -375,7 +375,7 @@ export default function RegisterPage() {
                     Already have an account?{" "}
                     <Link
                       href="/login"
-                      className="font-bold text-blue-600 hover:text-purple-600 transition-colors"
+                      className="font-bold text-brand-primary hover:text-brand-secondary transition-colors"
                     >
                       Sign in
                     </Link>
@@ -388,10 +388,10 @@ export default function RegisterPage() {
                     type="button"
                     onClick={handleGoogleSignIn}
                     disabled={isGoogleLoading || isGitHubLoading || isLoading}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-md disabled:bg-gray-50 disabled:cursor-not-allowed transition-all font-semibold text-gray-700"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl hover:border-brand-primary hover:shadow-md disabled:bg-gray-50 disabled:cursor-not-allowed transition-all font-semibold text-gray-700"
                   >
                     {isGoogleLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                      <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
                     ) : (
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
                         <path
@@ -493,7 +493,7 @@ export default function RegisterPage() {
                         className={`w-full px-4 py-2.5 border-2 ${
                           errors.name
                             ? "border-red-300 focus:border-red-500"
-                            : "border-gray-200 focus:border-blue-500"
+                            : "border-gray-200 focus:border-brand-primary"
                         } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                         placeholder="John Doe"
                       />
@@ -523,7 +523,7 @@ export default function RegisterPage() {
                         className={`w-full px-4 py-2.5 border-2 ${
                           errors.email
                             ? "border-red-300 focus:border-red-500"
-                            : "border-gray-200 focus:border-blue-500"
+                            : "border-gray-200 focus:border-brand-primary"
                         } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                         placeholder="john@example.com"
                       />
@@ -557,7 +557,7 @@ export default function RegisterPage() {
                           className={`w-full px-4 pr-10 py-2.5 border-2 ${
                             errors.password
                               ? "border-red-300 focus:border-red-500"
-                              : "border-gray-200 focus:border-blue-500"
+                              : "border-gray-200 focus:border-brand-primary"
                           } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                           placeholder="Create password"
                         />
@@ -640,7 +640,7 @@ export default function RegisterPage() {
                           className={`w-full px-4 pr-10 py-2.5 border-2 ${
                             errors.confirmPassword
                               ? "border-red-300 focus:border-red-500"
-                              : "border-gray-200 focus:border-blue-500"
+                              : "border-gray-200 focus:border-brand-primary"
                           } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                           placeholder="Confirm password"
                         />
@@ -715,13 +715,13 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Terms & Conditions */}
-                  <div className="flex items-start gap-2.5 bg-blue-50 rounded-xl p-3">
+                  <div className="flex items-start gap-2.5 bg-red-50 rounded-xl p-3">
                     <input
                       id="terms"
                       name="terms"
                       type="checkbox"
                       required
-                      className="mt-0.5 w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mt-0.5 w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 rounded"
                     />
                     <label
                       htmlFor="terms"
@@ -750,7 +750,7 @@ export default function RegisterPage() {
                   <Button
                     type="submit"
                     disabled={isLoading || isGoogleLoading || isGitHubLoading}
-                    className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full h-12 text-base font-bold bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">
@@ -781,8 +781,8 @@ export default function RegisterPage() {
                 {/* Mobile View - Show Features */}
                 <div className="lg:hidden mt-6 pt-5 border-t border-gray-200">
                   <div className="grid grid-cols-3 gap-3 text-center">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3">
-                      <div className="text-xl font-black text-blue-600 mb-0.5">
+                    <div className="bg-gradient-to-br from-red-50 to-orange-100 rounded-xl p-3">
+                      <div className="text-xl font-black text-brand-primary mb-0.5">
                         50+
                       </div>
                       <div className="text-xs font-semibold text-gray-700">

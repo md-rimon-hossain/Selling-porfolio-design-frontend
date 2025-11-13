@@ -8,7 +8,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
-            <h3 className="text-xl font-bold mb-3 text-white">DesignHub</h3>
+            <h3 className="text-xl font-bold mb-3 text-white font-pacifico">
+              DesignHub
+            </h3>
             <p className="text-gray-400 text-sm mb-4">
               Your destination for premium design templates and creative
               resources.
@@ -16,7 +18,7 @@ const Footer = () => {
             <div className="flex gap-3">
               <a
                 href="#"
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-brand-primary hover:bg-brand-secondary flex items-center justify-center transition-colors"
                 aria-label="Facebook"
               >
                 <svg
@@ -29,7 +31,7 @@ const Footer = () => {
               </a>
               <a
                 href="#"
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-brand-primary hover:bg-brand-secondary flex items-center justify-center transition-colors"
                 aria-label="Twitter"
               >
                 <svg
@@ -42,7 +44,7 @@ const Footer = () => {
               </a>
               <a
                 href="#"
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-brand-primary hover:bg-brand-secondary flex items-center justify-center transition-colors"
                 aria-label="Instagram"
               >
                 <svg

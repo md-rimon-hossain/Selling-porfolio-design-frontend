@@ -121,7 +121,7 @@ const PaymentStatusChecker: React.FC<PaymentStatusCheckerProps> = ({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+        <Loader2 className="w-12 h-12 animate-spin text-brand-primary" />
         <p className="text-gray-700 font-medium">Checking payment status...</p>
         <p className="text-sm text-gray-500">Please wait</p>
       </div>

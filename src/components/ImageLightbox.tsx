@@ -209,7 +209,7 @@ export default function ImageLightbox({
             e.stopPropagation();
             handleZoom(-0.25);
           }}
-          className="p-2 text-white hover:text-blue-400 transition-colors"
+          className="p-2 text-white hover:text-brand-accent transition-colors"
           aria-label="Zoom out"
         >
           <ZoomOut className="w-5 h-5" />
@@ -222,7 +222,7 @@ export default function ImageLightbox({
             e.stopPropagation();
             handleZoom(0.25);
           }}
-          className="p-2 text-white hover:text-blue-400 transition-colors"
+          className="p-2 text-white hover:text-brand-accent transition-colors"
           aria-label="Zoom in"
         >
           <ZoomIn className="w-5 h-5" />
@@ -233,7 +233,7 @@ export default function ImageLightbox({
               e.stopPropagation();
               resetZoom();
             }}
-            className="p-2 text-white hover:text-blue-400 transition-colors ml-2"
+            className="p-2 text-white hover:text-brand-accent transition-colors ml-2"
             aria-label="Reset zoom"
           >
             <RotateCcw className="w-5 h-5" />

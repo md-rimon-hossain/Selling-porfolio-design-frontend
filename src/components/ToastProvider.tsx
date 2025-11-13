@@ -281,7 +281,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
                           ? "bg-gradient-to-r from-red-500 to-red-400"
                           : t.type === "warning"
                           ? "bg-gradient-to-r from-yellow-500 to-orange-400"
-                          : "bg-gradient-to-r from-blue-500 to-green-400"
+                          : "bg-gradient-to-r from-brand-primary to-green-400"
                       }`}
                       style={{
                         width: `${percent}%`,

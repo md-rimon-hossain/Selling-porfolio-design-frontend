@@ -76,7 +76,7 @@ const FeaturedDesigns: React.FC = () => {
           <p className="text-gray-600 mb-6">
             Check back soon for amazing designs!
           </p>
-          <Button className="bg-blue-600 hover:bg-blue-700" asChild>
+          <Button className="bg-brand-primary hover:bg-brand-secondary" asChild>
             <Link href="/designs">Browse All Designs</Link>
           </Button>
         </div>
@@ -88,18 +88,18 @@ const FeaturedDesigns: React.FC = () => {
     <section className="mb-16">
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="animate-fadeInUp">
+          <h2 className="text-4xl font-bold text-gray-900 mb-2">
             Featured Designs
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-lg">
             Handpicked designs from our collection
           </p>
         </div>
-        <Link href="/designs">
+        <Link href="/designs" className="animate-fadeInUp">
           <Button
             variant="outline"
-            className="border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+            className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:!text-white transition-all duration-300"
           >
             View All
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -109,10 +109,11 @@ const FeaturedDesigns: React.FC = () => {
 
       {/* Designs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {designs.slice(0, 6).map((design) => (
+        {designs.slice(0, 6).map((design, index) => (
           <div
             key={design._id}
-            className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+            className="group bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-2xl hover:border-brand-secondary transition-all duration-300 overflow-hidden animate-fadeInUp"
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
             <Link href={`/designs/${design._id}`}>
               {/* Design Image */}
@@ -122,7 +123,7 @@ const FeaturedDesigns: React.FC = () => {
                     src={design.previewImageUrls[0]}
                     alt={design.title}
                     fill
-                    className={`object-cover transition-all duration-300 group-hover:scale-105 ${
+                    className={`object-cover transition-all duration-500 group-hover:scale-110 ${
                       loadedImages[design._id!] ? "opacity-100" : "opacity-0"
                     }`}
                     onLoad={() =>
@@ -156,33 +157,32 @@ const FeaturedDesigns: React.FC = () => {
 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-                  <span className="bg-white text-gray-700 px-3 py-1 rounded-full text-xs font-medium shadow-sm">
+                  <span className="bg-white text-gray-700 px-3 py-1 rounded-full text-xs font-medium shadow-md">
                     {design.mainCategory?.name ||
                       design.subCategory?.name ||
                       "Uncategorized"}
                   </span>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                    <span className="bg-brand-secondary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md animate-float">
                       {design.currencyDisplay}
                       {typeof design.discountedPrice === "number" &&
                       design.discountedPrice >= 0
                         ? design.discountedPrice
                         : design.basePrice ?? 0}
-
                     </span>
-                    <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-sm">
-                      {design.currencyDisplay}
-                      {typeof design.basePrice === "number" &&
-                      design.basePrice >= 0
-                        ? design.basePrice
-                        : design.basePrice ?? 0}
-                    </span>
+                    {typeof design.basePrice === "number" &&
+                      design.basePrice > (design.discountedPrice ?? 0) && (
+                        <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-md">
+                          {design.currencyDisplay}
+                          {design.basePrice}
+                        </span>
+                      )}
                   </div>
                 </div>
 
                 {design.complexityLevel && (
                   <div className="absolute bottom-3 left-3">
-                    <span className="bg-white text-gray-700 px-3 py-1 rounded-full text-xs font-medium shadow-sm">
+                    <span className="bg-white text-brand-primary px-3 py-1 rounded-full text-xs font-medium shadow-md">
                       {design.complexityLevel}
                     </span>
                   </div>
@@ -193,7 +193,7 @@ const FeaturedDesigns: React.FC = () => {
             {/* Design Info */}
             <div className="p-5">
               <Link href={`/designs/${design._id}`}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-secondary transition-colors line-clamp-1">
                   {design.title}
                 </h3>
               </Link>
@@ -223,7 +223,7 @@ const FeaturedDesigns: React.FC = () => {
                             ? (design as any).avgRating
                             : 0
                         )
-                          ? "text-yellow-400 fill-yellow-400"
+                          ? "text-brand-accent fill-brand-accent"
                           : "text-gray-300"
                       }`}
                     />
@@ -251,7 +251,7 @@ const FeaturedDesigns: React.FC = () => {
                   {design.tags.slice(0, 3).map((tag, index) => (
                     <span
                       key={index}
-                      className="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-md"
+                      className="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-md hover:bg-brand-secondary hover:text-white transition-colors cursor-pointer"
                     >
                       #{tag}
                     </span>
@@ -276,7 +276,10 @@ const FeaturedDesigns: React.FC = () => {
                 </div>
 
                 <Link href={`/designs/${design._id}`}>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button
+                    size="sm"
+                    className="bg-brand-secondary hover:bg-brand-primary text-white transition-colors"
+                  >
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
@@ -289,9 +292,12 @@ const FeaturedDesigns: React.FC = () => {
 
       {/* View All Button */}
       {designs.length > 6 && (
-        <div className="text-center mt-8">
+        <div className="text-center mt-8 animate-fadeInUp">
           <Link href="/designs">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              size="lg"
+              className="bg-brand-secondary hover:bg-brand-primary text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
               View All {designs.length} Designs
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>

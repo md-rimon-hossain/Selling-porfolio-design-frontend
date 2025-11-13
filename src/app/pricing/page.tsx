@@ -135,7 +135,7 @@ const PricingPage = () => {
   const getPlanColors = (plan: PricingPlan) => {
     if (plan.priority <= 1) {
       return {
-        gradient: "from-purple-600 via-pink-600 to-blue-600",
+        gradient: "from-brand-primary via-brand-secondary to-brand-accent",
         button:
           "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700",
         border: "border-purple-500/50",
