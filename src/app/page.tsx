@@ -3,17 +3,19 @@ import Link from "next/link";
 import CategoriesSection from "@/components/CategoriesSection";
 import FeaturedDesigns from "@/components/FeaturedDesigns";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
+import Hero from "@/components/Hero";
+import About from "@/components/About";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white pt-20 pb-32">
-        {/* Subtle Background Pattern */}
+      {/* <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white pt-20 pb-32">
+        
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Badge */}
+   
           <div className="flex justify-center mb-8">
             <div className="inline-flex items-center gap-2 bg-blue-50 rounded-full px-4 py-2 border border-blue-100">
               <Sparkles className="w-4 h-4 text-blue-600" />
@@ -23,7 +25,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Content */}
+         
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
               Premium Design
@@ -38,7 +40,7 @@ export default function Home() {
               collection.
             </p>
 
-            {/* CTA Buttons */}
+        
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/designs">
                 <Button
@@ -60,7 +62,7 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Trust Indicators */}
+           
             <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
               <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900 mb-1">
@@ -87,10 +89,11 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Features Section */}
-      <section className="py-20 bg-slate-50">
+      <Hero />
+
+      {/* <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -142,37 +145,39 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Categories Section */}
+      <About />
+
       <section className="bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <CategoriesSection />
         </div>
       </section>
 
-      {/* Featured Designs Section */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FeaturedDesigns />
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
+      <section className="py-24 bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-accent relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 animate-fadeInUp">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto animate-fadeInUp">
             Join thousands of satisfied customers and take your projects to the
             next level.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp">
             <Link href="/register">
               <Button
                 size="lg"
-                className="text-base px-8 py-6 bg-white text-blue-600 hover:bg-gray-100 shadow-xl"
+                className="text-base px-8 py-6 bg-white text-brand-primary hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
               >
                 Create Free Account
               </Button>
@@ -181,7 +186,7 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="lg"
-                className="text-base bg-white/10 px-8 py-6 border-2 border-white text-white hover:bg-white/10"
+                className="text-base bg-white/10 px-8 py-6 border-2 border-white text-white hover:bg-white/20 backdrop-blur-sm"
               >
                 Explore Designs
               </Button>

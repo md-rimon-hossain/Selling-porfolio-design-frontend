@@ -62,20 +62,24 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     subscriptionData?.data?.hasActiveSubscription || false;
 
   return (
-    <div className="relative">
+    <div className="relative flex">
+      <Link
+        href={user.role === "admin" ? "/admin" : "/dashboard"}
+        className="px-4 py-2 text-sm font-semibold uppercase tracking-wide text-gray-200 hover:text-white transition-colors"
+      >
+        {user.role === "admin" ? "Admin" : "Dashboard"}
+      </Link>
       {/* User Avatar/Button */}
       <Button
         variant="ghost"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="flex items-center gap-2 hover:bg-gray-100"
+        className="flex items-center gap-2 text-sm text-white bg-[#FF9900] "
         disabled={isLoading}
       >
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+        <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center text-white text-sm font-medium  ">
           {user.name.charAt(0).toUpperCase()}
         </div>
-        <span className="hidden md:block text-sm font-medium text-gray-700">
-          {user.name}
-        </span>
+
         <ChevronDown
           className={`w-4 h-4 text-gray-500 transition-transform ${
             isDropdownOpen ? "rotate-180" : ""
@@ -89,7 +93,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
           {/* User Info */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-medium">
+              <div className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white text-lg font-medium">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -100,7 +104,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
               </div>
             </div>
             <div className="flex items-center gap-2 mt-3">
-              <span className="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded capitalize">
+              <span className="px-2 py-1 text-xs font-medium text-brand-primary bg-red-50 rounded capitalize">
                 {user.role}
               </span>
               {hasSubscription && (

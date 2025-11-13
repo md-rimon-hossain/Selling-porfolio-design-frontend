@@ -17,9 +17,8 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const user = useAppSelector((state) => state.auth.user);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const { data, error, isLoading, isSuccess, isError } = useGetProfileQuery(
-    undefined,
-  );
+  const { data, error, isLoading, isSuccess, isError } =
+    useGetProfileQuery(undefined);
 
   useEffect(() => {
     if (data && data.data) {
@@ -67,7 +66,6 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       return;
     }
 
-    
     // Protected routes: /dashboard and /admin
     const isProtectedRoute =
       pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
@@ -81,17 +79,16 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     }
   }, [pathname, user, authChecked, router]);
 
-  if(user && (pathname === "/login" || pathname === "/register")) {
-      // Logged in user trying to access login/register -> redirect to home
-      router.push("/");
-      return;
-    }
-
+  if (user && (pathname === "/login" || pathname === "/register")) {
+    // Logged in user trying to access login/register -> redirect to home
+    router.push("/");
+    return;
+  }
 
   // Show loading state while fetching profile (but not on login/register pages)
   if (isLoading && pathname !== "/login" && pathname !== "/register") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading...</p>

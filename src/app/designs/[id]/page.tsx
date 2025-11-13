@@ -339,7 +339,7 @@ export default function DesignDetailPage() {
             The design you're looking for doesn't exist or has been removed.
           </p>
           <Link href="/designs">
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <Button className="bg-brand-primary hover:bg-brand-secondary">
               Back to Designs
             </Button>
           </Link>
@@ -553,14 +553,14 @@ export default function DesignDetailPage() {
             {design.usedTools && design.usedTools.length > 0 && (
               <div className="bg-white rounded-lg border border-gray-200 p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Wrench className="w-5 h-5 text-blue-600" />
+                  <Wrench className="w-5 h-5 text-brand-primary" />
                   <h3 className="font-bold text-gray-900">Tools Used</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {design.usedTools.map((tool, index) => (
                     <span
                       key={index}
-                      className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded font-medium"
+                      className="bg-red-50 text-brand-primary text-xs px-2.5 py-1 rounded font-medium"
                     >
                       {tool}
                     </span>
@@ -768,7 +768,7 @@ export default function DesignDetailPage() {
                             </span>
                             {(review.reviewer?._id === currentUserId ||
                               review.reviewer?.id === currentUserId) && (
-                              <span className="ml-2 inline-flex items-center text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                              <span className="ml-2 inline-flex items-center text-xs font-medium bg-red-50 text-brand-primary px-2 py-0.5 rounded-full">
                                 You reviewed
                               </span>
                             )}
@@ -826,7 +826,7 @@ export default function DesignDetailPage() {
                     </div>
                   ))}
                   {reviews.length > 5 && (
-                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    <button className="text-sm text-brand-primary hover:text-brand-secondary font-medium">
                       Show all {reviews.length} reviews
                     </button>
                   )}
@@ -849,7 +849,7 @@ export default function DesignDetailPage() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Link href={categoryQueryLink}>
-                    <span className="bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded">
+                    <span className="bg-brand-primary text-white text-xs font-semibold px-2.5 py-1 rounded">
                       {mainCategory?.name || subCategory?.name || "Category"}
                     </span>
                   </Link>
@@ -865,7 +865,7 @@ export default function DesignDetailPage() {
                 {designerName && (
                   <p className="text-sm text-gray-600">
                     by{" "}
-                    <span className="font-semibold text-blue-600">
+                    <span className="font-semibold text-brand-primary">
                       {designerName}
                     </span>
                   </p>
@@ -875,7 +875,7 @@ export default function DesignDetailPage() {
               {/* discounted price */}
               <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-blue-600">
+                  <span className="text-4xl font-bold text-brand-primary">
                     {design?.currencyDisplay}
                     {design?.discountedPrice?.toFixed(2) || 0}
                   </span>
@@ -975,8 +975,8 @@ export default function DesignDetailPage() {
 
               <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-blue-50 rounded-md">
-                    <FileText className="w-6 h-6 text-blue-600" />
+                  <div className="p-2 bg-red-50 rounded-md">
+                    <FileText className="w-6 h-6 text-brand-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">

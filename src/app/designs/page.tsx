@@ -179,7 +179,7 @@ export default function DesignsPage() {
                   <div className="flex items-center space-x-2 text-sm">
                     <Link
                       href="/"
-                      className="text-gray-600 hover:text-blue-600 transition-colors"
+                      className="text-gray-600 hover:text-brand-primary transition-colors"
                     >
                       Home
                     </Link>
@@ -277,7 +277,7 @@ export default function DesignsPage() {
               placeholder="Search designs by name, tag, or designer..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:border-brand-primary focus:ring-2 focus:ring-brand-primary focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
             />
             {searchQuery && (
               <button
@@ -316,7 +316,7 @@ export default function DesignsPage() {
                 {activeFiltersCount > 0 && (
                   <button
                     onClick={clearAllFilters}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-sm text-brand-primary hover:text-brand-secondary font-medium"
                   >
                     Clear all
                   </button>
@@ -338,7 +338,7 @@ export default function DesignsPage() {
                             name="mainCategory"
                             checked={selectedCategory === cat.id}
                             onChange={() => handleCategorySelect(cat.id)}
-                            className="form-radio h-4 w-4 text-blue-600"
+                            className="form-radio h-4 w-4 text-brand-primary"
                           />
                           <span className="font-medium text-gray-900">
                             {cat.name}
@@ -399,8 +399,14 @@ export default function DesignsPage() {
                   </label>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span>{designs && designs[0]?.currencyDisplay }{minPrice}</span>
-                      <span>{designs && designs[0]?.currencyDisplay }{maxPrice}</span>
+                      <span>
+                        {designs && designs[0]?.currencyDisplay}
+                        {minPrice}
+                      </span>
+                      <span>
+                        {designs && designs[0]?.currencyDisplay}
+                        {maxPrice}
+                      </span>
                     </div>
                     <div className="space-y-2">
                       <input

@@ -92,13 +92,13 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Payment Amount Summary */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <CreditCard className="w-5 h-5 text-blue-600" />
+            <CreditCard className="w-5 h-5 text-brand-primary" />
             <span className="font-semibold text-gray-900">Payment Amount</span>
           </div>
-          <span className="text-xl font-bold text-blue-600">
+          <span className="text-xl font-bold text-brand-primary">
             {currency} {amount.toFixed(2)}
           </span>
         </div>
@@ -136,7 +136,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       <button
         type="submit"
         disabled={isProcessing || !stripe || !elements}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 shadow-sm"
+        className="w-full bg-brand-primary hover:bg-brand-secondary disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2 shadow-sm"
       >
         {isProcessing ? (
           <>
@@ -156,11 +156,11 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       {/* Terms and Conditions */}
       <p className="text-xs text-gray-500 text-center">
         By confirming your payment, you agree to our{" "}
-        <a href="/terms" className="text-blue-600 hover:underline">
+        <a href="/terms" className="text-brand-primary hover:underline">
           Terms of Service
         </a>{" "}
         and{" "}
-        <a href="/privacy" className="text-blue-600 hover:underline">
+        <a href="/privacy" className="text-brand-primary hover:underline">
           Privacy Policy
         </a>
         .

@@ -75,44 +75,43 @@ export const CategoryDropdown: React.FC = () => {
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Categories Button */}
-      <Button
-        variant="ghost"
+      <button
         onClick={toggleDropdown}
-        className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 text-sm font-medium rounded-md"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold uppercase tracking-wide text-gray-200 hover:text-white transition-colors"
       >
-        <Grid3x3 className="w-4 h-4" />
         <span>Categories</span>
         <ChevronDown
-          className={`w-4 h-4 transition-transform ${
+          className={`w-4 h-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
-      </Button>
+      </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="py-2">
+        <div className="absolute left-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="py-3">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-900">
-                Browse by Category
+            <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-brand-primary/5 to-brand-accent/5">
+              <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                <Grid3x3 className="w-5 h-5 text-brand-primary" />
+                Explore Designs Categories
               </h3>
               <p className="text-xs text-gray-600 mt-1">
-                {categories.length} categories available
+                {categories.length} categories • Latest work & projects
               </p>
             </div>
 
             {categoriesLoading ? (
               <div className="px-4 py-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-brand-primary border-t-transparent mx-auto"></div>
                 <p className="mt-3 text-sm text-gray-600">
                   Loading categories...
                 </p>
               </div>
             ) : categories.length > 0 ? (
-              <div className="max-h-96 overflow-y-auto">
-                <div className="px-2 py-2 space-y-1">
+              <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                <div className="px-3 py-3 space-y-2">
                   {categories.map((category) => {
                     const designCount = getCategoryDesignCount(category.id);
                     return (
@@ -120,22 +119,22 @@ export const CategoryDropdown: React.FC = () => {
                         <Link
                           href={`/designs?mainCategory=${category.id}`}
                           onClick={() => setIsOpen(false)}
-                          className="group block px-3 py-2.5 rounded-md hover:bg-gray-50 transition-colors"
+                          className="group block px-4 py-3 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 border border-transparent hover:border-brand-primary/20 transition-all duration-200 hover:shadow-md"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                              <h4 className="text-sm font-semibold text-gray-900 group-hover:text-brand-primary transition-colors flex items-center gap-2">
                                 {category.name}
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 group-hover:bg-brand-primary group-hover:text-white text-xs font-bold text-gray-600 transition-all">
+                                  {designCount}
+                                </span>
                               </h4>
-                              <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">
+                              <p className="text-xs text-gray-500 line-clamp-1 mt-1 group-hover:text-gray-700">
                                 {category.description}
                               </p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <span className="px-2 py-1 bg-gray-100 group-hover:bg-blue-50 text-gray-700 group-hover:text-blue-600 text-xs font-medium rounded transition-colors">
-                                {designCount}
-                              </span>
-                              <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all" />
+                              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
                             </div>
                           </div>
                         </Link>
@@ -153,7 +152,7 @@ export const CategoryDropdown: React.FC = () => {
                                   <Link
                                     href={`/designs?subCategory=${subcat.id}`}
                                     onClick={() => setIsOpen(false)}
-                                    className="hover:underline text-blue-600"
+                                    className="hover:underline text-brand-primary"
                                   >
                                     {subcat.name}
                                   </Link>
@@ -181,14 +180,14 @@ export const CategoryDropdown: React.FC = () => {
 
             {/* Footer */}
             {categories.length > 0 && (
-              <div className="border-t border-gray-200 px-4 py-3">
+              <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4 rounded-b-lg">
                 <Link
                   href="/categories"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  className="flex items-center justify-center gap-2 text-sm font-semibold text-brand-primary hover:text-brand-secondary group transition-all hover:translate-x-1 duration-200"
                   onClick={() => setIsOpen(false)}
                 >
-                  <span>View All Categories</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>View All Portfolio</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             )}

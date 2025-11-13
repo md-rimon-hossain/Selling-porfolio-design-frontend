@@ -9,7 +9,7 @@ export default function TermsOfServicePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl"></div>
+              <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl"></div>
               <span className="text-xl font-black text-gray-900">
                 Design Store
               </span>
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
           {/* Hero Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12 text-white">
+          <div className="bg-gradient-to-r from-brand-primary to-brand-secondary px-8 py-12 text-white">
             <h1 className="text-4xl sm:text-5xl font-black mb-4">
               Terms of Service
             </h1>

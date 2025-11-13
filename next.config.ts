@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       // OAuth Provider Images
       "lh3.googleusercontent.com", // Google profile images
       "avatars.githubusercontent.com", // GitHub profile images
+      "scontent.fdac99-1.fna.fbcdn.net", // Facebook profile images
     ],
   },
 };

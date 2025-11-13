@@ -90,12 +90,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 relative overflow-hidden">
       {/* Animated Background Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Back to Home Button */}
@@ -124,22 +124,22 @@ export default function LoginPage() {
       </div>
 
       <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full max-w-6xl">
+        <div className="w-full max-w-5xl">
           {/* Main Card with Split Layout */}
-          <div className="backdrop-blur-sm bg-white/90 rounded-3xl shadow-2xl border border-white/60 overflow-hidden">
-            <div className="grid lg:grid-cols-2 min-h-[650px]">
+          <div className="backdrop-blur-sm bg-white/95 rounded-2xl shadow-2xl border border-white/60 overflow-hidden">
+            <div className="grid lg:grid-cols-2 min-h-[580px]">
               {/* Left Side - Form */}
-              <div className="p-8 sm:p-12 flex flex-col justify-center order-2 lg:order-1">
+              <div className="p-6 sm:p-8 flex flex-col justify-center order-2 lg:order-1">
                 {/* Header */}
-                <div className="mb-8">
-                  <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">
+                <div className="mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2">
                     Welcome Back
                   </h2>
-                  <p className="text-gray-600">
+                  <p className="text-sm text-gray-600">
                     Don&apos;t have an account?{" "}
                     <Link
                       href="/register"
-                      className="font-bold text-blue-600 hover:text-purple-600 transition-colors"
+                      className="font-bold text-red-600 hover:text-orange-600 transition-colors"
                     >
                       Sign up
                     </Link>
@@ -147,7 +147,7 @@ export default function LoginPage() {
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   {/* General Error */}
                   {errors.general && (
                     <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-2xl flex items-start gap-3">
@@ -170,7 +170,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-sm font-bold text-gray-700 mb-2"
+                      className="block text-xs font-bold text-gray-700 mb-1.5"
                     >
                       Email Address
                     </label>
@@ -198,11 +198,11 @@ export default function LoginPage() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full pl-12 pr-4 py-3 border-2 ${
+                        className={`w-full pl-12 pr-4 py-2.5 border-2 ${
                           errors.email
                             ? "border-red-300 focus:border-red-500"
-                            : "border-gray-200 focus:border-blue-500"
-                        } rounded-2xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400 font-medium`}
+                            : "border-gray-200 focus:border-red-600"
+                        } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                         placeholder="john@example.com"
                       />
                     </div>
@@ -228,7 +228,7 @@ export default function LoginPage() {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-bold text-gray-700 mb-2"
+                      className="block text-xs font-bold text-gray-700 mb-1.5"
                     >
                       Password
                     </label>
@@ -256,11 +256,11 @@ export default function LoginPage() {
                         required
                         value={formData.password}
                         onChange={handleChange}
-                        className={`w-full pl-12 pr-12 py-3 border-2 ${
+                        className={`w-full pl-12 pr-12 py-2.5 border-2 ${
                           errors.password
                             ? "border-red-300 focus:border-red-500"
-                            : "border-gray-200 focus:border-blue-500"
-                        } rounded-2xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400 font-medium`}
+                            : "border-gray-200 focus:border-red-600"
+                        } rounded-xl focus:outline-none transition-colors text-gray-900 placeholder-gray-400`}
                         placeholder="Enter your password"
                       />
                       <button
@@ -345,7 +345,7 @@ export default function LoginPage() {
                     <div className="text-sm">
                       <a
                         href="#"
-                        className="font-bold text-blue-600 hover:text-purple-600 transition-colors"
+                        className="font-bold text-red-600 hover:text-orange-600 transition-colors"
                       >
                         Forgot password?
                       </a>
@@ -356,7 +356,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-full h-12 text-base font-bold bg-gradient-to-r from-red-600 to-orange-600 hover:from-orange-600 hover:to-amber-600 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
@@ -408,16 +408,16 @@ export default function LoginPage() {
               </div>
 
               {/* Right Side - Branding */}
-              <div className="hidden lg:flex relative bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 p-12 items-center justify-center overflow-hidden order-1 lg:order-2">
+              <div className="hidden lg:flex relative bg-gradient-to-br from-red-600 via-orange-600 to-amber-600 p-8 items-center justify-center overflow-hidden order-1 lg:order-2">
                 {/* Decorative Elements */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 translate-y-1/2"></div>
 
                 <div className="relative z-10 text-white max-w-md">
                   {/* Logo/Icon */}
-                  <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-8 shadow-xl">
+                  <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 shadow-xl">
                     <svg
-                      className="w-12 h-12 text-white"
+                      className="w-10 h-10 text-white"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -431,16 +431,16 @@ export default function LoginPage() {
                     </svg>
                   </div>
 
-                  <h1 className="text-4xl font-black mb-4 leading-tight">
+                  <h1 className="text-3xl font-black mb-3 leading-tight">
                     Continue Your Creative Journey
                   </h1>
-                  <p className="text-lg text-white/90 mb-8 leading-relaxed">
+                  <p className="text-base text-white/90 mb-6 leading-relaxed">
                     Access your dashboard, manage your designs, and connect with
                     the creative community.
                   </p>
 
                   {/* Features List */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                         <svg
