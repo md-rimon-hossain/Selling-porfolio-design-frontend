@@ -5,6 +5,7 @@ import FeaturedDesigns from "@/components/FeaturedDesigns";
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from "lucide-react";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 
 export default function Home() {
   return (
@@ -161,7 +162,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 bg-gradient-to-br from-brand-primary via-brand-secondary to-brand-accent relative overflow-hidden">
+      <TestimonialCarousel />
+
+      <section className="py-24 bg-gradient-to-br from-red-600 via-orange-600 to-amber-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         </div>
@@ -177,7 +180,7 @@ export default function Home() {
             <Link href="/register">
               <Button
                 size="lg"
-                className="text-base px-8 py-6 bg-white text-brand-primary hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
+                className="text-base px-8 py-6 bg-white text-red-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all"
               >
                 Create Free Account
               </Button>
