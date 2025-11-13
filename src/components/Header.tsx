@@ -15,6 +15,11 @@ export const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Debug logging
+  useEffect(() => {
+    console.log("Header - Current user:", user);
+  }, [user]);
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
@@ -108,7 +113,6 @@ export const Header: React.FC = () => {
             <div className="pl-4 border-l border-white/20">
               {user ? (
                 <>
-                  
                   <UserProfile user={user} />
                 </>
               ) : (

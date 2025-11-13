@@ -5,6 +5,7 @@ import { useGetProfileQuery } from "../services/api";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setCredentials, logout } from "../store/features/authSlice";
 import { usePathname, useRouter } from "next/navigation";
+import { store } from "../store/store";
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -20,23 +21,51 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
   const { data, error, isLoading, isSuccess, isError } =
     useGetProfileQuery(undefined);
 
+  console.log("AuthWrapper - Query state:", {
+    hasData: !!data,
+    hasError: !!error,
+    isLoading,
+    isSuccess,
+    isError,
+    error: error,
+    fullData: data, // Log the full data object
+  });
+
   useEffect(() => {
     if (data && data.data) {
+      console.log("AuthWrapper - Profile data received:", data.data);
+      console.log("AuthWrapper - Setting credentials in Redux");
       dispatch(
         setCredentials({
           user: data.data,
         })
       );
       setAuthChecked(true);
+      console.log("AuthWrapper - Credentials set, checking Redux state...");
+
+      // Verify it was set
+      setTimeout(() => {
+        console.log(
+          "AuthWrapper - Redux state after set:",
+          store.getState().auth.user
+        );
+      }, 100);
     } else if (error) {
-      // Only logout if the error is authentication related
-      const errorData = error as { status?: number };
-      if (errorData?.status === 401 || errorData?.status === 403) {
-        dispatch(logout());
+      console.log("AuthWrapper - Profile error:", error);
+      // Only logout if there's already a user (meaning the session expired)
+      // Don't logout on initial load if there's no user yet
+      if (user) {
+        const errorData = error as { status?: number };
+        if (errorData?.status === 401 || errorData?.status === 403) {
+          console.log("AuthWrapper - Session expired, logging out");
+          dispatch(logout());
+        }
+      } else {
+        console.log("AuthWrapper - No user in state, skipping logout");
       }
       setAuthChecked(true);
     }
-  }, [data, error, dispatch]);
+  }, [data, error, dispatch, user]);
 
   // Mark auth as checked when query completes (success or error)
   useEffect(() => {
@@ -79,11 +108,12 @@ export const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
     }
   }, [pathname, user, authChecked, router]);
 
-  if (user && (pathname === "/login" || pathname === "/register")) {
-    // Logged in user trying to access login/register -> redirect to home
-    router.push("/");
-    return;
-  }
+  // Redirect logged-in users away from auth pages
+  useEffect(() => {
+    if (user && (pathname === "/login" || pathname === "/register")) {
+      router.push("/");
+    }
+  }, [user, pathname, router]);
 
   // Show loading state while fetching profile (but not on login/register pages)
   if (isLoading && pathname !== "/login" && pathname !== "/register") {
