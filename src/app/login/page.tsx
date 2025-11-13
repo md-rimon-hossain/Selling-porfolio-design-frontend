@@ -54,6 +54,7 @@ export default function LoginPage() {
 
     try {
       const response = await login(formData).unwrap();
+      console.log("Login response:", response);
 
       if (response.success) {
         // Set user data in Redux store
@@ -63,7 +64,9 @@ export default function LoginPage() {
           })
         );
 
-        // Redirect to home page or dashboard
+        console.log("User set in Redux successfully");
+
+        // Redirect to home page - AuthWrapper will handle the rest
         router.push("/");
       }
     } catch (error: unknown) {
