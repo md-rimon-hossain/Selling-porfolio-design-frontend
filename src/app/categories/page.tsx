@@ -57,20 +57,20 @@ export default function CategoriesPage() {
       category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Gradient colors for categories
+  // Gradient colors for categories - Using brand red/orange/amber theme
   const gradients = [
-    "from-blue-500 via-blue-600 to-purple-600",
-    "from-purple-500 via-pink-500 to-red-500",
-    "from-green-500 via-teal-500 to-cyan-500",
-    "from-orange-500 via-red-500 to-pink-500",
-    "from-indigo-500 via-purple-500 to-pink-500",
-    "from-yellow-500 via-orange-500 to-red-500",
-    "from-teal-500 via-green-500 to-emerald-500",
-    "from-rose-500 via-pink-500 to-fuchsia-500",
-    "from-cyan-500 via-blue-500 to-indigo-500",
-    "from-lime-500 via-green-500 to-teal-500",
-    "from-amber-500 via-orange-500 to-red-500",
-    "from-violet-500 via-purple-500 to-pink-500",
+    "from-red-600 via-orange-600 to-amber-600",
+    "from-red-700 via-red-600 to-orange-600",
+    "from-orange-600 via-amber-600 to-yellow-600",
+    "from-red-600 via-rose-600 to-pink-600",
+    "from-amber-600 via-orange-600 to-red-600",
+    "from-orange-700 via-orange-600 to-amber-600",
+    "from-red-800 via-red-600 to-orange-600",
+    "from-amber-700 via-amber-600 to-orange-600",
+    "from-red-600 via-orange-700 to-amber-700",
+    "from-orange-600 via-red-600 to-rose-600",
+    "from-amber-600 via-orange-700 to-red-700",
+    "from-red-700 via-orange-700 to-amber-700",
   ];
 
   const icons = [
@@ -258,13 +258,13 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="px-4 sm:px-6 lg:px-10 py-6">
         {/* Breadcrumb */}
         <nav className="mb-4">
           <div className="flex items-center space-x-2 text-sm">
             <Link
               href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-gray-600 hover:text-red-600 transition-colors"
             >
               Home
             </Link>
@@ -275,7 +275,7 @@ export default function CategoriesPage() {
 
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 bg-clip-text text-transparent mb-1">
             Design Categories
           </h1>
           <p className="text-sm text-gray-600">
@@ -308,7 +308,7 @@ export default function CategoriesPage() {
                 placeholder="Search categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
               />
               {searchQuery && (
                 <button
@@ -338,7 +338,7 @@ export default function CategoriesPage() {
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded transition-all ${
                   viewMode === "grid"
-                    ? "bg-white text-blue-600 shadow-sm"
+                    ? "bg-white text-red-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
                 title="Grid view"
@@ -361,7 +361,7 @@ export default function CategoriesPage() {
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded transition-all ${
                   viewMode === "list"
-                    ? "bg-white text-blue-600 shadow-sm"
+                    ? "bg-white text-red-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
                 title="List view"
@@ -383,7 +383,7 @@ export default function CategoriesPage() {
             </div>
 
             {/* Results Count */}
-            <div className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-semibold">
+            <div className="px-4 py-2 bg-gradient-to-r from-red-50 to-orange-50 text-red-700 rounded-lg text-sm font-semibold">
               {filteredCategories.length}{" "}
               {filteredCategories.length === 1 ? "category" : "categories"}
             </div>
@@ -395,7 +395,7 @@ export default function CategoriesPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-blue-600 rounded-full animate-spin border-t-transparent absolute top-0 left-0"></div>
+              <div className="w-16 h-16 border-4 border-red-600 rounded-full animate-spin border-t-transparent absolute top-0 left-0"></div>
             </div>
             <p className="mt-6 text-lg text-gray-600 font-semibold">
               Loading categories...
@@ -425,7 +425,7 @@ export default function CategoriesPage() {
                     {/* Content */}
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
                           {category.name}
                         </h3>
                         {category.isActive && (
@@ -451,7 +451,7 @@ export default function CategoriesPage() {
                               >
                                 <Link
                                   href={`/designs?subCategory=${subcat.id}`}
-                                  className="hover:underline text-blue-600"
+                                  className="hover:underline text-red-600"
                                 >
                                   {subcat.name}
                                 </Link>
@@ -460,7 +460,7 @@ export default function CategoriesPage() {
                           </ul>
                         </div>
                       )}
-                      <div className="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700 mt-2">
+                      <div className="flex items-center text-red-600 text-sm font-medium group-hover:text-red-700 mt-2">
                         <Link
                           href={`/designs?mainCategory=${category.id}`}
                           className="flex items-center gap-1"
@@ -510,7 +510,7 @@ export default function CategoriesPage() {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
                               {category.name}
                             </h3>
                             {category.isActive && (
@@ -529,7 +529,7 @@ export default function CategoriesPage() {
                         <div className="flex-shrink-0">
                           <Button
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg"
+                            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md"
                           >
                             Browse
                             <svg
@@ -584,7 +584,7 @@ export default function CategoriesPage() {
                 {searchQuery && (
                   <Button
                     onClick={() => setSearchQuery("")}
-                    className="bg-blue-600 hover:bg-blue-700 font-semibold rounded-lg"
+                    className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 font-semibold rounded-lg shadow-md"
                   >
                     Clear Search
                   </Button>
@@ -604,7 +604,7 @@ export default function CategoriesPage() {
 
         {/* Call to Action */}
         {!categoriesLoading && filteredCategories.length > 0 && (
-          <div className="mt-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-center shadow-sm">
+          <div className="mt-12 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 rounded-lg p-8 text-center shadow-lg">
             <h3 className="text-2xl font-bold text-white mb-2">
               Ready to Explore?
             </h3>
@@ -615,7 +615,7 @@ export default function CategoriesPage() {
             <Link href="/designs">
               <Button
                 size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-50 shadow-sm font-semibold rounded-lg"
+                className="bg-white text-red-600 hover:bg-gray-50 shadow-lg font-semibold rounded-lg"
               >
                 View All Designs
                 <svg

@@ -39,7 +39,7 @@ export const Header: React.FC = () => {
         isScrolled ? "shadow-lg" : ""
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 relative">
           {/* Left Navigation */}
           <nav className="hidden lg:flex items-center space-x-6 flex-1">
