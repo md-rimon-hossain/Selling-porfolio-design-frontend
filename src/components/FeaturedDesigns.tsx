@@ -163,20 +163,28 @@ const FeaturedDesigns: React.FC = () => {
                       "Uncategorized"}
                   </span>
                   <div className="flex flex-col items-end gap-1">
-                    <span className="bg-brand-secondary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md animate-float">
-                      {design.currencyDisplay}
-                      {typeof design.discountedPrice === "number" &&
-                      design.discountedPrice >= 0
-                        ? design.discountedPrice
-                        : design.basePrice ?? 0}
-                    </span>
-                    {typeof design.basePrice === "number" &&
-                      design.basePrice > (design.discountedPrice ?? 0) && (
-                        <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-md">
+                    {design.discountedPrice === 0 ? (
+                      <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-md animate-pulse">
+                        🎉 FREE
+                      </span>
+                    ) : (
+                      <>
+                        <span className="bg-brand-secondary text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md animate-float">
                           {design.currencyDisplay}
-                          {design.basePrice}
+                          {typeof design.discountedPrice === "number" &&
+                          design.discountedPrice >= 0
+                            ? design.discountedPrice
+                            : design.basePrice ?? 0}
                         </span>
-                      )}
+                        {typeof design.basePrice === "number" &&
+                          design.basePrice > (design.discountedPrice ?? 0) && (
+                            <span className="bg-white text-gray-500 px-2 py-0.5 rounded-full text-xs font-medium line-through shadow-md">
+                              {design.currencyDisplay}
+                              {design.basePrice}
+                            </span>
+                          )}
+                      </>
+                    )}
                   </div>
                 </div>
 

@@ -9,13 +9,14 @@ import { Purchase, SubscriptionStatus } from "@/types/dashboard";
 
 export interface DownloadAccess {
   canDownload: boolean;
-  reason: "purchased" | "subscription" | "no_access";
+  reason: "purchased" | "subscription" | "no_access" | "free";
   status?: "completed" | "pending";
   message: string;
 }
 
 export const useDesignDownloadAccess = (
-  designId: string
+  designId: string,
+  designPrice?: number
 ): {
   access: DownloadAccess;
   isLoading: boolean;
@@ -38,6 +39,23 @@ export const useDesignDownloadAccess = (
   } = useGetSubscriptionStatusQuery(undefined, { skip: !user });
 
   const access = useMemo((): DownloadAccess => {
+    // Check if design is free (price is 0)
+    if (designPrice === 0) {
+      if (!user) {
+        return {
+          canDownload: false,
+          reason: "free",
+          message: "Please login to download this free design",
+        };
+      }
+      return {
+        canDownload: true,
+        reason: "free",
+        status: "completed",
+        message: "This is a free design",
+      };
+    }
+
     if (!user) {
       return {
         canDownload: false,
@@ -94,7 +112,7 @@ export const useDesignDownloadAccess = (
       reason: "no_access",
       message: "Purchase this design or subscribe to download",
     };
-  }, [user, designId, purchasesData, subscriptionData]);
+  }, [user, designId, designPrice, purchasesData, subscriptionData]);
 
   return {
     access,

@@ -25,6 +25,10 @@ import {
   FileText,
   Wrench,
   Sparkles,
+  Shield,
+  Zap,
+  Users,
+  TrendingUp,
 } from "lucide-react";
 import { useDesignDownloadAccess } from "@/hooks/useDesignDownloadAccess";
 import {
@@ -252,6 +256,12 @@ export default function DesignDetailPage() {
   }, [refetchDesign, refetchAccess]);
 
   const handleDownload = useCallback(async () => {
+    // If user is not logged in for free design, redirect to login
+    if (!user && design?.discountedPrice === 0) {
+      router.push("/login");
+      return;
+    }
+
     try {
       // Use RTK Query mutation for download - it returns blob directly
       const blob = await downloadDesign(designId).unwrap();
@@ -279,7 +289,7 @@ export default function DesignDetailPage() {
           : "Download failed. Please try again.";
       toast.error(errorMessage);
     }
-  }, [designId, downloadDesign, toast]);
+  }, [designId, downloadDesign, toast, user, design?.discountedPrice, router]);
 
   const purchaseDesign = useMemo(() => {
     return {
@@ -350,7 +360,7 @@ export default function DesignDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="px-4 sm:px-6 lg:px-10 py-6">
         {/* Breadcrumb */}
         <nav className="mb-6">
           <div className="flex items-center space-x-2 text-sm">
@@ -513,9 +523,9 @@ export default function DesignDetailPage() {
                 alt={design.title}
               />
 
-              {/* Stats Bar */}
-              <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-t border-gray-200">
-                <div className="text-center">
+              {/* Enhanced Stats Bar */}
+              <div className="grid grid-cols-4 gap-4 p-5 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
+                <div className="text-center group hover:transform hover:scale-105 transition-transform duration-200">
                   <div className="flex items-center justify-center mb-1">
                     <LikeButton
                       designId={design._id!}
@@ -525,77 +535,140 @@ export default function DesignDetailPage() {
                       showCount={true}
                     />
                   </div>
-                  <span className="text-xs text-gray-600">Likes</span>
+                  <span className="text-xs text-gray-600 font-medium">
+                    Likes
+                  </span>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">
-                    {design.downloadCount || 0}
-                  </p>
-                  <span className="text-xs text-gray-600">Downloads</span>
+                <div className="text-center group hover:transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
+                    <p className="text-lg font-bold text-gray-900">
+                      {design.downloadCount || 0}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium">
+                    Downloads
+                  </span>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">
-                    {statistics?.averageRating
-                      ? statistics.averageRating.toFixed(1)
-                      : "0.0"}
-                  </p>
-                  <span className="text-xs text-gray-600">Avg Rating</span>
+                <div className="text-center group hover:transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <p className="text-lg font-bold text-gray-900">
+                      {statistics?.averageRating
+                        ? statistics.averageRating.toFixed(1)
+                        : "0.0"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium">
+                    Rating
+                  </span>
                 </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">
-                    {statistics?.totalReviews || 0}
-                  </p>
-                  <span className="text-xs text-gray-600">Reviews</span>
+                <div className="text-center group hover:transform hover:scale-105 transition-transform duration-200">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <p className="text-lg font-bold text-gray-900">
+                      {statistics?.totalReviews || 0}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium">
+                    Reviews
+                  </span>
                 </div>
               </div>
             </div>
-            {/* Tools */}
-            {design.usedTools && design.usedTools.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Wrench className="w-5 h-5 text-brand-primary" />
-                  <h3 className="font-bold text-gray-900">Tools Used</h3>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {design.usedTools.map((tool, index) => (
-                    <span
-                      key={index}
-                      className="bg-red-50 text-brand-primary text-xs px-2.5 py-1 rounded font-medium"
-                    >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Effects */}
-            {design.effectsUsed && design.effectsUsed.length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
-                  <h3 className="font-bold text-gray-900">Effects</h3>
+            {/* Description Section */}
+            {design.description && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    About This Design
+                  </h2>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {design.effectsUsed.map((effect, index) => (
-                    <span
-                      key={index}
-                      className="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded font-medium"
-                    >
-                      {effect}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Process */}
-            {design.processDescription && (
-              <div className="bg-white rounded-lg border border-gray-200 p-5 md:col-span-2">
-                <h3 className="font-bold text-gray-900 mb-3">Design Process</h3>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {design.processDescription}
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {design.description}
                 </p>
+              </div>
+            )}
+
+            {/* Design Process - Enhanced */}
+            {design.processDescription && (
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-purple-600 rounded-lg">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Design Process & Story
+                    </h2>
+                    <p className="text-sm text-purple-700">
+                      Behind the scenes of this creation
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white bg-opacity-60 rounded-lg p-5 border border-purple-100">
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap text-base">
+                    {design.processDescription}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Tools & Effects Grid */}
+            {((design.usedTools && design.usedTools.length > 0) ||
+              (design.effectsUsed && design.effectsUsed.length > 0)) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Tools */}
+                {design.usedTools && design.usedTools.length > 0 && (
+                  <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-red-50 rounded-lg">
+                        <Wrench className="w-5 h-5 text-brand-primary" />
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-lg">
+                        Tools Used
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {design.usedTools.map((tool, index) => (
+                        <span
+                          key={index}
+                          className="bg-red-50 text-brand-primary text-sm px-3 py-1.5 rounded-lg font-medium border border-red-100 hover:bg-red-100 transition-colors"
+                        >
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Effects */}
+                {design.effectsUsed && design.effectsUsed.length > 0 && (
+                  <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-purple-50 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-lg">
+                        Effects Applied
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {design.effectsUsed.map((effect, index) => (
+                        <span
+                          key={index}
+                          className="bg-purple-50 text-purple-700 text-sm px-3 py-1.5 rounded-lg font-medium border border-purple-100 hover:bg-purple-100 transition-colors"
+                        >
+                          {effect}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -842,9 +915,9 @@ export default function DesignDetailPage() {
               )}
             </div>
           </div>
-          {/* Right Column - Purchase Card */}
+          {/* Right Column - Enhanced Purchase Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-5 sticky top-20 space-y-4">
+            <div className="bg-white rounded-lg border-2 border-gray-200 shadow-xl p-6 sticky top-20 space-y-5">
               {/* Title & Category */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -856,6 +929,11 @@ export default function DesignDetailPage() {
                   {design.complexityLevel && (
                     <span className="bg-green-600 text-white text-xs font-semibold px-2.5 py-1 rounded">
                       {design.complexityLevel}
+                    </span>
+                  )}
+                  {design?.discountedPrice === 0 && (
+                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                      FREE
                     </span>
                   )}
                 </div>
@@ -872,31 +950,91 @@ export default function DesignDetailPage() {
                 )}
               </div>
 
-              {/* discounted price */}
-              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-brand-primary">
-                    {design?.currencyDisplay}
-                    {design?.discountedPrice?.toFixed(2) || 0}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {design.currencyCode}
-                  </span>
+              {/* Enhanced Pricing Display */}
+              {design?.discountedPrice === 0 ? (
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-300">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-lg font-bold px-4 py-2 rounded-full">
+                      🎉 100% FREE
+                    </span>
+                  </div>
+                  <p className="text-center text-green-700 font-semibold text-sm">
+                    Download this design for free!
+                  </p>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-lg font-medium text-gray-500 line-through">
-                    {design?.currencyDisplay}
-                    {design?.basePrice.toFixed(2) || 0}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {design.currencyCode}
-                  </span>
+              ) : (
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-5 border-2 border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                      Price
+                    </span>
+                    {design?.basePrice &&
+                      design?.discountedPrice &&
+                      design.basePrice > design.discountedPrice && (
+                        <span className="bg-green-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                          {Math.round(
+                            ((design.basePrice - design.discountedPrice) /
+                              design.basePrice) *
+                              100
+                          )}
+                          % OFF
+                        </span>
+                      )}
+                  </div>
+                  <div className="flex items-end gap-3 mb-1">
+                    <span className="text-4xl font-black text-blue-600">
+                      {design?.currencyDisplay}
+                      {design?.discountedPrice?.toFixed(2) || 0}
+                    </span>
+                    <span className="text-sm text-gray-600 font-medium pb-1">
+                      {design.currencyCode}
+                    </span>
+                  </div>
+                  {design?.basePrice &&
+                    design?.discountedPrice &&
+                    design.basePrice > design.discountedPrice && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-semibold text-gray-400 line-through">
+                          {design?.currencyDisplay}
+                          {design?.basePrice.toFixed(2) || 0}
+                        </span>
+                        <span className="text-xs text-green-700 font-medium">
+                          You save {design?.currencyDisplay}
+                          {(design.basePrice - design.discountedPrice).toFixed(
+                            2
+                          )}
+                        </span>
+                      </div>
+                    )}
                 </div>
-              </div>
+              )}
 
               {/* Purchase Actions */}
               <div className="space-y-3">
-                {accessLoading ? (
+                {design?.discountedPrice === 0 ? (
+                  <Button
+                    onClick={handleDownload}
+                    disabled={isDownloading || !user}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-base font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDownloading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Preparing Download...
+                      </>
+                    ) : !user ? (
+                      <>
+                        <Download className="w-5 h-5 mr-2" />
+                        Login to Download Free
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-5 h-5 mr-2" />
+                        Download Free Design
+                      </>
+                    )}
+                  </Button>
+                ) : accessLoading ? (
                   <div className="w-full h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                     <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
                   </div>
@@ -953,53 +1091,58 @@ export default function DesignDetailPage() {
                   <>
                     <Button
                       onClick={handlePurchaseClick}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-sm font-semibold"
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-base font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                     >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase for {design?.currencyDisplay}
+                      <ShoppingCart className="w-5 h-5 mr-2" />
+                      Buy Now for {design?.currencyDisplay}
                       {design?.discountedPrice?.toFixed(2) || 0}
                     </Button>
-                    <p className="text-center text-xs text-gray-600">
-                      or{" "}
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 mb-1">or</p>
                       <Link
                         href="/pricing"
-                        className="text-blue-600 font-semibold hover:underline"
+                        className="inline-flex items-center gap-1 text-blue-600 font-semibold hover:text-blue-700 text-sm underline-offset-4 hover:underline"
                       >
-                        subscribe
-                      </Link>{" "}
-                      for unlimited access
-                    </p>
+                        <Zap className="w-4 h-4" />
+                        Get unlimited access with a subscription
+                      </Link>
+                    </div>
                   </>
                 )}
               </div>
 
-              <div className="flex justify-start items-center gap-4 py-4 border-y border-gray-200">
+              {/* Enhanced Download Details */}
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-red-50 rounded-md">
-                    <FileText className="w-6 h-6 text-brand-primary" />
+                  <div className="p-2 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg shadow-sm">
+                    <FileText className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      Download details
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900 mb-2">
+                      What You'll Get
                     </p>
                     {design?.downloadableFile ? (
-                      <dl className="mt-2 text-sm text-gray-600 grid grid-cols-1 gap-1">
-                        <div className="flex items-center gap-2">
-                          <dt className="w-28 text-gray-500">File name</dt>
-                          <dd className="truncate">
+                      <dl className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between py-1">
+                          <dt className="text-gray-600 font-medium">
+                            📄 File name
+                          </dt>
+                          <dd className="text-gray-900 font-semibold truncate ml-2 max-w-[140px]">
                             {(design.downloadableFile as any).file_name || "—"}
                           </dd>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <dt className="w-28 text-gray-500">Format</dt>
-                          <dd className="uppercase">
+                        <div className="flex items-center justify-between py-1">
+                          <dt className="text-gray-600 font-medium">
+                            🎨 Format
+                          </dt>
+                          <dd className="text-gray-900 font-semibold uppercase">
                             {(design.downloadableFile as any).file_format ||
                               "—"}
                           </dd>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <dt className="w-28 text-gray-500">Size</dt>
-                          <dd>
+                        <div className="flex items-center justify-between py-1">
+                          <dt className="text-gray-600 font-medium">💾 Size</dt>
+                          <dd className="text-gray-900 font-semibold">
                             {formatBytes(
                               (design.downloadableFile as any).file_size
                             )}
@@ -1007,8 +1150,8 @@ export default function DesignDetailPage() {
                         </div>
                       </dl>
                     ) : (
-                      <p className="text-sm text-gray-500 mt-1">
-                        No downloadable file information available
+                      <p className="text-sm text-gray-500">
+                        File information will be available after purchase
                       </p>
                     )}
                   </div>
@@ -1065,11 +1208,31 @@ export default function DesignDetailPage() {
                 </div>
               </div>
 
-              {/* Security */}
+              {/* Trust Signals */}
               <div className="pt-4 border-t border-gray-200">
-                <p className="text-xs text-center text-gray-500">
-                  🔒 Secure checkout • Lifetime access
-                </p>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="flex flex-col items-center">
+                    <Shield className="w-5 h-5 text-green-600 mb-1" />
+                    <span className="text-xs font-medium text-gray-700">
+                      Secure
+                    </span>
+                    <span className="text-xs text-gray-500">Payment</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Zap className="w-5 h-5 text-blue-600 mb-1" />
+                    <span className="text-xs font-medium text-gray-700">
+                      Instant
+                    </span>
+                    <span className="text-xs text-gray-500">Download</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <CheckCircle className="w-5 h-5 text-purple-600 mb-1" />
+                    <span className="text-xs font-medium text-gray-700">
+                      Lifetime
+                    </span>
+                    <span className="text-xs text-gray-500">Access</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
