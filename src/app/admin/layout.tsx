@@ -16,6 +16,7 @@ import {
   Menu,
   X,
   Users,
+  BookOpen,
 } from "lucide-react";
 import { useLogoutMutation } from "@/services/api";
 import { logout as logoutAction } from "@/store/features/authSlice";
@@ -68,6 +69,7 @@ export default function AdminLayout({
   const navigation = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Designs", href: "/admin/designs", icon: Package },
+    { name: "Courses", href: "/admin/courses", icon: BookOpen },
     { name: "Categories", href: "/admin/categories", icon: Tags },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Pricing Plans", href: "/admin/pricing-plans", icon: CreditCard },

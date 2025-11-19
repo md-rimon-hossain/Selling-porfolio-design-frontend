@@ -1,10 +1,9 @@
-/* eslint-disable react/jsx-key */
 "use client";
 
 import React, { useState } from "react";
 import { useGetCategoriesQuery } from "@/services/api";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Subcategory {
   id: string;
@@ -26,9 +25,9 @@ interface Category {
   subcategories: Subcategory[];
 }
 
-export default function CategoriesPage() {
+export default function CoursesCategoriesPage() {
   const { data: categoriesData, isLoading: categoriesLoading } =
-    useGetCategoriesQuery({ categoryType: "design" });
+    useGetCategoriesQuery({ categoryType: "course" });
   const rawCategories = categoriesData?.data || [];
   const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
     id: c.id ?? c._id,
@@ -59,22 +58,22 @@ export default function CategoriesPage() {
 
   // Gradient colors for categories - Using brand red/orange/amber theme
   const gradients = [
-    "from-red-600 via-orange-600 to-amber-600",
-    "from-red-700 via-red-600 to-orange-600",
-    "from-orange-600 via-amber-600 to-yellow-600",
-    "from-red-600 via-rose-600 to-pink-600",
-    "from-amber-600 via-orange-600 to-red-600",
-    "from-orange-700 via-orange-600 to-amber-600",
-    "from-red-800 via-red-600 to-orange-600",
-    "from-amber-700 via-amber-600 to-orange-600",
-    "from-red-600 via-orange-700 to-amber-700",
-    "from-orange-600 via-red-600 to-rose-600",
-    "from-amber-600 via-orange-700 to-red-700",
-    "from-red-700 via-orange-700 to-amber-700",
+    "from-blue-600 via-indigo-600 to-purple-600",
+    "from-blue-700 via-blue-600 to-indigo-600",
+    "from-indigo-600 via-purple-600 to-pink-600",
+    "from-blue-600 via-cyan-600 to-teal-600",
+    "from-purple-600 via-indigo-600 to-blue-600",
+    "from-indigo-700 via-indigo-600 to-purple-600",
+    "from-blue-800 via-blue-600 to-indigo-600",
+    "from-purple-700 via-purple-600 to-indigo-600",
+    "from-blue-600 via-indigo-700 to-purple-700",
+    "from-indigo-600 via-blue-600 to-cyan-600",
+    "from-purple-600 via-indigo-700 to-blue-700",
+    "from-blue-700 via-indigo-700 to-purple-700",
   ];
 
   const icons = [
-    // Design
+    // Course icons
     <svg
       className="w-10 h-10"
       fill="none"
@@ -85,10 +84,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
       />
     </svg>,
-    // Web
     <svg
       className="w-10 h-10"
       fill="none"
@@ -99,10 +97,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
       />
     </svg>,
-    // Mobile
     <svg
       className="w-10 h-10"
       fill="none"
@@ -113,10 +110,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
       />
     </svg>,
-    // Photo
     <svg
       className="w-10 h-10"
       fill="none"
@@ -127,16 +123,28 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
       />
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
       />
     </svg>,
-    // UI/UX
+    <svg
+      className="w-10 h-10"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13 10V3L4 14h7v7l9-11h-7z"
+      />
+    </svg>,
     <svg
       className="w-10 h-10"
       fill="none"
@@ -150,7 +158,6 @@ export default function CategoriesPage() {
         d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
       />
     </svg>,
-    // Brand
     <svg
       className="w-10 h-10"
       fill="none"
@@ -161,10 +168,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
       />
     </svg>,
-    // Print
     <svg
       className="w-10 h-10"
       fill="none"
@@ -175,10 +181,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
       />
     </svg>,
-    // 3D
     <svg
       className="w-10 h-10"
       fill="none"
@@ -189,10 +194,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+        d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
       />
     </svg>,
-    // Illustration
     <svg
       className="w-10 h-10"
       fill="none"
@@ -203,10 +207,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l.707.707A1 1 0 0012.414 11H15m-3 7.5A9.5 9.5 0 1121.5 12 9.5 9.5 0 0112 2.5z"
       />
     </svg>,
-    // Animation
     <svg
       className="w-10 h-10"
       fill="none"
@@ -217,16 +220,9 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>,
-    // Typography
     <svg
       className="w-10 h-10"
       fill="none"
@@ -237,21 +233,7 @@ export default function CategoriesPage() {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-      />
-    </svg>,
-    // Marketing
-    <svg
-      className="w-10 h-10"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
       />
     </svg>,
   ];
@@ -264,10 +246,12 @@ export default function CategoriesPage() {
           <div className="flex items-center space-x-2 text-sm">
             <Link
               href="/"
-              className="text-gray-600 hover:text-red-600 transition-colors"
+              className="text-gray-600 hover:text-blue-600 transition-colors"
             >
               Home
             </Link>
+            <span className="text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">Courses</span>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900 font-medium">Categories</span>
           </div>
@@ -275,11 +259,11 @@ export default function CategoriesPage() {
 
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 bg-clip-text text-transparent mb-1">
-            Design Categories
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-1">
+            Course Categories
           </h1>
           <p className="text-sm text-gray-600">
-            Explore {categories.length} design categories
+            Explore {categories.length} course categories
           </p>
         </div>
 
@@ -308,7 +292,7 @@ export default function CategoriesPage() {
                 placeholder="Search categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors text-gray-900 placeholder-gray-500"
               />
               {searchQuery && (
                 <button
@@ -338,7 +322,7 @@ export default function CategoriesPage() {
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded transition-all ${
                   viewMode === "grid"
-                    ? "bg-white text-red-600 shadow-sm"
+                    ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
                 title="Grid view"
@@ -361,7 +345,7 @@ export default function CategoriesPage() {
                 onClick={() => setViewMode("list")}
                 className={`p-2 rounded transition-all ${
                   viewMode === "list"
-                    ? "bg-white text-red-600 shadow-sm"
+                    ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
                 title="List view"
@@ -383,7 +367,7 @@ export default function CategoriesPage() {
             </div>
 
             {/* Results Count */}
-            <div className="px-4 py-2 bg-gradient-to-r from-red-50 to-orange-50 text-red-700 rounded-lg text-sm font-semibold">
+            <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-lg text-sm font-semibold">
               {filteredCategories.length}{" "}
               {filteredCategories.length === 1 ? "category" : "categories"}
             </div>
@@ -395,7 +379,7 @@ export default function CategoriesPage() {
           <div className="flex flex-col items-center justify-center py-20">
             <div className="relative">
               <div className="w-16 h-16 border-4 border-gray-200 rounded-full"></div>
-              <div className="w-16 h-16 border-4 border-red-600 rounded-full animate-spin border-t-transparent absolute top-0 left-0"></div>
+              <div className="w-16 h-16 border-4 border-blue-600 rounded-full animate-spin border-t-transparent absolute top-0 left-0"></div>
             </div>
             <p className="mt-6 text-lg text-gray-600 font-semibold">
               Loading categories...
@@ -425,7 +409,7 @@ export default function CategoriesPage() {
                     {/* Content */}
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                           {category.name}
                         </h3>
                         {category.isActive && (
@@ -450,8 +434,8 @@ export default function CategoriesPage() {
                                 className="text-xs text-gray-600"
                               >
                                 <Link
-                                  href={`/designs?subCategory=${subcat.id}`}
-                                  className="hover:underline text-red-600"
+                                  href={`/courses?subCategory=${subcat.id}`}
+                                  className="hover:underline text-blue-600"
                                 >
                                   {subcat.name}
                                 </Link>
@@ -460,9 +444,9 @@ export default function CategoriesPage() {
                           </ul>
                         </div>
                       )}
-                      <div className="flex items-center text-red-600 text-sm font-medium group-hover:text-red-700 mt-2">
+                      <div className="flex items-center text-blue-600 text-sm font-medium group-hover:text-blue-700 mt-2">
                         <Link
-                          href={`/designs?mainCategory=${category.id}`}
+                          href={`/courses?mainCategory=${category.id}`}
                           className="flex items-center gap-1"
                         >
                           <span>Explore</span>
@@ -493,7 +477,7 @@ export default function CategoriesPage() {
                 {filteredCategories.map((category, index) => (
                   <Link
                     key={category.id}
-                    href={`/designs?mainCategory=${category.id}`}
+                    href={`/courses?mainCategory=${category.id}`}
                     className="group block"
                   >
                     <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md border border-gray-200 transition-all duration-200">
@@ -510,7 +494,7 @@ export default function CategoriesPage() {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors">
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                               {category.name}
                             </h3>
                             {category.isActive && (
@@ -529,7 +513,7 @@ export default function CategoriesPage() {
                         <div className="flex-shrink-0">
                           <Button
                             size="sm"
-                            className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md"
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-md"
                           >
                             Browse
                             <svg
@@ -568,33 +552,35 @@ export default function CategoriesPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
                   />
                 </svg>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {searchQuery ? "No Results Found" : "No Categories Available"}
+                {searchQuery
+                  ? "No Results Found"
+                  : "No Course Categories Available"}
               </h3>
               <p className="text-gray-600 mb-6">
                 {searchQuery
                   ? `No categories match "${searchQuery}". Try a different search term.`
-                  : "No design categories are currently available."}
+                  : "No course categories are currently available. Create some categories in the admin panel to get started."}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {searchQuery && (
                   <Button
                     onClick={() => setSearchQuery("")}
-                    className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 font-semibold rounded-lg shadow-md"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 font-semibold rounded-lg shadow-md"
                   >
                     Clear Search
                   </Button>
                 )}
-                <Link href="/">
+                <Link href="/courses">
                   <Button
                     variant="outline"
                     className="font-semibold rounded-lg"
                   >
-                    Back to Home
+                    Back to Courses
                   </Button>
                 </Link>
               </div>
@@ -604,20 +590,20 @@ export default function CategoriesPage() {
 
         {/* Call to Action */}
         {!categoriesLoading && filteredCategories.length > 0 && (
-          <div className="mt-12 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 rounded-lg p-8 text-center shadow-lg">
+          <div className="mt-12 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-lg p-8 text-center shadow-lg">
             <h3 className="text-2xl font-bold text-white mb-2">
-              Ready to Explore?
+              Ready to Learn?
             </h3>
             <p className="text-white/90 mb-4">
               Browse through {categories.length} categories and discover amazing
-              designs
+              courses
             </p>
-            <Link href="/designs">
+            <Link href="/courses">
               <Button
                 size="lg"
-                className="bg-white text-red-600 hover:bg-gray-50 shadow-lg font-semibold rounded-lg"
+                className="bg-white text-blue-600 hover:bg-gray-50 shadow-lg font-semibold rounded-lg"
               >
-                View All Designs
+                View All Courses
                 <svg
                   className="w-5 h-5 ml-2"
                   fill="none"

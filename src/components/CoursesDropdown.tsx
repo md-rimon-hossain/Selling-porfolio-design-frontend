@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useGetCategoriesQuery, useGetDesignsQuery } from "@/services/api";
+import { useGetCategoriesQuery, useGetCoursesQuery } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 // Local Category type to match backend response
@@ -20,16 +20,16 @@ interface Category {
   isActive: boolean;
   subcategories: Subcategory[];
 }
-import { Grid3x3, ChevronDown, ArrowRight } from "lucide-react";
+import { BookOpen, ChevronDown, Grid3x3, ArrowRight } from "lucide-react";
 
-export const CategoryDropdown: React.FC = () => {
+export const CoursesDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: categoriesData, isLoading: categoriesLoading } =
-    useGetCategoriesQuery({ categoryType: "design" });
+    useGetCategoriesQuery({ categoryType: "course" });
 
-  const { data: allDesignsData } = useGetDesignsQuery({});
+  const { data: allCoursesData } = useGetCoursesQuery({});
 
   const rawCategories = categoriesData?.data || [];
   const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
@@ -45,11 +45,11 @@ export const CategoryDropdown: React.FC = () => {
       parentCategory: sc.parentCategory ?? null,
     })),
   }));
-  const allDesigns = allDesignsData?.data || [];
+  const allCourses = allCoursesData?.data || [];
 
-  const getCategoryDesignCount = (categoryId: string) => {
-    return allDesigns.filter((design: any) => {
-      const cat = design.category || design.mainCategory || design.subCategory;
+  const getCategoryCourseCount = (categoryId: string) => {
+    return allCourses.filter((course: any) => {
+      const cat = course.category || course.mainCategory || course.subCategory;
       return cat?._id === categoryId || cat?.id === categoryId || false;
     }).length;
   };
@@ -74,12 +74,12 @@ export const CategoryDropdown: React.FC = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Categories Button */}
+      {/* Courses Button */}
       <button
         onClick={toggleDropdown}
         className="flex items-center gap-2 px-3 py-2 text-sm font-semibold uppercase tracking-wide text-gray-200 hover:text-white transition-colors"
       >
-        <span>Categories</span>
+        <span>Course Categories</span>
         <ChevronDown
           className={`w-4 h-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -92,19 +92,19 @@ export const CategoryDropdown: React.FC = () => {
         <div className="absolute left-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 backdrop-blur-sm animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="py-3">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-brand-primary/5 to-brand-accent/5">
+            <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-600/5 to-indigo-600/5">
               <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Grid3x3 className="w-5 h-5 text-brand-primary" />
-                Explore Designs Categories
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                Explore Course Categories
               </h3>
               <p className="text-xs text-gray-600 mt-1">
-                {categories.length} categories • Latest work & projects
+                {categories.length} categories • Learn from experts
               </p>
             </div>
 
             {categoriesLoading ? (
               <div className="px-4 py-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-brand-primary border-t-transparent mx-auto"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto"></div>
                 <p className="mt-3 text-sm text-gray-600">
                   Loading categories...
                 </p>
@@ -113,20 +113,20 @@ export const CategoryDropdown: React.FC = () => {
               <div className="max-h-96 overflow-y-auto custom-scrollbar">
                 <div className="px-3 py-3 space-y-2">
                   {categories.map((category) => {
-                    const designCount = getCategoryDesignCount(category.id);
+                    const courseCount = getCategoryCourseCount(category.id);
                     return (
                       <div key={category.id}>
                         <Link
-                          href={`/designs?mainCategory=${category.id}`}
+                          href={`/courses?mainCategory=${category.id}`}
                           onClick={() => setIsOpen(false)}
-                          className="group block px-4 py-3 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 border border-transparent hover:border-brand-primary/20 transition-all duration-200 hover:shadow-md"
+                          className="group block px-4 py-3 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border border-transparent hover:border-blue-600/20 transition-all duration-200 hover:shadow-md"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-semibold text-gray-900 group-hover:text-brand-primary transition-colors flex items-center gap-2">
+                              <h4 className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
                                 {category.name}
-                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 group-hover:bg-brand-primary group-hover:text-white text-xs font-bold text-gray-600 transition-all">
-                                  {designCount}
+                                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 group-hover:bg-blue-600 group-hover:text-white text-xs font-bold text-gray-600 transition-all">
+                                  {courseCount}
                                 </span>
                               </h4>
                               <p className="text-xs text-gray-500 line-clamp-1 mt-1 group-hover:text-gray-700">
@@ -134,7 +134,7 @@ export const CategoryDropdown: React.FC = () => {
                               </p>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-brand-primary group-hover:translate-x-1 transition-all" />
+                              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                             </div>
                           </div>
                         </Link>
@@ -150,9 +150,9 @@ export const CategoryDropdown: React.FC = () => {
                                   className="text-xs text-gray-600"
                                 >
                                   <Link
-                                    href={`/designs?subCategory=${subcat.id}`}
+                                    href={`/courses?subCategory=${subcat.id}`}
                                     onClick={() => setIsOpen(false)}
-                                    className="hover:underline text-brand-primary"
+                                    className="hover:underline text-blue-600"
                                   >
                                     {subcat.name}
                                   </Link>
@@ -168,9 +168,9 @@ export const CategoryDropdown: React.FC = () => {
               </div>
             ) : (
               <div className="px-4 py-8 text-center">
-                <Grid3x3 className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                <BookOpen className="w-10 h-10 text-gray-400 mx-auto mb-3" />
                 <p className="text-sm font-medium text-gray-600">
-                  No categories available
+                  No course categories available
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   Check back soon for updates
@@ -182,11 +182,11 @@ export const CategoryDropdown: React.FC = () => {
             {categories.length > 0 && (
               <div className="border-t border-gray-200 bg-gradient-to-r from-gray-50 to-white p-4 rounded-b-lg">
                 <Link
-                  href="/categories"
-                  className="flex items-center justify-center gap-2 text-sm font-semibold text-brand-primary hover:text-brand-secondary group transition-all hover:translate-x-1 duration-200"
+                  href="/courses/categories"
+                  className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 group transition-all hover:translate-x-1 duration-200"
                   onClick={() => setIsOpen(false)}
                 >
-                  <span>View All Portfolio</span>
+                  <span>View All Course Categories</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>

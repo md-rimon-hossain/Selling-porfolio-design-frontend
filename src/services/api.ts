@@ -23,6 +23,8 @@ export const api = createApi({
     "Users",
     "Categories",
     "Designs",
+    "Courses",
+    "Enrollments",
     "PricingPlans",
     "Purchases",
     "Reviews",
@@ -153,8 +155,24 @@ export const api = createApi({
     }),
 
     // ==================== CATEGORIES ====================
-    getCategories: builder.query<any, void>({
-      query: () => "/categories",
+    getCategories: builder.query<
+      any,
+      {
+        categoryType?: "design" | "course";
+        search?: string;
+        page?: number;
+        limit?: number;
+      }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.categoryType)
+          searchParams.append("categoryType", params.categoryType);
+        if (params.search) searchParams.append("search", params.search);
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        return `/categories?${searchParams.toString()}`;
+      },
       providesTags: ["Categories"],
     }),
     getCategory: builder.query<any, string>({
@@ -163,7 +181,13 @@ export const api = createApi({
     }),
     createCategory: builder.mutation<
       any,
-      { name: string; description: string; isActive?: boolean }
+      {
+        name: string;
+        description: string;
+        categoryType?: "design" | "course";
+        parentCategory?: string | null;
+        isActive?: boolean;
+      }
     >({
       query: (data) => ({
         url: "/categories",
@@ -837,6 +861,209 @@ export const api = createApi({
       }),
       invalidatesTags: ["Payments", "Purchases"],
     }),
+
+    // ==================== COURSES ====================
+    getCourses: builder.query<any, any>({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.search) searchParams.append("search", params.search);
+        if (params.mainCategory)
+          searchParams.append("mainCategory", params.mainCategory);
+        if (params.subCategory)
+          searchParams.append("subCategory", params.subCategory);
+        if (params.instructor)
+          searchParams.append("instructor", params.instructor);
+        if (params.level) searchParams.append("level", params.level);
+        if (params.status) searchParams.append("status", params.status);
+        if (params.minPrice)
+          searchParams.append("minPrice", params.minPrice.toString());
+        if (params.maxPrice)
+          searchParams.append("maxPrice", params.maxPrice.toString());
+        if (params.tags) searchParams.append("tags", params.tags.join(","));
+        if (params.sortBy) searchParams.append("sortBy", params.sortBy);
+        if (params.sortOrder)
+          searchParams.append("sortOrder", params.sortOrder);
+        return `/courses?${searchParams.toString()}`;
+      },
+      providesTags: ["Courses"],
+    }),
+    getCourse: builder.query<any, string>({
+      query: (id) => `/courses/${id}`,
+      providesTags: (_result, _error, id) => [{ type: "Courses", id }],
+    }),
+    getFeaturedCourses: builder.query<any, number | undefined>({
+      query: (limit) => `/courses/featured${limit ? `?limit=${limit}` : ""}`,
+      providesTags: ["Courses"],
+    }),
+    getRecommendedCourses: builder.query<any, number | undefined>({
+      query: (limit) =>
+        `/courses/recommendations/for-me${limit ? `?limit=${limit}` : ""}`,
+      providesTags: ["Courses"],
+    }),
+    getCoursesByCategory: builder.query<
+      any,
+      { categoryId: string; page?: number; limit?: number }
+    >({
+      query: ({ categoryId, page, limit }) => {
+        const searchParams = new URLSearchParams();
+        if (page) searchParams.append("page", page.toString());
+        if (limit) searchParams.append("limit", limit.toString());
+        return `/courses/category/${categoryId}?${searchParams.toString()}`;
+      },
+      providesTags: ["Courses"],
+    }),
+    checkCourseEnrollment: builder.query<any, string>({
+      query: (courseId) => `/courses/${courseId}/enrollment/check`,
+      providesTags: ["Enrollments"],
+    }),
+    createCourse: builder.mutation<any, any>({
+      query: (courseData) => ({
+        url: "/courses/admin/create",
+        method: "POST",
+        body: courseData,
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+    updateCourse: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/courses/admin/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        "Courses",
+        { type: "Courses", id },
+      ],
+    }),
+    deleteCourse: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/courses/admin/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+    bulkUpdateCourseStatus: builder.mutation<
+      any,
+      { ids: string[]; status: string }
+    >({
+      query: ({ ids, status }) => ({
+        url: "/courses/admin/bulk-update-status",
+        method: "PATCH",
+        body: { ids, status },
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+    bulkDeleteCourses: builder.mutation<any, string[]>({
+      query: (ids) => ({
+        url: "/courses/admin/bulk-delete",
+        method: "DELETE",
+        body: { ids },
+      }),
+      invalidatesTags: ["Courses"],
+    }),
+    getInstructorCourses: builder.query<
+      any,
+      { page?: number; limit?: number; status?: string }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.status) searchParams.append("status", params.status);
+        return `/courses/instructor/my-courses?${searchParams.toString()}`;
+      },
+      providesTags: ["Courses"],
+    }),
+    getInstructorAnalytics: builder.query<any, void>({
+      query: () => "/courses/instructor/analytics",
+      providesTags: ["Courses"],
+    }),
+    getCourseAnalytics: builder.query<any, string>({
+      query: (courseId) => `/courses/admin/${courseId}/analytics`,
+      providesTags: ["Courses"],
+    }),
+
+    // ==================== ENROLLMENTS ====================
+    enrollInCourse: builder.mutation<
+      any,
+      { courseId: string; purchaseId?: string }
+    >({
+      query: (data) => ({
+        url: "/courses/enroll",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Enrollments", "Courses"],
+    }),
+    getMyEnrollments: builder.query<
+      any,
+      { page?: number; limit?: number; status?: string }
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.page) searchParams.append("page", params.page.toString());
+        if (params.limit) searchParams.append("limit", params.limit.toString());
+        if (params.status) searchParams.append("status", params.status);
+        return `/courses/my/enrollments?${searchParams.toString()}`;
+      },
+      providesTags: ["Enrollments"],
+    }),
+    updateLessonProgress: builder.mutation<
+      any,
+      {
+        enrollmentId: string;
+        moduleIndex: number;
+        lessonIndex: number;
+        completed: boolean;
+        watchedDuration?: number;
+      }
+    >({
+      query: ({ enrollmentId, ...data }) => ({
+        url: `/courses/enrollments/${enrollmentId}/progress`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    addNote: builder.mutation<
+      any,
+      {
+        enrollmentId: string;
+        moduleIndex: number;
+        lessonIndex: number;
+        timestamp: number;
+        content: string;
+      }
+    >({
+      query: ({ enrollmentId, ...data }) => ({
+        url: `/courses/enrollments/${enrollmentId}/notes`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    updateNote: builder.mutation<
+      any,
+      { enrollmentId: string; noteId: string; content: string }
+    >({
+      query: ({ enrollmentId, noteId, content }) => ({
+        url: `/courses/enrollments/${enrollmentId}/notes/${noteId}`,
+        method: "PATCH",
+        body: { content },
+      }),
+      invalidatesTags: ["Enrollments"],
+    }),
+    deleteNote: builder.mutation<any, { enrollmentId: string; noteId: string }>(
+      {
+        query: ({ enrollmentId, noteId }) => ({
+          url: `/courses/enrollments/${enrollmentId}/notes/${noteId}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Enrollments"],
+      }
+    ),
   }),
 });
 
@@ -908,4 +1135,26 @@ export const {
   useGetAllPaymentsAdminQuery,
   useGetPaymentStatisticsAdminQuery,
   useRefundPaymentMutation,
+  // Courses
+  useGetCoursesQuery,
+  useGetCourseQuery,
+  useGetFeaturedCoursesQuery,
+  useGetRecommendedCoursesQuery,
+  useGetCoursesByCategoryQuery,
+  useCreateCourseMutation,
+  useUpdateCourseMutation,
+  useDeleteCourseMutation,
+  useBulkUpdateCourseStatusMutation,
+  useBulkDeleteCoursesMutation,
+  useCheckCourseEnrollmentQuery,
+  useGetInstructorCoursesQuery,
+  useGetInstructorAnalyticsQuery,
+  useGetCourseAnalyticsQuery,
+  // Enrollments
+  useEnrollInCourseMutation,
+  useGetMyEnrollmentsQuery,
+  useUpdateLessonProgressMutation,
+  useAddNoteMutation,
+  useUpdateNoteMutation,
+  useDeleteNoteMutation,
 } = api;

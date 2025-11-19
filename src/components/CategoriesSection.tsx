@@ -36,7 +36,7 @@ interface Category {
 }
 
 export const CategoriesSection: React.FC = () => {
-  const { data: categoriesData, isLoading, error } = useGetCategoriesQuery();
+  const { data: categoriesData, isLoading, error } = useGetCategoriesQuery({});
   const rawCategories = categoriesData?.data || [];
   const categories: Category[] = (rawCategories as any[]).map((c: any) => ({
     id: c.id,

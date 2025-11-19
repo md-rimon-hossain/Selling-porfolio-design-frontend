@@ -61,7 +61,9 @@ export default function DesignsPage() {
   );
 
   const { data, isLoading, refetch } = useGetDesignsQuery(queryParams);
-  const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: categoriesData } = useGetCategoriesQuery({
+    categoryType: "design",
+  });
   const [createDesign, { isLoading: isCreating }] = useCreateDesignMutation();
   const [updateDesign, { isLoading: isUpdating }] = useUpdateDesignMutation();
   const [deleteDesign] = useDeleteDesignMutation();
@@ -486,7 +488,7 @@ export default function DesignsPage() {
             {/* Min Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min Price 
+                Min Price
               </label>
               <input
                 type="number"
@@ -505,7 +507,7 @@ export default function DesignsPage() {
             {/* Max Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Price 
+                Max Price
               </label>
               <input
                 type="number"
@@ -641,9 +643,10 @@ export default function DesignsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <span className="text-lg font-bold text-blue-600">
-                      <span className="text-2xl font-bold"> {
-                        design.currencyDisplay
-                      }</span>
+                      <span className="text-2xl font-bold">
+                        {" "}
+                        {design.currencyDisplay}
+                      </span>
                       {design.discountedPrice &&
                       design.discountedPrice < design.basePrice
                         ? design.discountedPrice
