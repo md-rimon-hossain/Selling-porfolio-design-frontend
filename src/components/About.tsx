@@ -18,7 +18,7 @@ const About = () => {
       id="about"
       className="relative bg-white py-24 px-6 overflow-hidden"
     >
-      <div className="flex flex-col lg:flex-row items-center gap-12">
+      <div className="flex max-w-7xl mx-auto flex-col lg:flex-row items-center gap-12">
         {/* Left - text / features */}
         <div
           ref={textRef}

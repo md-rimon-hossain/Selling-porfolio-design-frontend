@@ -40,6 +40,7 @@ interface ICategory {
 interface FormErrors {
   name?: string;
   description?: string;
+  categoryType?: string;
 }
 
 import { useEffect, useRef } from "react";
@@ -56,7 +57,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function CategoriesPage() {
-  // Tab state: 'parent', 'sub', or 'all'
+  // Tab state: 'parent', 'sub' or 'all'
   const [activeTab, setActiveTab] = useState<"parent" | "sub" | "all">("all");
   // Track if modal is for subcategory creation
   const [isSubcategoryMode, setIsSubcategoryMode] = useState(false);
@@ -98,6 +99,7 @@ export default function CategoriesPage() {
     description: "",
     isActive: true,
     parentCategory: null as string | null,
+    categoryType: "design" as "design" | "course",
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +143,10 @@ export default function CategoriesPage() {
       errors.description = "Description cannot exceed 200 characters";
     }
 
+    // Category type validation
+    if (!formData.categoryType) {
+      errors.categoryType = "Category type is required";
+    }
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -161,7 +167,8 @@ export default function CategoriesPage() {
           name: formData.name,
           description: formData.description,
           isActive: formData.isActive,
-          parentCategory: formData.parentCategory, // Already a string | null
+          parentCategory: formData.parentCategory,
+          categoryType: formData.categoryType,
         };
         await updateCategory(updateData).unwrap();
         toast.success("Category updated successfully!");
@@ -175,6 +182,7 @@ export default function CategoriesPage() {
         description: "",
         isActive: true,
         parentCategory: null,
+        categoryType: "design",
       });
       setEditingCategory(null);
       setFormErrors({});
@@ -199,6 +207,7 @@ export default function CategoriesPage() {
       description: category.description,
       isActive: category.isActive,
       parentCategory: category.parentCategory?.id || null,
+      categoryType: (category as any).categoryType || "design",
     });
     setFormErrors({});
     setError(null);
@@ -242,6 +251,7 @@ export default function CategoriesPage() {
       description: "",
       isActive: true,
       parentCategory: null,
+      categoryType: "design",
     });
     setFormErrors({});
     setError(null);
@@ -298,6 +308,7 @@ export default function CategoriesPage() {
                       description: "",
                       isActive: true,
                       parentCategory: null,
+                      categoryType: "design",
                     });
                     setFormErrors({});
                     setError(null);
@@ -317,6 +328,7 @@ export default function CategoriesPage() {
                       description: "",
                       isActive: true,
                       parentCategory: "",
+                      categoryType: "design",
                     });
                     setFormErrors({});
                     setError(null);
@@ -730,6 +742,29 @@ export default function CategoriesPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Category Type Field */}
+                  <div>
+                    <label
+                      htmlFor="category-type"
+                      className="block text-sm font-semibold text-slate-700 mb-2"
+                    >
+                      Category Type <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="category-type"
+                      value={formData.categoryType}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          categoryType: e.target.value as "design" | "course",
+                        })
+                      }
+                      className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-slate-50"
+                    >
+                      <option value="design">Design</option>
+                      <option value="course">Course</option>
+                    </select>
+                  </div>
                   {/* Parent Category Field - for subcategory creation and editing */}
                   {(isSubcategoryMode ||
                     (editingCategory && editingCategory.parentCategory)) && (
@@ -754,22 +789,13 @@ export default function CategoriesPage() {
                         }
                         className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-slate-50"
                       >
-                        <option value="">Select Parent Category</option>
-                        {categories
-                          .filter((cat) => !cat.parentCategory)
-                          .map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </option>
-                          ))}
+                        <option value="">Select a parent category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </option>
+                        ))}
                       </select>
-                      <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                        <Info className="w-4 h-4 text-blue-400" />
-                        <span>
-                          <strong>Tip:</strong> Select a parent category for
-                          your subcategory.
-                        </span>
-                      </div>
                     </div>
                   )}
                   {/* Name Field */}
@@ -778,42 +804,24 @@ export default function CategoriesPage() {
                       htmlFor="category-name"
                       className="block text-sm font-semibold text-slate-700 mb-2"
                     >
-                      {isSubcategoryMode ? "Sub Category" : "Category"} Name{" "}
-                      <span className="text-red-500">*</span>
+                      Category Name <span className="text-red-500">*</span>
                     </label>
                     <input
                       id="category-name"
                       type="text"
                       value={formData.name}
-                      onChange={(e) => {
-                        setFormData({ ...formData, name: e.target.value });
-                        if (formErrors.name) {
-                          setFormErrors({ ...formErrors, name: undefined });
-                        }
-                      }}
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
-                        formErrors.name
-                          ? "border-red-300 bg-red-50"
-                          : "border-slate-300"
-                      }`}
-                      placeholder="e.g., Web Design"
-                      aria-invalid={!!formErrors.name}
-                      aria-describedby="category-name-error"
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-slate-50"
+                      placeholder="Enter category name"
                     />
                     {formErrors.name && (
-                      <p
-                        id="category-name-error"
-                        className="mt-1 text-sm text-red-600 flex items-center gap-1"
-                      >
-                        <AlertCircle className="w-4 h-4" />
+                      <p className="mt-2 text-sm text-red-600">
                         {formErrors.name}
                       </p>
                     )}
-                    <p className="mt-1 text-xs text-slate-500">
-                      2-50 characters, letters and spaces only
-                    </p>
                   </div>
-
                   {/* Description Field */}
                   <div>
                     <label
@@ -824,171 +832,58 @@ export default function CategoriesPage() {
                     </label>
                     <textarea
                       id="category-description"
-                      rows={4}
                       value={formData.description}
-                      onChange={(e) => {
+                      onChange={(e) =>
                         setFormData({
                           ...formData,
                           description: e.target.value,
-                        });
-                        if (formErrors.description) {
-                          setFormErrors({
-                            ...formErrors,
-                            description: undefined,
-                          });
-                        }
-                      }}
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none ${
-                        formErrors.description
-                          ? "border-red-300 bg-red-50"
-                          : "border-slate-300"
-                      }`}
-                      placeholder="Describe this category..."
-                      aria-invalid={!!formErrors.description}
-                      aria-describedby="category-description-error"
+                        })
+                      }
+                      className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-slate-50"
+                      placeholder="Enter category description"
+                      rows={3}
                     />
                     {formErrors.description && (
-                      <p
-                        id="category-description-error"
-                        className="mt-1 text-sm text-red-600 flex items-center gap-1"
-                      >
-                        <AlertCircle className="w-4 h-4" />
+                      <p className="mt-2 text-sm text-red-600">
                         {formErrors.description}
                       </p>
                     )}
-                    <p className="mt-1 text-xs text-slate-500">
-                      {formData.description.length}/200 characters (minimum 10)
-                    </p>
                   </div>
-
-                  {/* Active Status Toggle */}
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="flex items-center gap-3">
-                      {formData.isActive ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-600" />
-                      )}
-                      <div>
-                        <label
-                          htmlFor="isActive"
-                          className="text-sm font-semibold text-slate-700 cursor-pointer"
-                        >
-                          Active Status
-                        </label>
-                        <p className="text-xs text-slate-500">
-                          {formData.isActive
-                            ? "Category is visible to users"
-                            : "Category is hidden from users"}
-                        </p>
-                      </div>
-                    </div>
+                  {/* Status Toggle */}
+                  <div className="flex items-center gap-3">
                     <input
+                      id="category-status"
                       type="checkbox"
-                      id="isActive"
                       checked={formData.isActive}
                       onChange={(e) =>
                         setFormData({ ...formData, isActive: e.target.checked })
                       }
-                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-600 cursor-pointer"
-                      aria-checked={formData.isActive}
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                     />
+                    <label
+                      htmlFor="category-status"
+                      className="text-sm font-semibold text-slate-700"
+                    >
+                      Active
+                    </label>
                   </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  {/* Submit Button */}
+                  <div className="flex justify-end gap-4">
                     <Button
-                      type="button"
                       onClick={handleCloseModal}
+                      className="w-full sm:w-auto"
                       variant="outline"
-                      className="flex-1"
-                      disabled={isCreating || isUpdating}
-                      aria-label="Cancel"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                      disabled={isCreating || isUpdating}
-                      aria-label={
-                        editingCategory ? "Update Category" : "Create Category"
-                      }
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all"
                     >
-                      {isCreating || isUpdating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {editingCategory ? "Updating..." : "Creating..."}
-                        </>
-                      ) : (
-                        <>
-                          {editingCategory
-                            ? "Update Category"
-                            : "Create Category"}
-                        </>
-                      )}
+                      {editingCategory ? "Update Category" : "Create Category"}
                     </Button>
                   </div>
                 </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-red-100 rounded-full">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">
-                    Delete Category
-                  </h3>
-                  <p className="text-sm text-slate-600">
-                    This action cannot be undone
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-slate-700 mb-6">
-                Are you sure you want to delete this category? All associated
-                designs will need to be recategorized.
-              </p>
-
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setCategoryToDelete(null);
-                  }}
-                  variant="outline"
-                  className="flex-1"
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleDeleteConfirm}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </>
-                  )}
-                </Button>
               </div>
             </div>
           </div>

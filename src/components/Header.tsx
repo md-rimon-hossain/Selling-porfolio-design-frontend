@@ -6,6 +6,7 @@ import { useAppSelector } from "../store/hooks";
 import { UserProfile } from "./UserProfile";
 import { AuthButtons } from "./AuthButtons";
 import { CategoryDropdown } from "./CategoryDropdown";
+import { CoursesDropdown } from "./CoursesDropdown";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
@@ -65,7 +66,18 @@ export const Header: React.FC = () => {
               Designs
             </Link>
 
-            <CategoryDropdown />
+            <Link
+              href="/courses"
+              className={`px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
+                isActiveLink("/courses")
+                  ? "text-white"
+                  : "text-gray-200 hover:text-white"
+              }`}
+            >
+              Courses
+            </Link>
+
+            <CoursesDropdown />
           </nav>
 
           {/* Center Logo */}
@@ -163,6 +175,30 @@ export const Header: React.FC = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Designs
+            </Link>
+
+            <Link
+              href="/courses"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/courses")
+                  ? "text-gray-900 bg-white"
+                  : "text-gray-100 hover:text-gray-900 hover:bg-white/90"
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Courses
+            </Link>
+
+            <Link
+              href="/courses/categories"
+              className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
+                isActiveLink("/courses/categories")
+                  ? "text-gray-900 bg-white"
+                  : "text-gray-100 hover:text-gray-900 hover:bg-white/90"
+              }`}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Course Categories
             </Link>
 
             <Link

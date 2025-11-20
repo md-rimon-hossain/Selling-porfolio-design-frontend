@@ -18,11 +18,11 @@ import {
   Download,
   Users,
   Activity,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboard() {
-
   const { data: purchaseAnalytics, isLoading: purchaseLoading } =
     useGetPurchaseAnalyticsQuery({ period: "monthly" });
   const { data: reviewAnalytics, isLoading: reviewLoading } =
@@ -34,19 +34,18 @@ export default function AdminDashboard() {
   const { data: designsData } = useGetDesignsQuery({ limit: 5 });
   const { data: plansData } = useGetPricingPlansQuery({ limit: 5 });
 
-
   // console.log(reviewAnalytics);
   // console.log(downloadAnalytics);
   // console.log(designsData);
   // console.log(plansData);
   console.log(reviewAnalytics);
 
-
-
   const stats = [
     {
       name: "Total Revenue",
-      value: `$${purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"}`,
+      value: `$${
+        purchaseAnalytics?.data?.overview.totalRevenue?.toFixed(2) || "0.00"
+      }`,
       change: "+12.5%",
       icon: DollarSign,
       color: "from-green-600 to-emerald-600",
@@ -153,7 +152,8 @@ export default function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">
-                      {purchase.currencyDisplay}{purchase.amount?.toFixed(2)}
+                      {purchase.currencyDisplay}
+                      {purchase.amount?.toFixed(2)}
                     </p>
                     <span
                       className={`inline-block px-2 py-1 text-xs rounded-full ${
@@ -197,7 +197,9 @@ export default function AdminDashboard() {
                     Average Rating
                   </p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {reviewAnalytics?.data?.overview.averageRating?.toFixed(1) || "0.0"}
+                    {reviewAnalytics?.data?.overview.averageRating?.toFixed(
+                      1
+                    ) || "0.0"}
                   </p>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -206,7 +208,9 @@ export default function AdminDashboard() {
                       key={i}
                       className={`w-6 h-6 ${
                         i <
-                        Math.floor(reviewAnalytics?.data?.overview.averageRating || 0)
+                        Math.floor(
+                          reviewAnalytics?.data?.overview.averageRating || 0
+                        )
                           ? "text-yellow-500 fill-yellow-500"
                           : "text-gray-300"
                       }`}
@@ -240,13 +244,20 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
             href="/admin/designs"
             className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white hover:shadow-lg transform hover:scale-105 transition-all"
           >
             <Package className="w-6 h-6 mr-3" />
             <span className="font-bold">Add New Design</span>
+          </Link>
+          <Link
+            href="/admin/courses/create"
+            className="flex items-center justify-center p-6 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white hover:shadow-lg transform hover:scale-105 transition-all"
+          >
+            <BookOpen className="w-6 h-6 mr-3" />
+            <span className="font-bold">Add New Course</span>
           </Link>
           <Link
             href="/admin/pricing-plans"

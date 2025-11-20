@@ -50,7 +50,9 @@ export default function DesignsPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   const itemsPerPage = viewMode === "compact" ? 24 : 12;
-  const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: categoriesData } = useGetCategoriesQuery({
+    categoryType: "design",
+  });
 
   const rawCategories = categoriesData?.data || [];
   const categories = (rawCategories as any[]).map((c: any) => ({

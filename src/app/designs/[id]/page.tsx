@@ -360,10 +360,10 @@ export default function DesignDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-4 sm:px-6 lg:px-10 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Breadcrumb */}
-        <nav className="mb-6">
-          <div className="flex items-center space-x-2 text-sm">
+        <nav className="mb-4">
+          <div className="flex items-center space-x-2 text-xs">
             <Link
               href="/"
               className="text-gray-600 hover:text-blue-600 transition-colors"
@@ -392,88 +392,49 @@ export default function DesignDetailPage() {
         </nav>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left Column - Image & Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Main Image */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden group">
-              <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
-                {heroImage ? (
-                  <>
-                    <Image
-                      src={heroImage}
-                      alt={`${design.title} preview ${currentImageIndex + 1}`}
-                      fill
-                      priority={true}
-                      className={`object-cover transition-all duration-500 ${
-                        imageLoaded
-                          ? "opacity-100 scale-100"
-                          : "opacity-0 scale-105"
-                      }`}
-                      onLoad={() => setImageLoaded(true)}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = "none";
-                      }}
-                    />
-
-                    {/* Prev / Next controls */}
-                    {previewImages.length > 1 && (
-                      <>
-                        <button
-                          aria-label="Previous image"
-                          onClick={() =>
-                            setCurrentImageIndex(
-                              (i) =>
-                                (i - 1 + previewImages.length) %
-                                previewImages.length
-                            )
-                          }
-                          className="absolute left-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
-                        >
-                          ‹
-                        </button>
-                        <button
-                          aria-label="Next image"
-                          onClick={() =>
-                            setCurrentImageIndex(
-                              (i) => (i + 1) % previewImages.length
-                            )
-                          }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow-md"
-                        >
-                          ›
-                        </button>
-                      </>
-                    )}
-                    {/* open lightbox on click */}
-                    <button
-                      aria-label="Open fullscreen"
-                      onClick={() => setLightboxOpen(true)}
-                      className="absolute inset-0 w-full h-full bg-transparent"
-                    />
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Package className="w-24 h-24 text-gray-300" />
+          <div className="lg:col-span-2 space-y-4">
+            {/* Compact Professional Gallery */}
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+              {/* Compact Header */}
+              <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-[#82181A] to-[#82181A] border-b border-blue-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
                   </div>
-                )}
-
-                {/* Floating Badge */}
-                <div className="absolute top-4 left-4">
+                  <div>
+                    <h2 className="text-base font-bold text-white">
+                      Design Screens
+                    </h2>
+                    <p className="text-xs text-blue-100">
+                      {previewImages.length}{" "}
+                      {previewImages.length === 1 ? "image" : "images"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                   <span
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       design.status === "Active"
-                        ? "bg-green-600 text-white"
-                        : "bg-red-600 text-white"
+                        ? "bg-green-500 text-white"
+                        : "bg-red-500 text-white"
                     }`}
                   >
                     {design.status}
                   </span>
-                </div>
-
-                {/* Like Button */}
-                <div className="absolute top-4 right-4">
                   <LikeButton
                     designId={design._id!}
                     initialLikesCount={design.likesCount}
@@ -485,33 +446,106 @@ export default function DesignDetailPage() {
                 </div>
               </div>
 
-              {/* Image Thumbnails */}
-              {previewImages.length > 1 && (
-                <div className="flex items-center gap-2 mt-3 overflow-x-auto p-2">
-                  {previewImages.map((src, idx) => (
-                    <button
+              {/* Compact Image Gallery */}
+              <div className="p-4 space-y-4 bg-gray-50">
+                {previewImages.length > 0 ? (
+                  previewImages.map((src, idx) => (
+                    <div
                       key={src + idx}
-                      onClick={() => {
-                        setCurrentImageIndex(idx);
-                        setImageLoaded(false);
-                      }}
-                      className={`flex-shrink-0 w-20 h-12 rounded overflow-hidden border ${
-                        idx === currentImageIndex
-                          ? "ring-2 ring-blue-500"
-                          : "border-gray-200"
-                      }`}
+                      className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300"
                     >
-                      <Image
-                        src={src}
-                        alt={`${design.title} thumb ${idx + 1}`}
-                        width={160}
-                        height={96}
-                        className="object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
+                      {/* Compact Image Header */}
+                      <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                            {idx + 1}
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900">
+                            Screen {idx + 1}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCurrentImageIndex(idx);
+                            setLightboxOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-lg border border-gray-300 text-xs font-medium transition-all duration-200"
+                        >
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                            />
+                          </svg>
+                          Expand
+                        </button>
+                      </div>
+
+                      {/* Compact Image Container */}
+                      <div
+                        className="relative bg-white p-3 cursor-pointer"
+                        onClick={() => {
+                          setCurrentImageIndex(idx);
+                          setLightboxOpen(true);
+                        }}
+                      >
+                        <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 group-hover:border-blue-400 transition-colors">
+                          <div className="aspect-[16/9] relative">
+                            <Image
+                              src={src}
+                              alt={`${design.title} - Screen ${idx + 1}`}
+                              fill
+                              className="object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                              }}
+                            />
+                          </div>
+
+                          {/* Clean Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
+                            <div className="opacity-0 group-hover:opacity-100 transform scale-90 group-hover:scale-100 transition-all duration-300">
+                              <div className="bg-white text-gray-900 px-4 py-2 rounded-full text-xs font-semibold shadow-lg flex items-center gap-2">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                  />
+                                </svg>
+                                View Fullscreen
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center py-16 bg-white rounded-xl border border-gray-200">
+                    <div className="text-center">
+                      <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm font-medium">
+                        No preview images
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Image Lightbox */}
               <ImageLightbox
@@ -524,7 +558,7 @@ export default function DesignDetailPage() {
               />
 
               {/* Enhanced Stats Bar */}
-              <div className="grid grid-cols-4 gap-4 p-5 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
+              <div className="grid grid-cols-4 gap-3 p-3 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-200">
                 <div className="text-center group hover:transform hover:scale-105 transition-transform duration-200">
                   <div className="flex items-center justify-center mb-1">
                     <LikeButton
@@ -579,39 +613,37 @@ export default function DesignDetailPage() {
 
             {/* Description Section */}
             {design.description && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-600" />
+              <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-blue-50 rounded-lg">
+                    <FileText className="w-4 h-4 text-blue-600" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-base font-bold text-gray-900">
                     About This Design
                   </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {design.description}
                 </p>
               </div>
             )}
 
-            {/* Design Process - Enhanced */}
+            {/* Design Process - Compact */}
             {design.processDescription && (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-6 shadow-sm">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-600 rounded-lg">
-                    <Sparkles className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-purple-600 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">
-                      Design Process & Story
+                    <h2 className="text-base font-bold text-gray-900">
+                      Design Process
                     </h2>
-                    <p className="text-sm text-purple-700">
-                      Behind the scenes of this creation
-                    </p>
+                    <p className="text-xs text-purple-700">Behind the scenes</p>
                   </div>
                 </div>
-                <div className="bg-white bg-opacity-60 rounded-lg p-5 border border-purple-100">
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap text-base">
+                <div className="bg-white bg-opacity-60 rounded-lg p-3 border border-purple-100">
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
                     {design.processDescription}
                   </p>
                 </div>
@@ -621,23 +653,23 @@ export default function DesignDetailPage() {
             {/* Tools & Effects Grid */}
             {((design.usedTools && design.usedTools.length > 0) ||
               (design.effectsUsed && design.effectsUsed.length > 0)) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Tools */}
                 {design.usedTools && design.usedTools.length > 0 && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="p-2 bg-red-50 rounded-lg">
-                        <Wrench className="w-5 h-5 text-brand-primary" />
+                  <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 bg-red-50 rounded-lg">
+                        <Wrench className="w-4 h-4 text-brand-primary" />
                       </div>
-                      <h3 className="font-bold text-gray-900 text-lg">
+                      <h3 className="font-bold text-gray-900 text-sm">
                         Tools Used
                       </h3>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {design.usedTools.map((tool, index) => (
                         <span
                           key={index}
-                          className="bg-red-50 text-brand-primary text-sm px-3 py-1.5 rounded-lg font-medium border border-red-100 hover:bg-red-100 transition-colors"
+                          className="bg-red-50 text-brand-primary text-xs px-2 py-1 rounded-md font-medium border border-red-100 hover:bg-red-100 transition-colors"
                         >
                           {tool}
                         </span>
@@ -648,20 +680,20 @@ export default function DesignDetailPage() {
 
                 {/* Effects */}
                 {design.effectsUsed && design.effectsUsed.length > 0 && (
-                  <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="p-2 bg-purple-50 rounded-lg">
-                        <Sparkles className="w-5 h-5 text-purple-600" />
+                  <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-1.5 bg-purple-50 rounded-lg">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
                       </div>
-                      <h3 className="font-bold text-gray-900 text-lg">
+                      <h3 className="font-bold text-gray-900 text-sm">
                         Effects Applied
                       </h3>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {design.effectsUsed.map((effect, index) => (
                         <span
                           key={index}
-                          className="bg-purple-50 text-purple-700 text-sm px-3 py-1.5 rounded-lg font-medium border border-purple-100 hover:bg-purple-100 transition-colors"
+                          className="bg-purple-50 text-purple-700 text-xs px-2 py-1 rounded-md font-medium border border-purple-100 hover:bg-purple-100 transition-colors"
                         >
                           {effect}
                         </span>
@@ -675,10 +707,10 @@ export default function DesignDetailPage() {
             {/* Reviews Section */}
             <div
               id="reviews"
-              className="bg-white rounded-lg border border-gray-200 p-5"
+              className="bg-white rounded-lg border border-gray-200 p-4"
             >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold text-gray-900">
                   Customer Reviews
                 </h2>
                 {statistics && statistics.totalReviews > 0 && (
@@ -915,33 +947,33 @@ export default function DesignDetailPage() {
               )}
             </div>
           </div>
-          {/* Right Column - Enhanced Purchase Card */}
+          {/* Right Column - Compact Purchase Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border-2 border-gray-200 shadow-xl p-6 sticky top-20 space-y-5">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-lg p-4 sticky top-14 space-y-3">
               {/* Title & Category */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center flex-wrap gap-1.5 mb-2">
                   <Link href={categoryQueryLink}>
-                    <span className="bg-brand-primary text-white text-xs font-semibold px-2.5 py-1 rounded">
+                    <span className="bg-brand-primary text-white text-xs font-semibold px-2 py-0.5 rounded">
                       {mainCategory?.name || subCategory?.name || "Category"}
                     </span>
                   </Link>
                   {design.complexityLevel && (
-                    <span className="bg-green-600 text-white text-xs font-semibold px-2.5 py-1 rounded">
+                    <span className="bg-green-600 text-white text-xs font-semibold px-2 py-0.5 rounded">
                       {design.complexityLevel}
                     </span>
                   )}
                   {design?.discountedPrice === 0 && (
-                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
                       FREE
                     </span>
                   )}
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 leading-tight mb-2">
+                <h1 className="text-lg font-bold text-gray-900 leading-tight mb-1">
                   {design.title}
                 </h1>
                 {designerName && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600">
                     by{" "}
                     <span className="font-semibold text-brand-primary">
                       {designerName}
@@ -950,28 +982,28 @@ export default function DesignDetailPage() {
                 )}
               </div>
 
-              {/* Enhanced Pricing Display */}
+              {/* Compact Pricing Display */}
               {design?.discountedPrice === 0 ? (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border-2 border-green-300">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-lg font-bold px-4 py-2 rounded-full">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-300">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold px-3 py-1.5 rounded-full">
                       🎉 100% FREE
                     </span>
                   </div>
-                  <p className="text-center text-green-700 font-semibold text-sm">
-                    Download this design for free!
+                  <p className="text-center text-green-700 font-medium text-xs mt-1">
+                    Download for free!
                   </p>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-5 border-2 border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                       Price
                     </span>
                     {design?.basePrice &&
                       design?.discountedPrice &&
                       design.basePrice > design.discountedPrice && (
-                        <span className="bg-green-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                        <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                           {Math.round(
                             ((design.basePrice - design.discountedPrice) /
                               design.basePrice) *
@@ -981,25 +1013,25 @@ export default function DesignDetailPage() {
                         </span>
                       )}
                   </div>
-                  <div className="flex items-end gap-3 mb-1">
-                    <span className="text-4xl font-black text-blue-600">
+                  <div className="flex items-end gap-2">
+                    <span className="text-2xl font-black text-blue-600">
                       {design?.currencyDisplay}
                       {design?.discountedPrice?.toFixed(2) || 0}
                     </span>
-                    <span className="text-sm text-gray-600 font-medium pb-1">
+                    <span className="text-xs text-gray-600 font-medium pb-1">
                       {design.currencyCode}
                     </span>
                   </div>
                   {design?.basePrice &&
                     design?.discountedPrice &&
                     design.basePrice > design.discountedPrice && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-semibold text-gray-400 line-through">
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-sm font-semibold text-gray-400 line-through">
                           {design?.currencyDisplay}
                           {design?.basePrice.toFixed(2) || 0}
                         </span>
                         <span className="text-xs text-green-700 font-medium">
-                          You save {design?.currencyDisplay}
+                          Save {design?.currencyDisplay}
                           {(design.basePrice - design.discountedPrice).toFixed(
                             2
                           )}
@@ -1010,12 +1042,12 @@ export default function DesignDetailPage() {
               )}
 
               {/* Purchase Actions */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {design?.discountedPrice === 0 ? (
                   <Button
                     onClick={handleDownload}
                     disabled={isDownloading || !user}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-base font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-sm font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isDownloading ? (
                       <>
@@ -1091,7 +1123,7 @@ export default function DesignDetailPage() {
                   <>
                     <Button
                       onClick={handlePurchaseClick}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-base font-bold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       <ShoppingCart className="w-5 h-5 mr-2" />
                       Buy Now for {design?.currencyDisplay}
@@ -1111,18 +1143,18 @@ export default function DesignDetailPage() {
                 )}
               </div>
 
-              {/* Enhanced Download Details */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg shadow-sm">
-                    <FileText className="w-5 h-5 text-white" />
+              {/* Compact Download Details */}
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-start gap-2">
+                  <div className="p-1.5 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg shadow-sm">
+                    <FileText className="w-4 h-4 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-gray-900 mb-2">
+                    <p className="text-xs font-bold text-gray-900 mb-1.5">
                       What You'll Get
                     </p>
                     {design?.downloadableFile ? (
-                      <dl className="space-y-2 text-sm">
+                      <dl className="space-y-1 text-xs">
                         <div className="flex items-center justify-between py-1">
                           <dt className="text-gray-600 font-medium">
                             📄 File name
@@ -1160,14 +1192,14 @@ export default function DesignDetailPage() {
 
               {/* Tags */}
               {design.tags && design.tags.length > 0 && (
-                <div className="pt-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag className="w-4 h-4 text-gray-600" />
-                    <h3 className="font-semibold text-gray-900 text-sm">
+                <div className="pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Tag className="w-3.5 h-3.5 text-gray-600" />
+                    <h3 className="font-semibold text-gray-900 text-xs">
                       Tags
                     </h3>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {design.tags.map((tag, index) => (
                       <span
                         key={index}
@@ -1181,14 +1213,14 @@ export default function DesignDetailPage() {
               )}
 
               {/* Timeline */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-4 h-4 text-gray-600" />
-                  <h3 className="font-semibold text-gray-900 text-sm">
+              <div className="pt-3 border-t border-gray-200">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="w-3.5 h-3.5 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900 text-xs">
                     Timeline
                   </h3>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Created</span>
                     <span className="font-medium text-gray-900">
@@ -1209,28 +1241,25 @@ export default function DesignDetailPage() {
               </div>
 
               {/* Trust Signals */}
-              <div className="pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="pt-3 border-t border-gray-200">
+                <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="flex flex-col items-center">
-                    <Shield className="w-5 h-5 text-green-600 mb-1" />
+                    <Shield className="w-4 h-4 text-green-600 mb-0.5" />
                     <span className="text-xs font-medium text-gray-700">
                       Secure
                     </span>
-                    <span className="text-xs text-gray-500">Payment</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <Zap className="w-5 h-5 text-blue-600 mb-1" />
+                    <Zap className="w-4 h-4 text-blue-600 mb-0.5" />
                     <span className="text-xs font-medium text-gray-700">
                       Instant
                     </span>
-                    <span className="text-xs text-gray-500">Download</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <CheckCircle className="w-5 h-5 text-purple-600 mb-1" />
+                    <CheckCircle className="w-4 h-4 text-purple-600 mb-0.5" />
                     <span className="text-xs font-medium text-gray-700">
                       Lifetime
                     </span>
-                    <span className="text-xs text-gray-500">Access</span>
                   </div>
                 </div>
               </div>
